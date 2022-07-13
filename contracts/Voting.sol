@@ -81,6 +81,12 @@ contract Election {
     function getWinner() public payable returns (address){
         require(currBlock >= block.number);
         require(msg.value >= 1000000000000000000, "Get results with 1 ETH!");
+        // alternative winnin check
+        // for(uint256 i = 0; i < candidatesCount; i++){
+        //     if (candidatesMap[ballotCandidatesArr[i]].voteCount + 1 > candidatesMap[currentWinner].voteCount){
+        //         currentWinner = ballotCandidatesArr[i];
+        //     }
+        // }
         return currentWinner;
     }
 }
