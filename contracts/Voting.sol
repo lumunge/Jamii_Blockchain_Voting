@@ -70,9 +70,9 @@ contract Election {
         }
         require(flag == true, "Candidate does not exist in Ballot!");
         require(currBlock <= block.number);
-        if(candidatesMap[_candidate].voteCount + 1 > candidatesMap[currentWinner].voteCount){
-            currentWinner = _candidate;
-        }
+        // if(candidatesMap[_candidate].voteCount + 1 > candidatesMap[currentWinner].voteCount){
+        //     currentWinner = _candidate;
+        // }
         candidatesMap[_candidate].voteCount++;
         voters[msg.sender] = true;
         emit votedEvent(_candidate);
@@ -81,12 +81,17 @@ contract Election {
     function getWinner() public payable returns (address){
         require(currBlock >= block.number);
         require(msg.value >= 1000000000000000000, "Get results with 1 ETH!");
-        // alternative winnin check
-        // for(uint256 i = 0; i < candidatesCount; i++){
-        //     if (candidatesMap[ballotCandidatesArr[i]].voteCount + 1 > candidatesMap[currentWinner].voteCount){
-        //         currentWinner = ballotCandidatesArr[i];
-        //     }
-        // }
+        for(uint256 i = 0; i < candidatesCount; i++){
+            if (candidatesMap[ballotCandidatesArr[i]].voteCount + 1 > candidatesMap[currentWinner].voteCount){
+                currentWinner = ballotCandidatesArr[i];
+            }else if(candidatesMap[ballotCandidatesArr[i]].voteCount + 1 == candidatesMap[currentWinner].voteCount){
+                revert("There seems to be a tie");
+            }
+        }
         return currentWinner;
+    }
+
+    function withdraw(address payable _to) public {
+        _to.transfer(address(this).balance);
     }
 }
