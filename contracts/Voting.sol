@@ -1,20 +1,21 @@
 pragma solidity >=0.5.0;
 
 contract Election {
-    struct Candidate {
-        uint256 id;
-        string name;
+    struct Candidate{
+        address addr;
         uint256 voteCount;
     }
 
-    struct Ballot {
+    struct Ballot{
         string ballotName;
         address chair;
         address[] ballotCandidates;
-        uint256 totalVotes;
+        address[] ballotVoters;
     }
 
-    mapping(uint256 => Candidate) public candidates; // store candidates
+    Candidate[] public candidates;
+
+    mapping(address => Candidate) public candidatesMap; // store candidates
 
     mapping(address => bool) public voters; // voters that have voted
 
@@ -22,58 +23,48 @@ contract Election {
 
     mapping(address => address[]) public chairToCandidates;
 
-    address[] public ballotChairsArray;
+    address[] private ballotCandidatesArr; 
 
-    address[] public ballotCandidatesArr;
+    uint256 public candidatesCount; // count candidates
 
-    uint256 public candidatesCount; // count candidate
+    event votedEvent(address indexed _candidate);
 
-    event votedEvent(uint256 indexed _candidateId);
-
-    // constructor
-    // constructor() public {
-    //     addCandidate("Candidate 1");
-    //     addCandidate("Candidate 2");
-    // }
-
-    function createBallot(
-        string memory _ballotName,
-        address _chair,
-        address[] memory _ballotCandidates
-    ) public payable {
-        require(msg.value >= 1000000000000000000, "Start a ballot with 1 ETH");
-        ballotChairsArray.push(_chair);
-        Ballot memory newBallot = ballotsMapping[_chair];
-        newBallot.ballotName = _ballotName;
-        newBallot.chair = _chair;
-        for (uint256 i = 0; i < _ballotCandidates.length; i++) {
-            ballotCandidatesArr.push(_ballotCandidates[i]);
-        }
-        chairToCandidates[_chair] = ballotCandidatesArr;
-        newBallot.ballotCandidates = ballotCandidatesArr;
-        newBallot.totalVotes = 0;
+    constructor(string memory _ballotName, address[] memory _ballotCandidates) public payable {
+        createBallot(_ballotName, _ballotCandidates);
     }
 
-    function addCandidate(string memory _name) private {
-        // add new candidate
-        candidatesCount++;
-        candidates[candidatesCount] = Candidate(candidatesCount, _name, 0);
+    function createBallot(string memory _ballotName, address[] memory _ballotCandidates) private {
+        require(msg.value >= 1000000000000000000, "Start a ballot with 1 ETH");
+        Ballot memory newBallot = ballotsMapping[msg.sender];
+        newBallot.ballotName = _ballotName; 
+        newBallot.chair = msg.sender;
+        for(uint256 i = 0; i < _ballotCandidates.length; i++){
+            ballotCandidatesArr.push(_ballotCandidates[i]);
+            candidatesMap[_ballotCandidates[i]] = Candidate(_ballotCandidates[i], 0);
+            candidatesCount++;
+        }
+        chairToCandidates[msg.sender] = ballotCandidatesArr;
+        newBallot.ballotCandidates = ballotCandidatesArr;
+    }
+
+    function getCandidates() public view returns(address[] memory){
+        return ballotCandidatesArr;
     }
 
     // ["0x7c13bAFCd522b48eF843D620a11F464089EE31c8", "0x4afa11124eb39bbe34b237fd83c5a42042231de4"]
 
-    function vote(uint256 _candidateId) public {
-        // voter does not vote twice
+    function vote(address _candidate) public payable {
+        require(msg.value >= 1000000000000000000, "Cast vote with 1 ETH!");
         require(!voters[msg.sender]);
-
-        // candidate needs to to a valid candidate
-        require(_candidateId > 0 && _candidateId <= candidatesCount);
-
-        // record voter
+        bool flag = false;
+        for(uint256 i = 0; i < ballotCandidatesArr.length; i++){
+            if(ballotCandidatesArr[i] == _candidate){
+                flag = true;
+            }
+        }
+        require(flag == true, "Candidate does not exist in Ballot!");
+        candidatesMap[_candidate].voteCount++;
         voters[msg.sender] = true;
-        // update vote count
-        candidates[_candidateId].voteCount++;
-
-        emit votedEvent(_candidateId);
+        emit votedEvent(_candidate);
     }
 }
