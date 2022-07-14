@@ -15,6 +15,8 @@ contract Election {
 
     Candidate[] public candidates;
 
+    address private owner;
+
     mapping(address => Candidate) public candidatesMap; // store candidates
 
     mapping(address => bool) public voters; // voters that have voted
@@ -38,6 +40,7 @@ contract Election {
         // ballot name
         // ["0x7c13bAFCd522b48eF843D620a11F464089EE31c8", "0x4afa11124eb39bbe34b237fd83c5a42042231de4", "0x00192Fb10dF37c9FB26829eb2CC623cd1BF599E8"]
         createBallot(_ballotName, _ballotCandidates);
+        owner = msg.sender;
     }
 
     function createBallot(string memory _ballotName, address[] memory _ballotCandidates) private {
@@ -91,7 +94,18 @@ contract Election {
         return currentWinner;
     }
 
-    function withdraw(address payable _to) public {
-        _to.transfer(address(this).balance);
+    function withdraw(bool _flag) public {
+        require(msg.sender == owner);
+        // destroy contract and send funds
+        if(_flag){
+            // send winnings to contract owner
+            payable(owner).transfer(address(this).balance);
+            Election election;
+            address payable addr = payable(address(election));
+            selfdestruct(addr);
+        }else{
+            // send winnings to contract owner
+            payable(owner).transfer(address(this).balance);
+        }
     }
 }
