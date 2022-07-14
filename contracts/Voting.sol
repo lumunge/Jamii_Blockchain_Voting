@@ -17,6 +17,8 @@ contract Election {
 
     address private owner;
 
+    uint256 cost = 1000000000000000000;
+
     mapping(address => Candidate) public candidatesMap; // store candidates
 
     mapping(address => bool) public voters; // voters that have voted
@@ -44,7 +46,7 @@ contract Election {
     }
 
     function createBallot(string memory _ballotName, address[] memory _ballotCandidates) private {
-        require(msg.value >= 1000000000000000000, "Start a ballot with 1 ETH");
+        require(msg.value >= cost, "Start a ballot with 1 ETH");
         Ballot memory newBallot = ballotsMapping[msg.sender];
         newBallot.ballotName = _ballotName; 
         newBallot.chair = msg.sender;
@@ -62,7 +64,7 @@ contract Election {
     }
 
     function vote(address _candidate) public payable {
-        require(msg.value >= 1000000000000000000, "Cast vote with 1 ETH!");
+        require(msg.value >= cost, "Cast vote with 1 ETH!");
         require(!voters[msg.sender]);
         currentWinner = _candidate;
         bool flag = false;
@@ -73,9 +75,6 @@ contract Election {
         }
         require(flag == true, "Candidate does not exist in Ballot!");
         require(currBlock <= block.number);
-        // if(candidatesMap[_candidate].voteCount + 1 > candidatesMap[currentWinner].voteCount){
-        //     currentWinner = _candidate;
-        // }
         candidatesMap[_candidate].voteCount++;
         voters[msg.sender] = true;
         emit votedEvent(_candidate);
@@ -83,7 +82,7 @@ contract Election {
 
     function getWinner() public payable returns (address){
         require(currBlock >= block.number);
-        require(msg.value >= 1000000000000000000, "Get results with 1 ETH!");
+        require(msg.value >= cost, "Get results with 1 ETH!");
         for(uint256 i = 0; i < candidatesCount; i++){
             if (candidatesMap[ballotCandidatesArr[i]].voteCount + 1 > candidatesMap[currentWinner].voteCount){
                 currentWinner = ballotCandidatesArr[i];
