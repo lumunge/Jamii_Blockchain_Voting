@@ -55,18 +55,20 @@ contract Election {
 
     uint256 public currBlock = block.number;
 
-    string public electionName;
+    string public organizationName;
     string public electionType;
 
     mapping(address => Voter) voters;
-    mapping(address => bytes32) voterToUniqueId;
+    mapping(address => bytes32) public voterToUniqueId;
+    mapping(address => uint256) public voterToId;
 
-    constructor(string memory _electionName, string memory _electionType)
+    constructor(string memory _organizationName, string memory _electionType)
         public
         payable
     {
         require(msg.value >= electionCost, "Start an Election with 2 ETH");
         owner = msg.sender;
+        organizationName = _organizationName;
         electionType = _electionType;
     }
 
@@ -74,6 +76,10 @@ contract Election {
         string memory _ballotName,
         address[] memory _ballotCandidates
     ) public payable {
+        require(
+            msg.sender == owner,
+            "Request appropriate permissions from Owner"
+        );
         require(msg.value >= ballotCost, "Start a ballot with 1 ETH");
         Ballot memory newBallot = ballotsMapping[msg.sender];
         newBallot.ballotName = _ballotName;
@@ -91,17 +97,21 @@ contract Election {
         ballots.push(newBallot);
     }
 
+    // createBallot(_ballotCandidates)
+    // ["0x583031D1113aD414F02576BD6afaBfb302140225", "0x4B0897b0513fdC7C541B6d9D7E929C4e5364D2dB"]
+
     function getCandidates() public view returns (address[] memory) {
         return ballotCandidatesArr;
     }
 
-    function registerVoter(uint256 _idNumber) public returns (bytes32) {
-        require(
-            voters[msg.sender].registered == false,
-            "You already registered!"
-        );
+    // register a voter
+    function register(uint256 _idNumber) public returns (bytes32) {
+        require(voterToUniqueId[msg.sender] == 0, "You already registered!");
+        require(voterToId[msg.sender] == 0, "This id_number is registered!");
+        // id_number validation here
         bytes32 hashedId = keccak256(abi.encode(_idNumber));
         voterToUniqueId[msg.sender] = hashedId;
+        voterToId[msg.sender] = _idNumber;
         voters[msg.sender].registered = true;
         return hashedId;
     }
