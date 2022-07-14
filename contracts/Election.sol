@@ -1,9 +1,17 @@
-pragma solidity 0.6.6;
+pragma solidity 0.8.0;
 
 contract Election {
     struct Candidate {
         address addr;
         uint256 voteCount;
+    }
+
+    struct Voter {
+        address addr;
+        bool registered;
+        bool rights;
+        bool voted;
+        // implement voting weight
     }
 
     struct Ballot {
@@ -13,17 +21,24 @@ contract Election {
         address[] ballotVoters;
     }
 
-    Candidate[] public candidates;
+    // string[2] ballotTypes = ["open", "close"];
+
+    // Candidate[] public candidates;
 
     address private owner;
 
-    uint256 cost = 1000000000000000000;
+    uint256 ballotCost = 1000000000000000000;
+    uint256 electionCost = 2000000000000000000;
+    uint256 getWinnerCost = 500000000000000000;
+    uint256 votingCost = 88000000000000000; // $100
 
     mapping(address => Candidate) public candidatesMap; // store candidates
 
-    mapping(address => bool) public voters; // voters that have voted
+    // mapping(address => bool) public voters; // voters that have voted
 
     mapping(address => Ballot) public ballotsMapping;
+
+    Ballot[] public ballots;
 
     mapping(address => address[]) public chairToCandidates;
 
@@ -33,26 +48,31 @@ contract Election {
 
     uint256 public candidatesCount; // count candidates
 
+    // address[] public registeredVoters;
+
     event votedEvent(address indexed _candidate);
 
     uint256 public currBlock = block.number;
 
-    constructor(string memory _ballotName, address[] memory _ballotCandidates)
+    string public electionName;
+    string public electionType;
+
+    mapping(address => Voter) voters;
+
+    constructor(string memory _electionName, string memory _electionType)
         public
         payable
     {
-        // Start ballot
-        // ballot name
-        // ["0x7c13bAFCd522b48eF843D620a11F464089EE31c8", "0x4afa11124eb39bbe34b237fd83c5a42042231de4", "0x00192Fb10dF37c9FB26829eb2CC623cd1BF599E8"]
-        createBallot(_ballotName, _ballotCandidates);
+        require(msg.value >= electionCost, "Start an Election with 2 ETH");
         owner = msg.sender;
+        electionType = _electionType;
     }
 
     function createBallot(
         string memory _ballotName,
         address[] memory _ballotCandidates
-    ) private {
-        require(msg.value >= cost, "Start a ballot with 1 ETH");
+    ) public payable {
+        require(msg.value >= ballotCost, "Start a ballot with 1 ETH");
         Ballot memory newBallot = ballotsMapping[msg.sender];
         newBallot.ballotName = _ballotName;
         newBallot.chair = msg.sender;
@@ -66,15 +86,29 @@ contract Election {
         }
         chairToCandidates[msg.sender] = ballotCandidatesArr;
         newBallot.ballotCandidates = ballotCandidatesArr;
+        ballots.push(newBallot);
     }
 
     function getCandidates() public view returns (address[] memory) {
         return ballotCandidatesArr;
     }
 
-    function vote(address _candidate) public payable {
-        require(msg.value >= cost, "Cast vote with 1 ETH!");
-        require(!voters[msg.sender]);
+    function voterRegistration(address _voterAddress)
+        public
+        returns (Voter memory)
+    {
+        voters[_voterAddress].registered = true;
+    }
+
+    function assignVotingRights(address _voter) private {
+        require(msg.sender == owner);
+        require(voters[_voter].registered = true);
+        voters[_voter].rights = true;
+    }
+
+    function voteOpenBallot(address _candidate) private {
+        require(msg.value >= votingCost, "Cast vote with 1 ETH!");
+        require(!voters[msg.sender].voted);
         currentWinner = _candidate;
         bool flag = false;
         for (uint256 i = 0; i < ballotCandidatesArr.length; i++) {
@@ -85,13 +119,52 @@ contract Election {
         require(flag == true, "Candidate does not exist in Ballot!");
         require(currBlock <= block.number);
         candidatesMap[_candidate].voteCount++;
-        voters[msg.sender] = true;
+        voters[msg.sender].voted = true;
         emit votedEvent(_candidate);
+    }
+
+    function voteClosedBallot(address _candidate) private {
+        require(msg.value >= votingCost, "Cast vote with 1 ETH!");
+        require(
+            voters[msg.sender].registered = true,
+            "This is a closed ballot, Make sure you register!"
+        );
+        require(
+            voters[msg.sender].rights = true,
+            "You don't have any voting rights!"
+        );
+        require(!voters[msg.sender].voted, "You already cast your vote!");
+        currentWinner = _candidate;
+        bool flag = false;
+        for (uint256 i = 0; i < ballotCandidatesArr.length; i++) {
+            if (ballotCandidatesArr[i] == _candidate) {
+                flag = true;
+            }
+        }
+        require(flag == true, "Candidate does not exist in Ballot!");
+        require(currBlock <= block.number);
+        candidatesMap[_candidate].voteCount++;
+        voters[msg.sender].voted = true;
+        emit votedEvent(_candidate);
+    }
+
+    function vote(address _candidate) public payable {
+        if (
+            keccak256(abi.encodePacked(electionType)) ==
+            keccak256(abi.encodePacked("open"))
+        ) {
+            voteOpenBallot(_candidate);
+        } else if (
+            keccak256(abi.encodePacked(electionType)) ==
+            keccak256(abi.encodePacked("close"))
+        ) {
+            voteClosedBallot(_candidate);
+        }
     }
 
     function getWinner() public payable returns (address) {
         require(currBlock >= block.number);
-        require(msg.value >= cost, "Get results with 1 ETH!");
+        require(msg.value >= getWinnerCost, "Get results with 1 ETH!");
         for (uint256 i = 0; i < candidatesCount; i++) {
             if (
                 candidatesMap[ballotCandidatesArr[i]].voteCount + 1 >
