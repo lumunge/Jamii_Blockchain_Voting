@@ -11,6 +11,7 @@ contract Election {
         bool registered;
         bool rights;
         bool voted;
+        bytes32 uniqueId; // identification number
         // implement voting weight
     }
 
@@ -58,6 +59,7 @@ contract Election {
     string public electionType;
 
     mapping(address => Voter) voters;
+    mapping(address => bytes32) voterToUniqueId;
 
     constructor(string memory _electionName, string memory _electionType)
         public
@@ -93,11 +95,15 @@ contract Election {
         return ballotCandidatesArr;
     }
 
-    function voterRegistration(address _voterAddress)
-        public
-        returns (Voter memory)
-    {
-        voters[_voterAddress].registered = true;
+    function registerVoter(uint256 _idNumber) public returns (bytes32) {
+        require(
+            voters[msg.sender].registered == false,
+            "You already registered!"
+        );
+        bytes32 hashedId = keccak256(abi.encode(_idNumber));
+        voterToUniqueId[msg.sender] = hashedId;
+        voters[msg.sender].registered = true;
+        return hashedId;
     }
 
     function assignVotingRights(address _voter) private {
