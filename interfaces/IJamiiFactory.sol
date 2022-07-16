@@ -6,15 +6,13 @@ interface IJamiiFactory {
         * @arg election_id A unique identification number for an election
         * @arg election_owner The address of the election owner
         * @arg organization The name of the organization
-        * @arg ballots An array of Ballot structs representing individual ballots
-        * @arg ballot_candidates Array of address of ballot candidates
         * @arg open A boolean value indicating the election status
 
     */
     struct Election {
         uint256 election_id;
         address election_owner;
-        string organization;
+        string organization_name;
         bool open;
     }
 
@@ -39,6 +37,7 @@ interface IJamiiFactory {
         address[] ballot_voters_addr;
         uint256 voters_count;
         bool open;
+        address winner;
     }
 
     /*
@@ -65,11 +64,12 @@ interface IJamiiFactory {
      */
     struct Voter {
         uint256 voter_id;
-        address addr;
+        address voter_address;
+        uint256 ballot_id;
         bool registered;
         bool rights;
         bool voted;
-        uint256 unique_id; // ID_number
+        bytes32 unique_voter_id;
         // implement voting weight
     }
 
@@ -86,7 +86,7 @@ interface IJamiiFactory {
     /**
      * @dev Emitted when `_voter` registers to vote.
      */
-    event registered_voter(address _voter);
+    event registered_voter(bytes32 _voter_unique_id);
 
     /**
      * @dev Emitted when `ballot_owner/election_owner` assigns voting rights to `voter`.
