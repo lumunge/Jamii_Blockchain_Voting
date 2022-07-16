@@ -33,16 +33,42 @@ interface IElectionFactory {
         uint256 ballot_type;
         string ballot_name;
         address chair;
-        address[] ballot_candidates;
-        address[] ballot_voters;
+        Candidate[] ballot_candidates;
+        address[] ballot_candidates_addr;
+        Voter[] ballot_voters;
+        address[] ballot_voters_addr;
+        uint256 voters_count;
         bool open;
+    }
+
+    struct Candidate {
+        address addr;
+        uint256 vote_count;
+        // implement party
+    }
+
+    struct Voter {
+        address addr;
+        bool registered;
+        bool rights;
+        bool voted;
+        uint256 unique_id; // ID_number
+        // implement voting weight
     }
 
     /*
      * @dev creates a new open ballot
      * @param _ballot_name An arbitrary ballot name
      * @param _ballot_candidates An array of address of candidates participating in the ballot
+     * @param _ballot_type The type of ballot, open, closed...
      * @return A new ballot struct
+     *
+     * @require:
+     *  - ballot_candidates.length > 1
+     *  - valid ballot_type <= ballot_types
+     *  - creators pay ballot_cost
+     *  - msg.sender == ballot_owner || election_owner
+     *  - ballots.length <= limit
      */
     function create_open_ballot(
         string memory _ballot_name,
@@ -55,6 +81,12 @@ interface IElectionFactory {
      * @param _ballot_name An arbitrary ballot name
      * @param _ballot_candidates An array of address of candidates participating in the ballot
      * @return A new ballot struct
+     *
+     * @require:
+     *  - ballot_candidates.length > 1
+     *  - valid ballot_type (1)
+     *  - creators pay ballot_cost
+     *  - ballots.length <= limit
      */
     function create_closed_free_ballot(
         string memory _ballot_name,
@@ -67,6 +99,12 @@ interface IElectionFactory {
      * @param _ballot_name An arbitrary ballot name
      * @param _ballot_candidates An array of address of candidates participating in the ballot
      * @return A new ballot struct
+     *
+     * @require:
+     *  - ballot_candidates.length > 1
+     *  - valid ballot_type (2)
+     *  - creators pay ballot_cost
+     *  - ballots.length <= limit
      */
     function create_closed_paid_ballot(
         string memory _ballot_name,
@@ -75,63 +113,148 @@ interface IElectionFactory {
     ) external payable returns (Ballot memory);
 
     /*
-     * @dev registers a voter
+     * @dev registers a voter in a open ballot
      * @param _id_number A unique identification number
+     * @param _ballot The ballot identification number
      * @return A bytes32 unique user id
+     *
+     * @require:
+     *  - ballot is status:open
+     *  - unique _id_number(no duplicates)
+     *  - unregistered msg.sender
+     *  - valid _ballot_id number
      */
-    function register_voter_open_ballot(uint256 _id_number)
+    function register_voter_open_ballot(uint256 _id_number, uint256 _ballot_id)
         external
         returns (bytes32);
 
     /*
-     * @dev get a ballot
+     * @dev registers a voter in a paid ballot
+     * @param _id_number A unique identification number
+     * @param _ballot The ballot identification number
+     * @return A bytes32 unique user id
+     *
+     * @require:
+     *  - ballot is status:open
+     *  - unique _id_number(no duplicates)
+     *  - unregistered msg.sender
+     *  - valid _ballot_id number
+     *  - msg.value <= registration_fee
+     */
+    function register_voter_paid_ballot(uint256 _id_number, uint256 _ballot_id)
+        external
+        returns (bytes32);
+
+    /*
+     * @dev get a ballot in open ballot
      * @param _ballot_id A unique identification number for a ballot
-     * @return A Ballot struct
+     * @return A Ballot struct if ballot_type == 0 else request rights from chair
+     *
+     * @require:
+     *  - valid _ballot_id
+     *  - if ballot_type == closed msg.sender == ballot_owner || election_owner
      */
     function get_ballot(uint256 _ballot_id) external returns (Ballot memory);
 
     /*
      * @dev get the candidates in a ballot
      * @param _ballot_id A unique identification number for a ballot
-     * @return An array of addresses representing candidates in a ballot
+     * @return An array of addresses representing candidates in a ballot if ballot_type == 0 else request permissions
+     *
+     * @require:
+     *  - if ballot_type == closed msg.sender == ballot_owner || election_owner
+     *  - valid _ballot_id
      */
     function get_ballot_candidates(uint256 _ballot_id)
         external
-        returns (address[] memory);
+        returns (Candidate[] memory);
 
     /*
-     * @dev get a ballot's registered voters
+     * @dev get a ballot's registered voters in an open ballot, requests permissions in closed ballot
      * @param _ballot_id A unique identification number
      * @return An array of addresses representing ballot registered voters
+     *
+     * @require:
+     *  - if ballot_type == closed msg.sender == ballot_owner || election_owner
+     *  - valid _ballot_id
      */
     function get_registered_voters(uint256 _ballot_id)
         external
-        returns (address[] memory);
+        returns (Voter[] memory);
 
     /*
      * @dev get an election
      * @param _election_id A unique identification number for an election
      * @return An Election struct
+     *
+     * @require:
+     *  - msg.sender == ballot_owner || msg.sender == authorized
+     *  - valid _election_id
      */
     function get_election(uint256 _election_id)
         external
         returns (Election memory);
 
     /*
+     * @dev assign voting rights
+     * @param _voter A unique voter address
+     * @param _ballot_id The Id of a specific ballot
+     *
+     * @require:
+     *  - valid _ballot_id
+     *  - ballot is still open
+     *  - Ballots must exist
+     *  - msg.sender == ballot_owner || msg.sender == authorized
+     *  - msg.sender is registered voter in specified ballot
+     *  - ballot_type >= 1
+     *  - msg.sender == registered voter
+     *  - voting_rights == None
+     */
+    function assign_voting_rights(address _voter, uint256 _ballot_id) external;
+
+    /*
      * @dev voter votes for a candidate
      * @param _candidate The address of a candidate in the ballot
+     *
+     * @require:
+     *  - ballot_type == 0(open)
+     *  - msg.sender registered voter
+     *  - msg.sender NOT voted
+     *  - ballot is Open
+     *  - _candidate is a valid candidate
+     *  - ballot_id is valid
      */
-    function vote_open_ballot(address _candidate) external;
+    function vote_open_ballot(address _candidate, uint256 _ballot_id) external;
 
     /*
      *@dev voter votes in an open payable ballot
      *@param _candidate The address of the candidate in the open paid ballot
+     *
+     * @require:
+     *  - Ballot is Open Paid Ballot
+     *  - msg.value == open_paid_voting_cost
+     *  - msg.sender == registered Voter
+     *  - msg.sender has Valid Voting Rights
+
+     *  - _candidate to be valid candidate
+     *  - msg.sender to be registered voter
+     *  - ballot is open(in progress)
+     *  - msg.sender first time voting
+     *  - msg.value >= voting_price
      */
-    function vote_open_paid_ballot(address _candidate) external payable;
+    function vote_open_paid_ballot(address _candidate, uint256 _ballot_id)
+        external
+        payable;
 
     /*
      *@dev voter votes in an closed payable ballot
      *@param _candidate The address of the candidate in the open paid ballot
+     *
+     * @require:
+     *  - msg.sender == registered voters
+     *  - msg.sender == voting rights(weight)
+     *  - msg.sender first time voting
+     *  - msg.value >= voting price
      */
     function vote_closed_paid_ballot(address _candidate) external payable;
 
@@ -139,18 +262,30 @@ interface IElectionFactory {
      * @dev Get the winner of a ballot
      * @param _ballot_id A integer representing the ballot id
      * @return An address of the winner(candidate)
+     *
+     * @require:
+     *  - valid _ballot_id
+     *  - if ballot_type >= 1, Require msg.sender == ballot_owner || authorized owner
+     *  - ballot is over(closed)
      */
     function get_winner(uint256 _ballot_id) external payable returns (address);
 
     /*
      * @dev ends a ballot
      * @param _ballot_id The Id of a ballot
+     *
+     * @require:
+     *  - time for ballot is up block_number >= set_block_number
+     *  - msg.sender == ballot_owner
      */
     function end_ballot(uint256 _ballot_id) external;
 
     /*
      * @dev ends an election(ends all currently opened ballots)
      * @param _ballot_id The ballot Id
+     *
+     * @require:
+     *  - msg.sender == election_owner
      */
     function end_election(uint256 _election_id) external;
 }
