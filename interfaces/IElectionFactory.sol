@@ -41,13 +41,30 @@ interface IElectionFactory {
         bool open;
     }
 
+    /*
+        * @dev candidate struct
+        * @arg candidate_id A unique identification number for a candidate
+        * @arg candidate_address The address of a candidate
+        * @arg vote_count The number of votes a candidates has
+
+    */
     struct Candidate {
-        address addr;
+        uint256 candidate_id;
+        address candidate_address;
         uint256 vote_count;
         // implement party
     }
 
+    /*
+     * @dev voter struct
+     * @arg voter_id A unique identification number for a candidate
+     * @arg voter_address The address of a voter
+     * @arg registered A bool indicating whether the candidate is registered in Ballot
+     * @arg rights A voter's voting rights in Ballot
+     * @arg unique_id A unique identifier for a voter in Ballot
+     */
     struct Voter {
+        uint256 voter_id;
         address addr;
         bool registered;
         bool rights;
@@ -56,25 +73,49 @@ interface IElectionFactory {
         // implement voting weight
     }
 
+    /**
+     * @dev Emitted when msg.sender creates new `_organization_name`.
+     */
+    event created_new_election(string _organization_name);
+
+    /**
+     * @dev Emitted when ballot_owner/election_owner create a new Ballot with unique `_ballot_id`.
+     */
+    event created_ballot(uint256 _ballot_id);
+
+    /**
+     * @dev Emitted when `_voter` registers to vote.
+     */
+    event registered_voter(address _voter);
+
+    /**
+     * @dev Emitted when `ballot_owner/election_owner` assigns voting rights to `voter`.
+     */
+    event assigned_voting_rights(address _voter);
+
+    /**
+     * @dev Emitted when `_voter` casts a vote to `_candidate`.
+     */
+    event voted(address indexed _candidate);
+
     /*
      * @dev creates a new open ballot
      * @param _ballot_name An arbitrary ballot name
      * @param _ballot_candidates An array of address of candidates participating in the ballot
      * @param _ballot_type The type of ballot, open, closed...
-     * @return A new ballot struct
      *
      * @require:
      *  - ballot_candidates.length > 1
-     *  - valid ballot_type <= ballot_types
-     *  - creators pay ballot_cost
      *  - msg.sender == ballot_owner || election_owner
+     *  - creators pay ballot_cost
+     *  - valid ballot_type <= ballot_types
      *  - ballots.length <= limit
      */
     function create_open_ballot(
         string memory _ballot_name,
         address[] memory _ballot_candidates,
         uint256 _ballot_type
-    ) external payable returns (Ballot memory);
+    ) external payable;
 
     /*
      * @dev creates a new closed ballot
