@@ -1,6 +1,6 @@
 pragma solidity 0.8.8;
 
-interface IElectionFactory {
+interface IJamiiFactory {
     /*
         * @dev election struct
         * @arg election_id A unique identification number for an election
