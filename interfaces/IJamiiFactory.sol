@@ -17,38 +17,43 @@ interface IJamiiFactory {
     }
 
     /*
-        * @dev ballot struct
-        * @arg ballot_id A unique identification number for a ballot
-        * @arg ballot_type An integer representing the type of ballot
-        * @arg ballot_name The name of the ballot
-        * @arg chair Address of the ballot creator/owner
-        * @arg ballot_candidates Array of address of ballot candidates
-        * @arg ballot_voters Registered voters of a ballot
-
-    */
+     * @dev ballot struct
+     * @arg ballot_id A unique identification number for a ballot
+     * @arg ballot_type An integer representing the type of ballot
+     * @arg ballot_name The name of the ballot
+     * @arg chair Address of the ballot creator/owner
+     * @arg ballot_candidates Array of address of ballot candidates
+     * @arg ballot_voters Registered voters of a ballot
+     * @arg open The status of the Ballot, open/closed
+     * @arg current_winner The current_winner of a Ballot
+     * @arg tie True is there is a tie between candidates False otherwise
+     */
     struct Ballot {
         uint256 ballot_id;
         uint256 ballot_type;
         string ballot_name;
         address chair;
-        Candidate[] ballot_candidates;
+        // Candidate[] ballot_candidates;
         address[] ballot_candidates_addr;
-        Voter[] ballot_voters;
+        // Voter[] ballot_voters;
         address[] ballot_voters_addr;
         uint256 voters_count;
         bool open;
-        address winner;
+        address current_winner;
+        bool tie;
     }
 
     /*
         * @dev candidate struct
         * @arg candidate_id A unique identification number for a candidate
+        * @arg ballot_id A unique identifier for a Ballot
         * @arg candidate_address The address of a candidate
         * @arg vote_count The number of votes a candidates has
 
     */
     struct Candidate {
         uint256 candidate_id;
+        uint256 ballot_id;
         address candidate_address;
         uint256 vote_count;
         // implement party
@@ -58,9 +63,11 @@ interface IJamiiFactory {
      * @dev voter struct
      * @arg voter_id A unique identification number for a candidate
      * @arg voter_address The address of a voter
+     * @arg ballot_id A unique identifier for a Ballot
      * @arg registered A bool indicating whether the candidate is registered in Ballot
      * @arg rights A voter's voting rights in Ballot
-     * @arg unique_id A unique identifier for a voter in Ballot
+     * @arg voted Status of a Voter, voted/not voted
+     * @arg unique_voter_id A unique identifier for a voter in Ballot
      */
     struct Voter {
         uint256 voter_id;
@@ -71,6 +78,7 @@ interface IJamiiFactory {
         bool voted;
         bytes32 unique_voter_id;
         // implement voting weight
+        // implement multiple ballot -> ballot_id
     }
 
     /**
@@ -98,6 +106,11 @@ interface IJamiiFactory {
      */
     event voted(address indexed _candidate);
 
+    /**
+     * @dev Emitted when there is a tie between `ballot_candidates` in a Ballot.
+     */
+    event tied_ballot(bool _tie);
+
     /*
      * @dev creates a new open ballot
      * @param _ballot_name An arbitrary ballot name
@@ -118,7 +131,7 @@ interface IJamiiFactory {
     ) external payable;
 
     /*
-     * @dev creates a new closed ballot
+     * @dev creates a new closed ballot`
      * @param _ballot_name An arbitrary ballot name
      * @param _ballot_candidates An array of address of candidates participating in the ballot
      * @return A new ballot struct
@@ -206,9 +219,9 @@ interface IJamiiFactory {
      *  - if ballot_type == closed msg.sender == ballot_owner || election_owner
      *  - valid _ballot_id
      */
-    function get_ballot_candidates(uint256 _ballot_id)
+    function get_ballot_candidates_addr(uint256 _ballot_id)
         external
-        returns (Candidate[] memory);
+        returns (address[] memory);
 
     /*
      * @dev get a ballot's registered voters in an open ballot, requests permissions in closed ballot

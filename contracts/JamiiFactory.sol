@@ -7,7 +7,12 @@ contract JamiiFactory is IJamiiFactory {
     // Candidate[] public candidates;
     // address[] public registeredVoters;
     Election[] public elections;
-    Ballot[3] public ballots;
+    Ballot[] public ballots;
+
+    Candidate[] ballot_candidates;
+    address[] ballot_candidates_addr;
+    Voter[] ballot_voters;
+    address[] ballot_voters_addr;
 
     // numbers
     uint256 ballot_cost = 1000000000000000000;
@@ -16,7 +21,7 @@ contract JamiiFactory is IJamiiFactory {
     uint256 open_paid_voting_cost = 88000000000000000; // $100
     uint256 public candidates_count; // count candidates
     uint256 public ballot_count;
-    uint256 public election_count = 0;
+    uint256 public election_count;
     uint256 public voters_count;
     uint256 public election_type;
     uint256 public current_block = block.number;
@@ -24,6 +29,7 @@ contract JamiiFactory is IJamiiFactory {
     uint256 public ballot_types = 3;
     uint256 public ballot_type;
     uint256 private max_ballots = 3;
+    uint256 public uid;
 
     // strings
     string public organization_name;
@@ -33,13 +39,14 @@ contract JamiiFactory is IJamiiFactory {
     address private ballot_owner;
     address private election_owner;
     // address private current_winner;
-    address[] private ballot_candidates_arr;
+    // address[] public ballot_candidates_arr;
 
     // mappings
     mapping(address => Ballot) public ballots_mapping;
-    mapping(address => Candidate) public candidates_mapping; // store candidates
+    mapping(address => Candidate) public address_to_candidate_mapping; // store candidates
     mapping(address => address[]) public chair_to_candidates;
-    mapping(address => Voter) public voters_mapping;
+    mapping(address => Voter) public address_to_voter_mapping;
+    mapping(uint256 => Voter) public ballot_to_voter_mapping;
     mapping(address => bytes32) public voter_to_unique_id;
     mapping(uint256 => address) public id_to_voter;
     // mapping(address => bool) public voters; // voters that have voted
@@ -52,7 +59,13 @@ contract JamiiFactory is IJamiiFactory {
 
     // constructor - create an election with ballots
     constructor(string memory _organization_name) public payable {
-        require(msg.value >= election_cost, "Start an Election with 2 ETH");
+        // require(msg.value >= election_cost, "Start an Election with 2 ETH");
+        bytes memory bytes_organization_name = bytes(_organization_name);
+        require(
+            bytes_organization_name.length > 0,
+            "Enter a valid Organization Name!"
+        );
+        election_count = 0;
         organization_name = _organization_name;
         Election memory election = Election(
             election_count,
@@ -61,70 +74,78 @@ contract JamiiFactory is IJamiiFactory {
             true
         );
         election.election_id = election_count;
-        elections[election_count++] = election;
+        elections.push(election);
+        election_count++;
         ballot_owner = msg.sender;
         election_owner = msg.sender;
-        candidates_count = 0;
         ballot_count = 0;
         voters_count = 0;
-
-        emit created_new_election(_organization_name);
+        uid = 100;
+        emit created_new_election(organization_name);
     }
 
     function create_open_ballot(
         string memory _ballot_name,
-        address[] memory _ballot_candidates,
+        address[] memory _ballot_candidates_addr,
         uint256 _ballot_type
     ) public payable only_election_ballot_owner {
-        require(_ballot_candidates.length > 1, "Not Enough Ballot Candidates!");
+        bytes memory bytes_ballot_name = bytes(_ballot_name);
+        require(bytes_ballot_name.length > 0, "Enter a valid Ballot Name!");
+        require(
+            _ballot_candidates_addr.length > 1,
+            "Not Enough Ballot Candidates!"
+        );
         require(
             msg.sender == election_owner || msg.sender == ballot_owner,
             "Insufficient Permissions for this Action!"
         );
-        require(
-            msg.value >= ballot_cost,
-            "Not Enough Funds to Start a Ballot!"
-        );
+        // require(msg.value >= ballot_cost, "Not Enough Funds to Start a Ballot!");
         require(_ballot_type <= ballot_types, "Not a valid Ballot Type!");
         require(
-            ballots.length <= max_ballots,
+            ballot_count < max_ballots,
             "You have reached the Max Limit of Ballots for this Election!"
         );
 
-        ballot_owner = msg.sender;
-        Ballot memory new_ballot = ballots_mapping[msg.sender];
-        new_ballot.ballot_id = ballot_count;
-        new_ballot.ballot_type = _ballot_type;
-        new_ballot.ballot_name = _ballot_name;
-        new_ballot.chair = msg.sender;
-
-        for (uint256 i = 0; i < _ballot_candidates.length; i++) {
-            new_ballot.ballot_candidates[candidates_count] = Candidate(
-                candidates_count,
-                ballot_count,
-                _ballot_candidates[i],
+        uint256 n = _ballot_candidates_addr.length;
+        for (uint256 i = 0; i < n; i++) {
+            Candidate memory candidate = Candidate(
+                i,
+                uid,
+                _ballot_candidates_addr[i],
                 0
             );
-            new_ballot.ballot_candidates_addr[
-                candidates_count
-            ] = _ballot_candidates[i];
-            candidates_mapping[_ballot_candidates[i]] = Candidate(
-                candidates_count,
-                ballot_count,
-                _ballot_candidates[i],
-                0
-            );
-            candidates_count++;
+            address_to_candidate_mapping[
+                _ballot_candidates_addr[i]
+            ] = candidate;
         }
 
-        chair_to_candidates[msg.sender] = new_ballot.ballot_candidates_addr;
+        ballot_owner = msg.sender;
+        candidates_count = _ballot_candidates_addr.length;
+        Ballot memory new_ballot = Ballot(
+            uid,
+            _ballot_type,
+            _ballot_name,
+            msg.sender,
+            // ballot_candidates,
+            _ballot_candidates_addr,
+            // ballot_voters,
+            ballot_voters_addr,
+            0,
+            true,
+            address(0x0),
+            false
+        );
+        ballots.push(new_ballot);
+        ballots_mapping[msg.sender] = new_ballot;
+        chair_to_candidates[msg.sender] = _ballot_candidates_addr;
         ballot_count++;
+        uid++;
 
         emit created_ballot(ballot_count - 1);
     }
 
     // createBallot(_ballot_candidates)
-    // ["0x583031D1113aD414F02576BD6afaBfb302140225", "0x4B0897b0513fdC7C541B6d9D7E929C4e5364D2dB"]
+    // ["0xf9d48aC9eC8F207AEF93518B51D2CdA61e596904", "0x6c0A17AEe0a1420583446B77f0c8a55e369Bb07e"]
 
     function create_closed_free_ballot(
         string memory _ballot_name,
@@ -151,14 +172,17 @@ contract JamiiFactory is IJamiiFactory {
         public
         returns (bytes32)
     {
-        require(ballots.length > 0, "No Ballots Open Yet!");
-        Ballot memory ballot = ballots[_ballot_id];
+        uint256 int_ballot_id = _ballot_id - 100;
+        require(int_ballot_id < max_ballots, "No such Ballot Exists!");
+        // require(_ballot_id <= uid, "No Such Ballot!");
+        Ballot storage ballot = ballots[int_ballot_id];
+        require(ballot.open == true, "This ballot Ended!");
         require(
             id_to_voter[_id_number] == address(0x0),
             "This id_number is registered!"
         );
         require(voter_to_unique_id[msg.sender] == 0, "You already registered!");
-        require(ballots.length <= _ballot_id, "Invalid Ballot Id!");
+
         // id_number validation here
         bytes32 unique_voter_id = keccak256(abi.encode(_id_number));
         voter_to_unique_id[msg.sender] = unique_voter_id;
@@ -166,17 +190,18 @@ contract JamiiFactory is IJamiiFactory {
         Voter memory new_voter = Voter(
             voters_count,
             msg.sender,
-            _ballot_id,
+            int_ballot_id,
             true,
             true,
             false,
             unique_voter_id
         );
-        voters_mapping[msg.sender] = new_voter;
-        ballot.ballot_voters[voters_count] = new_voter;
-        ballot.ballot_voters_addr[voters_count] = msg.sender;
+        ballot_to_voter_mapping[int_ballot_id] = new_voter;
+        address_to_voter_mapping[msg.sender].registered = true;
+        ballot.voters_count++;
         id_to_voter[_id_number] = msg.sender;
-        voter_ids.push(_id_number);
+
+        // voter_ids.push(_id_number);
         return unique_voter_id;
 
         emit registered_voter(unique_voter_id);
@@ -210,23 +235,23 @@ contract JamiiFactory is IJamiiFactory {
         }
     }
 
-    function get_ballot_candidates(uint256 _ballot_id)
+    function get_ballot_candidates_addr(uint256 _ballot_id)
         public
         view
-        returns (Candidate[] memory)
+        returns (address[] memory)
     {
         require(_ballot_id <= ballots.length, "Invalid ballot Id!");
-        Ballot memory ballot = ballots[_ballot_id];
+        Ballot storage ballot = ballots[_ballot_id];
         if (ballot.ballot_type == 0) {
             // open
-            return ballots[_ballot_id].ballot_candidates;
+            return ballots[_ballot_id].ballot_candidates_addr;
         } else if (ballot.ballot_type >= 1) {
             // closed
             require(
                 msg.sender == ballot_owner || msg.sender == election_owner,
                 "You need Permissions for this Action!"
             ); // or authorized
-            return ballots[_ballot_id].ballot_candidates;
+            return ballots[_ballot_id].ballot_candidates_addr;
         }
     }
 
@@ -239,14 +264,14 @@ contract JamiiFactory is IJamiiFactory {
         Ballot memory ballot = ballots[_ballot_id];
         if (ballot.ballot_type == 0) {
             // open
-            return ballot.ballot_voters;
+            // return ballot.ballot_voters;
         } else if (ballot.ballot_type >= 1) {
             // closed
             require(
                 msg.sender == ballot_owner || msg.sender == election_owner,
                 "You need Permissions for this Action!"
             ); // or authorized
-            return ballot.ballot_voters;
+            // return ballot.ballot_voters;
         }
     }
 
@@ -281,7 +306,7 @@ contract JamiiFactory is IJamiiFactory {
         require(ballot.open == true, "The Ballot is Closed!");
         require(ballots.length > 0, "No ballots Opened Yet!");
         require(
-            voters_mapping[_voter].ballot_id == _ballot_id,
+            address_to_voter_mapping[msg.sender].ballot_id == _ballot_id,
             "Voter does NOT belong to this Ballot."
         );
         require(
@@ -289,15 +314,15 @@ contract JamiiFactory is IJamiiFactory {
             "This Option is Possible in a Closed Ballot!"
         );
         require(
-            voters_mapping[_voter].registered == true,
+            address_to_voter_mapping[msg.sender].registered == true,
             "You are NOT a Registered Voter!"
         );
         require(
-            voters_mapping[_voter].rights == false,
+            address_to_voter_mapping[msg.sender].rights == false,
             "Address already has Voting Rights!"
         );
 
-        voters_mapping[_voter].rights = true;
+        address_to_voter_mapping[msg.sender].rights = true;
 
         emit assigned_voting_rights(_voter);
     }
@@ -307,14 +332,14 @@ contract JamiiFactory is IJamiiFactory {
         returns (bool)
     {
         if (
-            candidates_mapping[_candidate].vote_count + 1 >
-            candidates_mapping[ballot.current_winner].vote_count
+            address_to_candidate_mapping[_candidate].vote_count + 1 >
+            address_to_candidate_mapping[ballot.current_winner].vote_count
         ) {
             ballot.current_winner = _candidate;
             ballot.tie = false;
         } else if (
-            candidates_mapping[_candidate].vote_count + 1 ==
-            candidates_mapping[ballot.current_winner].vote_count
+            address_to_candidate_mapping[_candidate].vote_count + 1 ==
+            address_to_candidate_mapping[ballot.current_winner].vote_count
         ) {
             ballot.tie = true;
         }
@@ -322,29 +347,30 @@ contract JamiiFactory is IJamiiFactory {
     }
 
     function vote_open_ballot(address _candidate, uint256 _ballot_id) public {
-        Ballot memory ballot = ballots[_ballot_id];
+        uint256 int_ballot_id = _ballot_id - 100;
+        Ballot memory ballot = ballots[int_ballot_id];
         ballot.current_winner = _candidate;
 
         require(ballot.ballot_type == 0, "This Is an Open Ballot!");
         require(
-            voters_mapping[msg.sender].registered == true,
+            address_to_voter_mapping[msg.sender].registered == true,
             "Please Register to Vote!"
         );
         require(
-            !voters_mapping[msg.sender].voted,
+            !address_to_voter_mapping[msg.sender].voted,
             "You already CAST your Vote!"
         );
         require(current_block <= block.number, "The Ballot has Expired!");
-        require(ballots.length <= _ballot_id, "Invalid Ballot Id!");
+        require(int_ballot_id <= ballot_count, "Invalid Ballot Id!");
         require(
-            candidates_mapping[_candidate].ballot_id != _ballot_id,
-            "Candidate does not exist in Ballot!"
+            address_to_candidate_mapping[_candidate].ballot_id == _ballot_id,
+            "Candidate does not exist in Ballot2!"
         );
 
         find_winner(_candidate, ballot);
 
-        candidates_mapping[_candidate].vote_count++;
-        voters_mapping[msg.sender].voted = true;
+        address_to_candidate_mapping[_candidate].vote_count++;
+        address_to_voter_mapping[msg.sender].voted = true;
 
         emit voted(_candidate);
     }
@@ -359,32 +385,32 @@ contract JamiiFactory is IJamiiFactory {
         require(ballot.ballot_type == 1, "This Is an Open Paid Ballot!");
         require(msg.value >= open_paid_voting_cost, "Cast vote with 1 ETH!");
         require(
-            voters_mapping[msg.sender].registered = true,
+            address_to_voter_mapping[msg.sender].registered = true,
             "You are NOT a registered Voter!"
         );
         require(
-            voters_mapping[msg.sender].rights = true,
+            address_to_voter_mapping[msg.sender].rights = true,
             "You don't have any Voting Rights!"
         );
         require(
-            !voters_mapping[msg.sender].voted,
+            !address_to_voter_mapping[msg.sender].voted,
             "You already cast your vote!"
         );
         require(current_block <= block.number, "This Ballot Ended!");
         require(
-            candidates_mapping[_candidate].ballot_id != _ballot_id,
+            address_to_candidate_mapping[_candidate].ballot_id != _ballot_id,
             "Candidate does not exist in Ballot!"
         );
 
         if (
-            candidates_mapping[_candidate].vote_count + 1 >
-            candidates_mapping[ballot.current_winner].vote_count
+            address_to_candidate_mapping[_candidate].vote_count + 1 >
+            address_to_candidate_mapping[ballot.current_winner].vote_count
         ) {
             ballot.current_winner = _candidate;
         }
 
-        candidates_mapping[_candidate].vote_count++;
-        voters_mapping[msg.sender].voted = true;
+        address_to_candidate_mapping[_candidate].vote_count++;
+        address_to_voter_mapping[msg.sender].voted = true;
 
         emit voted(_candidate);
     }
@@ -412,7 +438,7 @@ contract JamiiFactory is IJamiiFactory {
         );
 
         Ballot memory ballot = get_ballot(_ballot_id);
-        address[] memory ballot_candidates = ballot.ballot_candidates_addr;
+        // address[] memory ballot_candidates = ballot.ballot_candidates_addr;
 
         if (ballot.tie == true) {
             emit tied_ballot(ballot.tie);
@@ -436,12 +462,12 @@ contract JamiiFactory is IJamiiFactory {
         election.open = false;
     }
 
-    // function withdraw(bool _destroy) public {
-    //     require(msg.sender == owner);
-    //     if(_destroy){
-    //         payable(owner).transfer(address(this).balance);
-    //     }else{
-    //         payable(owner).transfer(address(this).balance);
-    //     }
-    // }
+    function withdraw(bool _destroy) public {
+        require(msg.sender == owner);
+        if (_destroy) {
+            payable(owner).transfer(address(this).balance);
+        } else {
+            payable(owner).transfer(address(this).balance);
+        }
+    }
 }
