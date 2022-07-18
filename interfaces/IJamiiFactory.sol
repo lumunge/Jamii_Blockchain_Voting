@@ -38,7 +38,9 @@ interface IJamiiFactory {
         // Voter[] ballot_voters;
         address[] ballot_voters_addr;
         uint256 voters_count;
-        bool open;
+        uint256 open_date;
+        uint256 _days;
+        bool expired;
         address current_winner;
         bool tie;
     }
@@ -127,7 +129,8 @@ interface IJamiiFactory {
     function create_open_ballot(
         string memory _ballot_name,
         address[] memory _ballot_candidates,
-        uint256 _ballot_type
+        uint256 _ballot_type,
+        uint256 _days
     ) external;
 
     /*
@@ -332,7 +335,7 @@ interface IJamiiFactory {
      *  - time for ballot is up block_number >= set_block_number
      *  - msg.sender == ballot_owner
      */
-    function end_ballot(uint256 _ballot_id) external;
+    function end_open_ballot(uint256 _ballot_id) external;
 
     /*
      * @dev ends an election(ends all currently opened ballots)

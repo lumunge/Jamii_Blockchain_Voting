@@ -93,7 +93,8 @@ contract JamiiFactory is IJamiiFactory {
     function create_open_ballot(
         string memory _ballot_name,
         address[] memory _ballot_candidates_addr,
-        uint256 _ballot_type
+        uint256 _ballot_type,
+        uint256 _days
     ) public only_election_ballot_owner {
         bytes memory bytes_ballot_name = bytes(_ballot_name);
         require(bytes_ballot_name.length > 0, "Enter a valid Ballot Name!");
@@ -135,7 +136,9 @@ contract JamiiFactory is IJamiiFactory {
             // ballot_voters,
             ballot_voters_addr,
             0,
-            true,
+            _days,
+            block.timestamp,
+            false,
             address(0x0),
             false
         );
@@ -180,7 +183,8 @@ contract JamiiFactory is IJamiiFactory {
         require(int_ballot_id < max_ballots, "No such Ballot Exists!");
         // require(_ballot_id <= uid, "No Such Ballot!");
         Ballot storage ballot = ballots[int_ballot_id];
-        require(ballot.open == true, "This ballot Ended!");
+        uint256 duration = (block.timestamp - ballot.open_date) / 60 / 60 / 24;
+        require(duration > ballot._days, "This Ballot Expired!");
         require(
             id_to_voter[_id_number] == address(0x0),
             "This id_number is registered!"
@@ -224,19 +228,19 @@ contract JamiiFactory is IJamiiFactory {
         view
         returns (Ballot memory)
     {
-        require(_ballot_id <= ballots.length, "Invalid ballot Id!");
-        Ballot memory ballot = ballots[_ballot_id];
-        if (ballot.ballot_type == 0) {
-            // open
-            return ballots[_ballot_id];
-        } else if (ballot.ballot_type >= 1) {
-            // closed
-            require(
-                msg.sender == ballot_owner || msg.sender == election_owner,
-                "You need Permissions for this Action!"
-            ); // or authorized
-            return ballots[_ballot_id];
-        }
+        // require(_ballot_id <= ballots.length, "Invalid ballot Id!");
+        // Ballot memory ballot = ballots[_ballot_id];
+        // if (ballot.ballot_type == 0) {
+        //     // open
+        //     return ballots[_ballot_id];
+        // } else if (ballot.ballot_type >= 1) {
+        //     // closed
+        //     require(
+        //         msg.sender == ballot_owner || msg.sender == election_owner,
+        //         "You need Permissions for this Action!"
+        //     ); // or authorized
+        //     return ballots[_ballot_id];
+        // }
     }
 
     function get_ballot_candidates_addr(uint256 _ballot_id)
@@ -307,7 +311,8 @@ contract JamiiFactory is IJamiiFactory {
     {
         require(_ballot_id <= ballots.length, "Invalid ballot Id!");
         Ballot memory ballot = ballots[_ballot_id];
-        require(ballot.open == true, "The Ballot is Closed!");
+        uint256 duration = (block.timestamp - ballot.open_date) / 60 / 60 / 24;
+        require(duration > ballot._days, "This Ballot Expired!");
         require(ballots.length > 0, "No ballots Opened Yet!");
         require(
             address_to_voter_mapping[msg.sender].ballot_id == _ballot_id,
@@ -434,15 +439,16 @@ contract JamiiFactory is IJamiiFactory {
     }
 
     function get_winner(uint256 _ballot_id) public payable returns (address) {
-        require(current_block >= block.number, "This Ballot is still Open!");
+        Ballot storage ballot = ballots[_ballot_id - 100];
+
+        uint256 duration = (block.timestamp - ballot.open_date) / 60 / 60 / 24;
+
+        require(duration < ballot._days, "This Ballot is still Open!");
         require(msg.value >= get_winner_cost, "Get results with 1 ETH!");
         require(
             _ballot_id <= ballot_count,
             "Ballot with that Id does NOT exist!"
         );
-
-        Ballot memory ballot = get_ballot(_ballot_id);
-        // address[] memory ballot_candidates = ballot.ballot_candidates_addr;
 
         if (ballot.tie == true) {
             emit tied_ballot(ballot.tie);
@@ -452,11 +458,15 @@ contract JamiiFactory is IJamiiFactory {
         }
     }
 
-    function end_ballot(uint256 _ballot_id) public {
+    function end_open_ballot(uint256 _ballot_id) public {
         require(msg.sender == ballot_owner, "You don't OWN this Ballot!");
+        Ballot storage ballot = ballots[_ballot_id - 100];
+        uint256 duration = (block.timestamp - ballot.open_date) / 60 / 60 / 24;
+        require(duration < ballot._days, "This Ballot is NOT yet Expired!");
         payable(ballot_owner).transfer(address(this).balance);
-        Ballot memory ballot = get_ballot(_ballot_id);
-        ballot.open = false;
+
+        ballot.expired = true;
+        ballots_mapping[msg.sender].expired = true;
     }
 
     function end_election(uint256 _election_id) public {
