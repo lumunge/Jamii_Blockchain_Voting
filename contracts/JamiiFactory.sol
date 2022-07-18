@@ -94,7 +94,8 @@ contract JamiiFactory is IJamiiFactory {
         string memory _ballot_name,
         address[] memory _ballot_candidates_addr,
         uint256 _ballot_type,
-        uint256 _days
+        uint256 _days,
+        uint256 _registration_period
     ) public only_election_ballot_owner {
         bytes memory bytes_ballot_name = bytes(_ballot_name);
         require(bytes_ballot_name.length > 0, "Enter a valid Ballot Name!");
@@ -107,6 +108,10 @@ contract JamiiFactory is IJamiiFactory {
         require(
             ballot_count < max_ballots,
             "You have reached the Max Limit of Ballots for this Election!"
+        );
+        require(
+            _days > _registration_period,
+            "Registration Period > Voting Days!"
         );
 
         ballot_candidate_mapping[uid] = _ballot_candidates_addr;
@@ -136,9 +141,10 @@ contract JamiiFactory is IJamiiFactory {
             // ballot_voters,
             ballot_voters_addr,
             0,
-            _days,
             block.timestamp,
+            _days,
             false,
+            _registration_period,
             address(0x0),
             false
         );
@@ -183,8 +189,14 @@ contract JamiiFactory is IJamiiFactory {
         require(int_ballot_id < max_ballots, "No such Ballot Exists!");
         // require(_ballot_id <= uid, "No Such Ballot!");
         Ballot storage ballot = ballots[int_ballot_id];
-        uint256 duration = (block.timestamp - ballot.open_date) / 60 / 60 / 24;
-        require(duration > ballot._days, "This Ballot Expired!");
+        // uint256 duration = (block.timestamp - ballot.open_date) / 60 / 60 / 24;
+        uint256 duration = (block.timestamp - ballot.open_date);
+
+        require(
+            (duration < (ballot.registration_window * 86400)),
+            "Registration Period has Passed!"
+        );
+        require(duration < (ballot._days * 86400), "This Ballot Expired!");
         require(
             id_to_voter[_id_number] == address(0x0),
             "This id_number is registered!"
@@ -359,6 +371,12 @@ contract JamiiFactory is IJamiiFactory {
         uint256 int_ballot_id = _ballot_id - 100;
         Ballot memory ballot = ballots[int_ballot_id];
         ballot.current_winner = _candidate;
+        uint256 duration = (block.timestamp - ballot.open_date) / 60 / 60 / 24;
+
+        require(
+            duration > ballot.registration_window,
+            "Registration Period is NOT Completed!"
+        );
 
         require(ballot.ballot_type == 0, "This Is an Open Ballot!");
         require(

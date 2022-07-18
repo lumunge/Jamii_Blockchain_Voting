@@ -41,9 +41,11 @@ interface IJamiiFactory {
         uint256 open_date;
         uint256 _days;
         bool expired;
+        uint256 registration_window;
         address current_winner;
         bool tie;
     }
+    // REGISTRATION_PERIOD(uint256 days): Require duration < ballot.registration_period
 
     /*
         * @dev candidate struct
@@ -130,7 +132,8 @@ interface IJamiiFactory {
         string memory _ballot_name,
         address[] memory _ballot_candidates,
         uint256 _ballot_type,
-        uint256 _days
+        uint256 _days,
+        uint256 _registration_window
     ) external;
 
     /*
