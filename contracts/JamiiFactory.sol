@@ -1,6 +1,8 @@
+// SPDX-License-Identifier: GPL-3.0
+
 pragma solidity 0.8.8;
 
-import "./IJamiiFactory.sol";
+import "../interfaces/IJamiiFactory.sol";
 
 contract JamiiFactory is IJamiiFactory {
     // Struct Arrays
@@ -15,10 +17,10 @@ contract JamiiFactory is IJamiiFactory {
     address[] ballot_voters_addr;
 
     // numbers
-    uint256 ballot_cost = 1000000000000000000;
-    uint256 election_cost = 2000000000000000000;
-    uint256 get_winner_cost = 500000000000000000;
-    uint256 open_paid_voting_cost = 88000000000000000; // $100
+    uint256 public ballot_cost = 1000000000000000000;
+    uint256 public election_cost = 2000000000000000000;
+    uint256 public get_winner_cost = 500000000000000000;
+    uint256 public open_paid_voting_cost = 88000000000000000; // $100
     uint256 public candidates_count; // count candidates
     uint256 public ballot_count;
     uint256 public election_count;
@@ -28,7 +30,7 @@ contract JamiiFactory is IJamiiFactory {
     uint256[] public voter_ids;
     uint256 public ballot_types = 3;
     uint256 public ballot_type;
-    uint256 private max_ballots = 3;
+    uint256 public max_ballots = 3;
     uint256 public uid;
 
     // strings
@@ -36,13 +38,14 @@ contract JamiiFactory is IJamiiFactory {
 
     // addresses
     address private owner = 0xdD870fA1b7C4700F2BD7f44238821C26f7392148;
-    address private ballot_owner;
-    address private election_owner;
+    address public ballot_owner;
+    address public election_owner;
     // address private current_winner;
     // address[] public ballot_candidates_arr;
 
     // mappings
     mapping(address => Ballot) public ballots_mapping;
+    mapping(uint256 => address[]) public ballot_candidate_mapping;
     mapping(address => Candidate) public address_to_candidate_mapping; // store candidates
     mapping(address => address[]) public chair_to_candidates;
     mapping(address => Voter) public address_to_voter_mapping;
@@ -59,7 +62,7 @@ contract JamiiFactory is IJamiiFactory {
 
     // constructor - create an election with ballots
     constructor(string memory _organization_name) public payable {
-        // require(msg.value >= election_cost, "Start an Election with 2 ETH");
+        require(msg.value >= election_cost, "Start an Election with 2 ETH");
         bytes memory bytes_organization_name = bytes(_organization_name);
         require(
             bytes_organization_name.length > 0,
@@ -105,6 +108,8 @@ contract JamiiFactory is IJamiiFactory {
             ballot_count < max_ballots,
             "You have reached the Max Limit of Ballots for this Election!"
         );
+
+        ballot_candidate_mapping[uid] = _ballot_candidates_addr;
 
         uint256 n = _ballot_candidates_addr.length;
         for (uint256 i = 0; i < n; i++) {
