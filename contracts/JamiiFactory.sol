@@ -17,8 +17,8 @@ contract JamiiFactory is IJamiiFactory {
     address[] ballot_voters_addr;
 
     // numbers
-    uint256 public ballot_cost = 1000000000000000000;
-    uint256 public election_cost = 2000000000000000000;
+    // uint256 public ballot_cost = 0;
+    uint256 public election_cost = 340000000000000000; // $500
     uint256 public get_winner_cost = 500000000000000000;
     uint256 public open_paid_voting_cost = 88000000000000000; // $100
     uint256 public candidates_count; // count candidates
@@ -56,13 +56,16 @@ contract JamiiFactory is IJamiiFactory {
 
     // modifiers
     modifier only_election_ballot_owner() {
-        require(msg.sender == ballot_owner || msg.sender == election_owner);
+        require(
+            msg.sender == ballot_owner || msg.sender == election_owner,
+            "Insufficient Permissions for this Action!"
+        );
         _;
     }
 
     // constructor - create an election with ballots
     constructor(string memory _organization_name) public payable {
-        require(msg.value >= election_cost, "Start an Election with 2 ETH");
+        require(msg.value >= election_cost, "Start an Election with $500");
         bytes memory bytes_organization_name = bytes(_organization_name);
         require(
             bytes_organization_name.length > 0,
@@ -91,16 +94,12 @@ contract JamiiFactory is IJamiiFactory {
         string memory _ballot_name,
         address[] memory _ballot_candidates_addr,
         uint256 _ballot_type
-    ) public payable only_election_ballot_owner {
+    ) public only_election_ballot_owner {
         bytes memory bytes_ballot_name = bytes(_ballot_name);
         require(bytes_ballot_name.length > 0, "Enter a valid Ballot Name!");
         require(
             _ballot_candidates_addr.length > 1,
             "Not Enough Ballot Candidates!"
-        );
-        require(
-            msg.sender == election_owner || msg.sender == ballot_owner,
-            "Insufficient Permissions for this Action!"
         );
         // require(msg.value >= ballot_cost, "Not Enough Funds to Start a Ballot!");
         require(_ballot_type <= ballot_types, "Not a valid Ballot Type!");
