@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MIT
 pragma solidity 0.8.8;
 
 interface IJamiiFactory {
@@ -129,7 +128,7 @@ interface IJamiiFactory {
         string memory _ballot_name,
         address[] memory _ballot_candidates,
         uint256 _ballot_type
-    ) external payable;
+    ) external;
 
     /*
      * @dev creates a new closed ballot`
