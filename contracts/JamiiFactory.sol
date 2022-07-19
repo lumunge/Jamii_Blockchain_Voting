@@ -10,15 +10,16 @@ contract JamiiFactory is IJamiiFactory {
     // address[] public registeredVoters;
     Election[] public elections;
     Ballot[] public ballots;
+    Voter[] public voters;
 
-    Candidate[] ballot_candidates;
-    address[] ballot_candidates_addr;
-    Voter[] ballot_voters;
+    // Candidate[] ballot_candidates;
+    // address[] ballot_candidates_addr;
     address[] ballot_voters_addr;
 
     // numbers
     // uint256 public ballot_cost = 0;
-    uint256 public election_cost = 340000000000000000; // $500
+    uint256 public election_cost = 340000000000000000; // $
+    // uint256 public election_cost = 1000000000000000; // $
     uint256 public get_winner_cost = 500000000000000000;
     uint256 public open_paid_voting_cost = 88000000000000000; // $100
     uint256 public candidates_count; // count candidates
@@ -45,11 +46,12 @@ contract JamiiFactory is IJamiiFactory {
 
     // mappings
     mapping(address => Ballot) public ballots_mapping;
+    mapping(uint256 => Ballot) public id_to_ballot_mapping;
     mapping(uint256 => address[]) public ballot_candidate_mapping;
     mapping(address => Candidate) public address_to_candidate_mapping; // store candidates
     mapping(address => address[]) public chair_to_candidates;
     mapping(address => Voter) public address_to_voter_mapping;
-    mapping(uint256 => Voter) public ballot_to_voter_mapping;
+    // mapping(uint256 => Voter) public ballot_to_voter_mapping;
     mapping(address => bytes32) public voter_to_unique_id;
     mapping(uint256 => address) public id_to_voter;
     // mapping(address => bool) public voters; // voters that have voted
@@ -150,6 +152,7 @@ contract JamiiFactory is IJamiiFactory {
         );
         ballots.push(new_ballot);
         ballots_mapping[msg.sender] = new_ballot;
+        id_to_ballot_mapping[uid] = new_ballot;
         chair_to_candidates[msg.sender] = _ballot_candidates_addr;
         ballot_count++;
         uid++;
@@ -190,8 +193,8 @@ contract JamiiFactory is IJamiiFactory {
         // require(_ballot_id <= uid, "No Such Ballot!");
         Ballot storage ballot = ballots[int_ballot_id];
         // uint256 duration = (block.timestamp - ballot.open_date) / 60 / 60 / 24;
-        uint256 duration = (block.timestamp - ballot.open_date);
 
+        uint256 duration = (block.timestamp - ballot.open_date);
         require(
             (duration < (ballot.registration_window * 86400)),
             "Registration Period has Passed!"
@@ -216,9 +219,11 @@ contract JamiiFactory is IJamiiFactory {
             false,
             unique_voter_id
         );
-        ballot_to_voter_mapping[int_ballot_id] = new_voter;
-        address_to_voter_mapping[msg.sender].registered = true;
+        address_to_voter_mapping[msg.sender] = new_voter;
+        // ballot_to_voter_mapping[int_ballot_id] = new_voter;
+        voters.push(new_voter);
         ballot.voters_count++;
+        id_to_ballot_mapping[_ballot_id].voters_count++;
         id_to_voter[_id_number] = msg.sender;
 
         // voter_ids.push(_id_number);
@@ -369,14 +374,14 @@ contract JamiiFactory is IJamiiFactory {
 
     function vote_open_ballot(address _candidate, uint256 _ballot_id) public {
         uint256 int_ballot_id = _ballot_id - 100;
-        Ballot memory ballot = ballots[int_ballot_id];
+        Ballot memory ballot = id_to_ballot_mapping[_ballot_id];
         ballot.current_winner = _candidate;
-        uint256 duration = (block.timestamp - ballot.open_date) / 60 / 60 / 24;
+        // uint256 duration = (block.timestamp - ballot.open_date) / 60 / 60 / 24;
 
-        require(
-            duration > ballot.registration_window,
-            "Registration Period is NOT Completed!"
-        );
+        // require(
+        //     duration > ballot.registration_window,
+        //     "Registration Period is NOT Completed!"
+        // );
 
         require(ballot.ballot_type == 0, "This Is an Open Ballot!");
         require(
@@ -387,12 +392,16 @@ contract JamiiFactory is IJamiiFactory {
             !address_to_voter_mapping[msg.sender].voted,
             "You already CAST your Vote!"
         );
-        require(current_block <= block.number, "The Ballot has Expired!");
-        require(int_ballot_id <= ballot_count, "Invalid Ballot Id!");
+        require(
+            id_to_ballot_mapping[_ballot_id].ballot_id == _ballot_id,
+            "Invalid Ballot Id!"
+        );
+
         require(
             address_to_candidate_mapping[_candidate].ballot_id == _ballot_id,
-            "Candidate does not exist in Ballot2!"
+            "Candidate does not exist in Ballot!"
         );
+        require(ballot.expired == false, "Ballot has Expired");
 
         find_winner(_candidate, ballot);
 
@@ -485,6 +494,7 @@ contract JamiiFactory is IJamiiFactory {
 
         ballot.expired = true;
         ballots_mapping[msg.sender].expired = true;
+        id_to_ballot_mapping[_ballot_id].expired = true;
     }
 
     function end_election(uint256 _election_id) public {
