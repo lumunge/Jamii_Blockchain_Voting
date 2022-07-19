@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 pragma solidity 0.8.8;
 
 interface IJamiiFactory {
@@ -33,10 +35,6 @@ interface IJamiiFactory {
         uint256 ballot_type;
         string ballot_name;
         address chair;
-        // Candidate[] ballot_candidates;
-        address[] ballot_candidates_addr;
-        // Voter[] ballot_voters;
-        address[] ballot_voters_addr;
         uint256 voters_count;
         uint256 open_date;
         uint256 _days;
@@ -93,7 +91,7 @@ interface IJamiiFactory {
     /**
      * @dev Emitted when ballot_owner/election_owner create a new Ballot with unique `_ballot_id`.
      */
-    event created_ballot(uint256 _ballot_id);
+    event created_ballot(uint256 _ballot_type);
 
     /**
      * @dev Emitted when `_voter` registers to vote.
@@ -128,7 +126,7 @@ interface IJamiiFactory {
      *  - valid ballot_type <= ballot_types
      *  - ballots.length <= limit
      */
-    function create_open_ballot(
+    function create_ballot(
         string memory _ballot_name,
         address[] memory _ballot_candidates,
         uint256 _ballot_type,
@@ -148,11 +146,11 @@ interface IJamiiFactory {
      *  - creators pay ballot_cost
      *  - ballots.length <= limit
      */
-    function create_closed_free_ballot(
-        string memory _ballot_name,
-        address[] memory _ballot_candidates,
-        uint256 _ballot_type
-    ) external payable returns (Ballot memory);
+    // function create_closed_free_ballot(
+    //     string memory _ballot_name,
+    //     address[] memory _ballot_candidates,
+    //     uint256 _ballot_type
+    // ) external payable returns (Ballot memory);
 
     /*
      * @dev creates a new closed paid ballot
@@ -166,11 +164,11 @@ interface IJamiiFactory {
      *  - creators pay ballot_cost
      *  - ballots.length <= limit
      */
-    function create_closed_paid_ballot(
-        string memory _ballot_name,
-        address[] memory _ballot_candidates,
-        uint256 _ballot_type
-    ) external payable returns (Ballot memory);
+    // function create_closed_paid_ballot(
+    //     string memory _ballot_name,
+    //     address[] memory _ballot_candidates,
+    //     uint256 _ballot_type
+    // ) external payable returns (Ballot memory);
 
     /*
      * @dev registers a voter in a open ballot
@@ -184,9 +182,9 @@ interface IJamiiFactory {
      *  - unregistered msg.sender
      *  - valid _ballot_id number
      */
-    function register_voter_open_ballot(uint256 _id_number, uint256 _ballot_id)
-        external
-        returns (bytes32);
+    // function register_voter_open_ballot(uint256 _id_number, uint256 _ballot_id)
+    //     external
+    //     returns (bytes32);
 
     /*
      * @dev registers a voter in a paid ballot
@@ -201,9 +199,43 @@ interface IJamiiFactory {
      *  - valid _ballot_id number
      *  - msg.value <= registration_fee
      */
-    function register_voter_paid_ballot(uint256 _id_number, uint256 _ballot_id)
+    //  function register_voter_paid_ballot(uint256 _id_number, uint256 _ballot_id)
+    //     external
+    //     returns (bytes32);
+
+    function register_voter(uint256 _id_number, uint256 _ballot_id) external;
+
+    /*
+     * @dev voter votes for a candidate
+     * @param _candidate The address of a candidate in the ballot
+     *
+     * @require:
+     *  - ballot_type == 0(open)
+     *  - msg.sender registered voter
+     *  - msg.sender NOT voted
+     *  - ballot is Open
+     *  - _candidate is a valid candidate
+     *  - ballot_id is valid
+     */
+    // function vote_open_ballot(address _candidate, uint256 _ballot_id) external;
+
+    function vote(address _candidate, uint256 _ballot_id) external;
+
+    function get_ballot(uint256 _ballot_id) external returns (Ballot memory);
+
+    function get_candidate(address _candidate_addr, uint256 _ballot_id)
         external
-        returns (bytes32);
+        returns (Candidate memory);
+
+    function get_voter(address _voter_address, uint256 _ballot_id)
+        external
+        returns (Voter memory);
+
+    function get_candidates(uint256 _ballot_id)
+        external
+        returns (address[] memory);
+
+    function get_voters(uint256 _ballot_id) external returns (address[] memory);
 
     /*
      * @dev get a ballot in open ballot
@@ -214,7 +246,7 @@ interface IJamiiFactory {
      *  - valid _ballot_id
      *  - if ballot_type == closed msg.sender == ballot_owner || election_owner
      */
-    function get_ballot(uint256 _ballot_id) external returns (Ballot memory);
+    // function get_ballot(uint256 _ballot_id) external returns (Ballot memory);
 
     /*
      * @dev get the candidates in a ballot
@@ -225,9 +257,9 @@ interface IJamiiFactory {
      *  - if ballot_type == closed msg.sender == ballot_owner || election_owner
      *  - valid _ballot_id
      */
-    function get_ballot_candidates_addr(uint256 _ballot_id)
-        external
-        returns (address[] memory);
+    // function get_ballot_candidates_addr(uint256 _ballot_id)
+    //     external
+    //     returns (address[] memory);
 
     /*
      * @dev get a ballot's registered voters in an open ballot, requests permissions in closed ballot
@@ -238,9 +270,9 @@ interface IJamiiFactory {
      *  - if ballot_type == closed msg.sender == ballot_owner || election_owner
      *  - valid _ballot_id
      */
-    function get_registered_voters(uint256 _ballot_id)
-        external
-        returns (Voter[] memory);
+    // function get_registered_voters(uint256 _ballot_id)
+    //     external
+    //     returns (Voter[] memory);
 
     /*
      * @dev get an election
@@ -272,19 +304,7 @@ interface IJamiiFactory {
      */
     function assign_voting_rights(address _voter, uint256 _ballot_id) external;
 
-    /*
-     * @dev voter votes for a candidate
-     * @param _candidate The address of a candidate in the ballot
-     *
-     * @require:
-     *  - ballot_type == 0(open)
-     *  - msg.sender registered voter
-     *  - msg.sender NOT voted
-     *  - ballot is Open
-     *  - _candidate is a valid candidate
-     *  - ballot_id is valid
-     */
-    function vote_open_ballot(address _candidate, uint256 _ballot_id) external;
+    // function vote_closed_free_ballot(address _candidate, uint256 _ballot_id) external;
 
     /*
      *@dev voter votes in an open payable ballot
@@ -302,9 +322,9 @@ interface IJamiiFactory {
      *  - msg.sender first time voting
      *  - msg.value >= voting_price
      */
-    function vote_open_paid_ballot(address _candidate, uint256 _ballot_id)
-        external
-        payable;
+    // function vote_open_paid_ballot(address _candidate, uint256 _ballot_id)
+    //     external
+    //     payable;
 
     /*
      *@dev voter votes in an closed payable ballot
@@ -316,7 +336,7 @@ interface IJamiiFactory {
      *  - msg.sender first time voting
      *  - msg.value >= voting price
      */
-    function vote_closed_paid_ballot(address _candidate) external payable;
+    // function vote_closed_paid_ballot(address _candidate,  uint256 _ballot_id) external payable;
 
     /*
      * @dev Get the winner of a ballot
