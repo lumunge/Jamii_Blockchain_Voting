@@ -1,3 +1,11 @@
 dotenv: .env
 wallets:
-  from_key: ${PRIVATE_KEY1}
+  from_key: ${PRIVATE_KEY}
+networks:
+  default: development
+  rinkeby:
+    verify: True
+  development:
+    verify: False
+  ganache-local:
+    verify: False
