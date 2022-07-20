@@ -31,6 +31,7 @@ interface IJamiiFactory {
      * @arg tie True is there is a tie between candidates False otherwise
      */
     struct Ballot {
+        uint256 election_id;
         uint256 ballot_id;
         uint256 ballot_type;
         string ballot_name;
@@ -113,6 +114,8 @@ interface IJamiiFactory {
      */
     event tied_ballot(bool _tie);
 
+    function create_election(string memory _organization_name) external payable;
+
     /*
      * @dev creates a new open ballot
      * @param _ballot_name An arbitrary ballot name
@@ -133,6 +136,8 @@ interface IJamiiFactory {
         uint256 _days,
         uint256 _registration_window
     ) external;
+
+    // function create_voter(uint256 _id_number, uint256 _ballot_id) external returns (bytes32);
 
     /*
      * @dev creates a new closed ballot`
@@ -218,7 +223,6 @@ interface IJamiiFactory {
      *  - ballot_id is valid
      */
     // function vote_open_ballot(address _candidate, uint256 _ballot_id) external;
-
     function vote(address _candidate, uint256 _ballot_id) external;
 
     function get_ballot(uint256 _ballot_id) external returns (Ballot memory);
@@ -348,7 +352,7 @@ interface IJamiiFactory {
      *  - if ballot_type >= 1, Require msg.sender == ballot_owner || authorized owner
      *  - ballot is over(closed)
      */
-    function get_winner(uint256 _ballot_id) external payable returns (address);
+    function get_winner(uint256 _ballot_id) external returns (address);
 
     /*
      * @dev ends a ballot
@@ -358,7 +362,7 @@ interface IJamiiFactory {
      *  - time for ballot is up block_number >= set_block_number
      *  - msg.sender == ballot_owner
      */
-    function end_open_ballot(uint256 _ballot_id) external;
+    // function end_open_ballot(uint256 _ballot_id) external;
 
     /*
      * @dev ends an election(ends all currently opened ballots)
@@ -367,5 +371,5 @@ interface IJamiiFactory {
      * @require:
      *  - msg.sender == election_owner
      */
-    function end_election(uint256 _election_id) external;
+    // function end_election(uint256 _election_id) external;
 }
