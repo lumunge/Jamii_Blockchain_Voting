@@ -1,6 +1,8 @@
 dotenv: .env
+owner:
+  addr: ${FEE}
 wallets:
-  from_key: ${PRIVATE_KEY}
+  from_key: ${PRIVATE_KEY2}
 networks:
   default: development
   rinkeby:
