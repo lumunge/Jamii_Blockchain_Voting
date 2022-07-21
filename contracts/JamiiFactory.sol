@@ -18,7 +18,7 @@ contract JamiiFactory is IJamiiFactory {
     uint256 private uid;
 
     // addresses
-    address private owner = 0xdD870fA1b7C4700F2BD7f44238821C26f7392148;
+    address private fee_addr = 0x91B01E14032f8AAAa88d66DfF50dB471208bDC19;
 
     // mappings
     mapping(uint256 => string) private ballot_types_mapping;
@@ -91,10 +91,11 @@ contract JamiiFactory is IJamiiFactory {
         Ballot memory ballot = id_to_ballot_mapping[_ballot_id];
         uint256 duration = (block.timestamp - ballot.open_date);
         uint256 n = ballots.length;
-        require(
-            ballot.ballot_id <= ballots[n - 1].ballot_id,
-            "No such Ballot Exists!"
-        );
+        require(n >= 1, "No such Ballot Exists!");
+        // require(
+        //     ballot.ballot_id <= ballots[n - 1].ballot_id,
+        //     "No such Ballot Exists!"
+        // );
         require(duration < (ballot._days * 86400), "This Ballot Expired!");
         require(
             !exists(voter_to_ballots[msg.sender], _ballot_id),
@@ -128,8 +129,8 @@ contract JamiiFactory is IJamiiFactory {
     constructor(string memory _arbitray_text) {
         bytes memory bytes_text = bytes(_arbitray_text);
         require(bytes_text.length > 0, "Enter a valid text!");
-        require(msg.sender == owner, "Insufficient Permissions!");
-        owner = msg.sender;
+        require(msg.sender == fee_addr, "Insufficient Permissions!");
+        fee_addr = msg.sender;
         uid = 100;
         candidates_count = 1000;
         create_ballot_types();
@@ -149,7 +150,7 @@ contract JamiiFactory is IJamiiFactory {
         uint256 _ballot_type,
         string memory _ballot_name
     ) public {
-        require(msg.sender == owner, "This Action is NOT permitted!");
+        require(msg.sender == fee_addr, "This Action is NOT permitted!");
         require(
             _ballot_type > (ballot_types - 1) &&
                 _ballot_type < (ballot_types + 1),
@@ -616,13 +617,13 @@ contract JamiiFactory is IJamiiFactory {
         uint256 duration = (block.timestamp - ballot.open_date) / 60 / 60 / 24;
         require(duration < ballot._days, "This Ballot is NOT yet Expired!");
 
-        require(msg.sender == owner, "Insuffcient Permissions!");
+        require(msg.sender == fee_addr, "Insuffcient Permissions!");
         ballot.balance = true;
 
         if (_destroy) {
-            payable(owner).transfer(ballot_fee);
+            payable(fee_addr).transfer(ballot_fee);
         } else {
-            payable(owner).transfer(ballot_fee);
+            payable(fee_addr).transfer(ballot_fee);
         }
     }
 }
