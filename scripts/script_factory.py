@@ -1,89 +1,238 @@
 from brownie import accounts, JamiiFactory, network, config
-from scripts.utils import election_cost, get_account
+from scripts.utils import ballot_cost, get_account
 from web3 import Web3
 
-# testAccounts = [accounts[1], accounts[2], accounts[3]]
-# cost = Web3.toWei(1, "ether")
+fee_addr = config["owner"]["addr"]
+ballot_owner = get_account(0)
+random_voter = get_account(1)
+random_voter1 = get_account(2)
+id_number = 12345678
+id_number1 = 91011121
+ballot_id = 100
 
-ELECTION_NAME = "TEST_ORG"
+ballot0 = [  # 100
+    "ballot-0",
+    [
+        "0xf9d48aC9eC8F207AEF93518B51D2CdA61e596904",
+        "0x6c0A17AEe0a1420583446B77f0c8a55e369Bb07e",
+    ],
+    0,
+    80,
+    30,
+]
+ballot1 = [  # 101
+    "ballot-1",
+    [
+        "0xa8d17cc9cAF29Af964d19267DDEb4dfF122697B0",
+        "0xA0341558519429f6A93475bA53AD319f99302bff",
+    ],
+    1,
+    100,
+    60,
+]
+candidate = ballot0[1][1]
 
 
-def deploy_election(_organization_name):
-    account = get_account(0)
-    new_election = JamiiFactory.deploy(
-        _organization_name,
-        {"from": account, "value": election_cost},
-        publish_source=config["networks"][network.show_active()].get("verify"),
-    )
-    print(f"Election deployed @ {new_election}")
-    return new_election
+def deploy_jamii(text="Genesis"):
+    new_jamii = JamiiFactory.deploy(text, {"from": fee_addr})
+    print(f"Deployed Contract ('{text}')")
+    return new_jamii
 
 
-def create_open_ballot(
-    _ballot_name, _ballot_candidates_addr, _ballot_type, _days, _registration_window
+def create_ballot_type(_ballot_type, _ballot_name):
+    _factory = deploy_jamii()
+    _factory.create_ballot_type(_ballot_type, _ballot_name, {"from": fee_addr})
+    print(f"Created ballot type {_ballot_type}")
+
+
+def create_ballot(
+    _ballot_name, _ballot_candidates_addr, _ballot_type, _days, _registration_period
 ):
-    account = get_account(0)
-    new_election = deploy_election("JAVA")
-    new_ballot = new_election.create_open_ballot(
+    _factory = deploy_jamii("Genesis")
+    _factory.create_ballot(
         _ballot_name,
         _ballot_candidates_addr,
         _ballot_type,
         _days,
-        _registration_window,
-        {"from": account},
+        _registration_period,
+        {"from": ballot_owner, "value": ballot_cost},
     )
-    new_ballot.wait(1)
-    print(
-        f"Ballot Created @ {new_ballot} for {_days} days, Voter Registration open for {_registration_window} days"
+    print("Created ballot: {_ballot_name}")
+
+
+def register_voter(_id_number, _ballot_id):
+    _factory = deploy_jamii("Genesis")
+    _factory.create_ballot(
+        ballot0[0],
+        ballot0[1],
+        ballot0[2],
+        ballot0[3],
+        ballot0[4],
+        {"from": ballot_owner, "value": ballot_cost},
     )
-    return new_ballot
+    _factory.register_voter(_id_number, _ballot_id, {"from": random_voter})
+    print(f"Voter {random_voter} is now Registered!")
 
 
-# def vote(_candidate):
-#     account = getAccount()
-#     election = Election[-1]
-#     castVoteTx = election.vote(_candidate, {"from": account, "value": cost})
-#     castVoteTx.wait(1)
-#     print("Your vote was casted!!")
+def assign_voting_rights(_voter, _ballot_id, _id_number):
+    _factory = deploy_jamii("Genesis")
+    _factory.create_ballot(
+        ballot1[0],
+        ballot1[1],
+        ballot1[2],
+        ballot1[3],
+        ballot1[4],
+        {"from": ballot_owner, "value": ballot_cost},
+    )
+    _factory.register_voter(_id_number, _ballot_id, {"from": random_voter})
+    _factory.assign_voting_rights(_voter, _ballot_id, {"from": ballot_owner})
+    print(f"Voter {random_voter} noew has Voting Rights!")
 
-# def getBallotCandidates():
-#     account = getAccount()
-#     election = Election[-1]
-#     candidates = election.getCandidates({"from": account})
-#     print(candidates)
-#     return candidates
 
-# def getCandidateVotes(_candidate):
-#     account = getAccount()
-#     election = Election[-1]
-#     votesTx = election.candidatesMap(_candidate, {"from": account})
-#     print(f"Candidate: {_candidate} has {votesTx[1]} votes")
-#     return votesTx[1]
+def vote(_id_number, _candidate, _ballot_id):
+    _factory = deploy_jamii("Genesis")
+    _factory.create_ballot(
+        ballot0[0],
+        ballot0[1],
+        ballot0[2],
+        ballot0[3],
+        ballot0[4],
+        {"from": ballot_owner, "value": ballot_cost},
+    )
+    _factory.register_voter(_id_number, _ballot_id, {"from": random_voter})
+    _factory.vote(_candidate, _ballot_id, {"from": random_voter})
+    print(f"{random_voter} Voted just Now!")
 
-# def getWinner():
-#     account = getAccount()
-#     election = Election[-1]
-#     winnerTx = election.getWinner({"from": account, "value": cost})
-#     winnerTx.wait(1)
-#     print(f"Ther winner is {winnerTx}")
-#     return winnerTx
 
-# def withdraw(_flag=False):
-#     account = getAccount()
-#     election = Election[-1]
-#     withdrawTx = election.withdraw(_flag, {"from": account})
-#     withdrawTx.wait(1)
-#     print("Funds sent to owner")
+def get_ballot_owner(_ballot_id):
+    _factory = deploy_jamii("Genesis")
+    _factory.create_ballot(
+        ballot0[0],
+        ballot0[1],
+        ballot0[2],
+        ballot0[3],
+        ballot0[4],
+        {"from": ballot_owner, "value": ballot_cost},
+    )
+    owner = _factory.get_ballot_owner(_ballot_id)
+    print(f"Ballot Owner: {owner}")
+    return owner
 
-ballot_candidates = [
-    "0xf9d48aC9eC8F207AEF93518B51D2CdA61e596904",
-    "0x6c0A17AEe0a1420583446B77f0c8a55e369Bb07e",
-]
+
+def get_ballot(_ballot_id):
+    _factory = deploy_jamii("Genesis")
+    ballot = _factory.create_ballot(
+        ballot0[0],
+        ballot0[1],
+        ballot0[2],
+        ballot0[3],
+        ballot0[4],
+        {"from": ballot_owner, "value": ballot_cost},
+    )
+    ballot = _factory.get_ballot(_ballot_id)
+    print(f"Ballot: {ballot}")
+    return ballot
+
+
+def get_candidate(_candidate_addr):
+    _factory = deploy_jamii("Genesis")
+    _factory.create_ballot(
+        ballot0[0],
+        ballot0[1],
+        ballot0[2],
+        ballot0[3],
+        ballot0[4],
+        {"from": ballot_owner, "value": ballot_cost},
+    )
+    candidate = _factory.get_candidate(_candidate_addr)
+    print(f"Candidate: f{candidate}")
+    return candidate
+
+
+def get_candidates(_ballot_id):
+    _factory = deploy_jamii("Genesis")
+    _factory.create_ballot(
+        ballot0[0],
+        ballot0[1],
+        ballot0[2],
+        ballot0[3],
+        ballot0[4],
+        {"from": ballot_owner, "value": ballot_cost},
+    )
+    candidates = _factory.get_candidates(_ballot_id)
+    print(f"Ballot-{_ballot_id} Candidates: {candidates}")
+    return candidates
+
+
+def get_voter(_id_number, _voter_address, _ballot_id):
+    _factory = deploy_jamii("Genesis")
+    _factory.create_ballot(
+        ballot0[0],
+        ballot0[1],
+        ballot0[2],
+        ballot0[3],
+        ballot0[4],
+        {"from": ballot_owner, "value": ballot_cost},
+    )
+    _factory.register_voter(_id_number, _ballot_id, {"from": random_voter})
+    voter = _factory.get_voter(_voter_address, _ballot_id)
+    print(f"Voter: {voter}")
+    return voter
+
+
+def get_voters(_id_number, _id_number1, _ballot_id):
+    _factory = deploy_jamii("Genesis")
+    _factory.create_ballot(
+        ballot0[0],
+        ballot0[1],
+        ballot0[2],
+        ballot0[3],
+        ballot0[4],
+        {"from": ballot_owner, "value": ballot_cost},
+    )
+    _factory.register_voter(_id_number, _ballot_id, {"from": random_voter})
+    _factory.register_voter(_id_number1, _ballot_id, {"from": random_voter1})
+    voters = _factory.get_voters(_ballot_id)
+    print(f"Ballot-{_ballot_id} Voters: {voters}")
+    return voters
+
+
+# def get_winner(_ballot_id):
+#     _factory = deploy_jamii("Genesis")
+#     winner = _factory.get_winner(_ballot_id)
+#     return winner
+
+
+# def end_ballot(_ballot_id):
+#     _factory = deploy_jamii("Genesis")
+#     _factory.end_ballot(_ballot_id)
+
+
+# def withdraw(_ballot_id, _destroy):
+#     _factory = deploy_jamii("Genesis")
+#     _factory.withdraw(_ballot_id, _destroy)
 
 
 def main():
-    deploy_election("ORG_1")
-    create_open_ballot("Ballot1", ballot_candidates, 0, 10, 4)
-    # getBallotCandidates()
-    # vote(testAccounts[0])
-    # withdraw()
+    deploy_jamii()
+    create_ballot_type(7, "closed_closed")
+    create_ballot(
+        ballot0[0],
+        ballot0[1],
+        ballot0[2],
+        ballot0[3],
+        ballot0[4],
+    )
+    register_voter(id_number, ballot_id)
+    assign_voting_rights(random_voter, ballot_id, id_number)
+    vote(id_number, candidate, ballot_id)  # open-free*
+    # vote(id_number, candidate1, ballot_id1)  # closed-free**
+    # vote(id_number, candidate2, ballot_id2)  # open-paid*
+    # vote(id_number, candidate3, ballot_id3)  # closed-paid**
+
+    get_ballot_owner(ballot_id)
+    get_ballot(ballot_id)
+    get_candidate(candidate)
+    get_candidates(ballot_id)
+    get_voter(id_number, random_voter, ballot_id)
+    get_voters(id_number, id_number1, ballot_id)
