@@ -27,22 +27,22 @@ interface IJamiiFactory {
         uint256 registration_window;
         address current_winner;
         bool tie;
+        bool balance;
     }
 
     /*
-        * @dev candidate struct
-        * @arg candidate_id A unique identification number for a candidate
-        * @arg ballot_id A unique identifier for a Ballot
-        * @arg candidate_address The address of a candidate
-        * @arg vote_count The number of votes a candidates has
-
-    */
+     * @dev candidate struct
+     * @arg candidate_id A unique identification number for a candidate
+     * @arg ballot_id A unique identifier for a Ballot
+     * @arg candidate_address The address of a candidate
+     * @arg vote_count The number of votes a candidates has
+     */
     struct Candidate {
         uint256 candidate_id;
         uint256 ballot_id;
         address candidate_address;
         uint256 vote_count;
-        // implement party
+        // implement other stats(party, funding)
     }
 
     /*
@@ -63,34 +63,38 @@ interface IJamiiFactory {
         bool rights;
         bool voted;
         bytes32 unique_voter_id;
-        // implement voting weight
-        // implement multiple ballot -> ballot_id
+        // implement other stats(voting weight, tokens)
     }
 
-    /**
+    /*
      * @dev Emitted when ballot_ownercreate a new Ballot with unique `_ballot_id`.
      */
     event created_ballot(uint256 _ballot_type);
 
-    /**
+    /*
      * @dev Emitted when `_voter` registers to vote.
      */
     event registered_voter(bytes32 _voter_unique_id);
 
-    /**
+    /*
      * @dev Emitted when `ballot_owner` assigns voting rights to `voter`.
      */
     event assigned_voting_rights(address _voter);
 
-    /**
+    /*
      * @dev Emitted when `_voter` casts a vote to `_candidate`.
      */
     event voted(address indexed _candidate);
 
-    /**
+    /*
      * @dev Emitted when there is a tie between `ballot_candidates` in a Ballot.
      */
     event tied_ballot(bool _tie);
+
+    /*
+     * @dev Emitted when a ballot chair ends a ballot with `_ballot_id`.
+     */
+    event ended_ballot(uint256 _ballot_id);
 
     /*
      * @dev creates a new open ballot
@@ -116,37 +120,6 @@ interface IJamiiFactory {
     function register_voter(uint256 _id_number, uint256 _ballot_id) external;
 
     /*
-     * @dev voter votes for a candidate
-     * @param _candidate The address of a candidate in the ballot
-     *
-     * @require:
-     *  - ballot_type == 0(open)
-     *  - msg.sender registered voter
-     *  - msg.sender NOT voted
-     *  - ballot is Open
-     *  - _candidate is a valid candidate
-     *  - ballot_id is valid
-     */
-    // function vote_open_ballot(address _candidate, uint256 _ballot_id) external;
-    function vote(address _candidate, uint256 _ballot_id) external;
-
-    function get_ballot(uint256 _ballot_id) external returns (Ballot memory);
-
-    function get_candidate(address _candidate_addr)
-        external
-        returns (Candidate memory);
-
-    function get_voter(address _voter_address, uint256 _ballot_id)
-        external
-        returns (Voter memory);
-
-    function get_candidates(uint256 _ballot_id)
-        external
-        returns (address[] memory);
-
-    function get_voters(uint256 _ballot_id) external returns (address[] memory);
-
-    /*
      * @dev assign voting rights
      * @param _voter A unique voter address
      * @param _ballot_id The Id of a specific ballot
@@ -162,6 +135,105 @@ interface IJamiiFactory {
      *  - voting_rights == None
      */
     function assign_voting_rights(address _voter, uint256 _ballot_id) external;
+
+    /*
+     * @dev voter votes for a candidate
+     * @param _candidate The address of a candidate in the ballot
+     *
+     * @require:
+     *  - ballot_type == 0(open)
+     *  - msg.sender registered voter
+     *  - msg.sender NOT voted
+     *  - ballot is Open
+     *  - _candidate is a valid candidate
+     *  - ballot_id is valid
+     */
+    function vote(address _candidate, uint256 _ballot_id) external;
+
+    /*
+     * @dev msg.sender gets the owner of a ballot.
+     * @param _ballot_id The unique Id of a Ballot!
+     *
+     * @require:
+     *
+     *
+     *
+     */
+    function get_ballot_owner(uint256 _ballot_id)
+        external
+        view
+        returns (address);
+
+    /*
+     * @dev msg.sender gets a ballot.
+     * @param _ballot_id The unique Id of a Ballot!
+     *
+     * @require:
+     *
+     *
+     *
+     */
+    function get_ballot(uint256 _ballot_id)
+        external
+        view
+        returns (Ballot memory);
+
+    /*
+     * @dev msg.sender gets a candidate.
+     * @param _candidate_addr The unique address of a Candidate!
+     *
+     * @require:
+     *
+     *
+     *
+     */
+    function get_candidate(address _candidate_addr)
+        external
+        view
+        returns (Candidate memory);
+
+    /*
+     * @dev msg.sender gets a voter of a ballot.
+     * @param _voter_address The unique address of a voter!
+     * @param _ballot_id The unique Id of a Ballot!
+     *
+     * @require:
+     *
+     *
+     *
+     */
+    function get_voter(address _voter_address, uint256 _ballot_id)
+        external
+        view
+        returns (Voter memory);
+
+    /*
+     * @dev msg.sender gets candidates of a ballot.
+     * @param _ballot_id The unique Id of a Ballot!
+     *
+     * @require:
+     *
+     *
+     *
+     */
+    function get_candidates(uint256 _ballot_id)
+        external
+        view
+        returns (address[] memory);
+
+    /*
+     * @dev msg.sender gets the voters of a ballot.
+     * @param _ballot_id The unique Id of a Ballot!
+     *
+     * @require:
+     *
+     *
+     *
+     */
+    function get_voters(uint256 _ballot_id)
+        external
+        view
+        returns (address[] memory);
 
     /*
      * @dev Get the winner of a ballot
@@ -183,14 +255,7 @@ interface IJamiiFactory {
      *  - time for ballot is up block_number >= set_block_number
      *  - msg.sender == ballot_owner
      */
-    // function end_open_ballot(uint256 _ballot_id) external;
+    function end_ballot(uint256 _ballot_id) external;
 
-    /*
-     * @dev ends an election(ends all currently opened ballots)
-     * @param _ballot_id The ballot Id
-     *
-     * @require:
-     *  - msg.sender == election_owner
-     */
-    // function end_election(uint256 _election_id) external;
+    function withdraw(uint256 _ballot_id, bool _destroy) external;
 }

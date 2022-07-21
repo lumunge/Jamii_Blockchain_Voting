@@ -113,6 +113,7 @@ contract JamiiFactory is IJamiiFactory {
 
     function exists(uint256[] memory _voter_ballots, uint256 _target)
         internal
+        pure
         returns (bool)
     {
         uint256 n = _voter_ballots.length;
@@ -179,8 +180,6 @@ contract JamiiFactory is IJamiiFactory {
         );
         require(_registration_period > 0, "Registration Period should be > 1!");
 
-        address[] memory ballot_voters_addr;
-
         ballot_candidate_mapping[uid] = _ballot_candidates_addr;
 
         uint256 n = _ballot_candidates_addr.length;
@@ -198,7 +197,6 @@ contract JamiiFactory is IJamiiFactory {
         }
 
         Ballot memory new_ballot = Ballot(
-            // election_id,
             uid,
             _ballot_type,
             _ballot_name,
@@ -209,6 +207,7 @@ contract JamiiFactory is IJamiiFactory {
             false,
             _registration_period,
             address(0x0),
+            false,
             false
         );
         id_to_ballot_mapping[uid] = new_ballot;
@@ -384,7 +383,6 @@ contract JamiiFactory is IJamiiFactory {
         );
 
         uint256 _ballot_type = ballot.ballot_type;
-        uint256 duration = (block.timestamp - ballot.open_date) / 60 / 60 / 24; // days
         require(ballot.expired == false, "This Ballot Expired!");
 
         require(
@@ -430,7 +428,6 @@ contract JamiiFactory is IJamiiFactory {
     {
         // require("Need to have locked value in ballot during registration!")
 
-        // uint256 int_ballot_id = _ballot_id - 100;
         Ballot memory ballot = id_to_ballot_mapping[_ballot_id];
         ballot.current_winner = _candidate;
         find_winner(_candidate, ballot);
@@ -442,7 +439,6 @@ contract JamiiFactory is IJamiiFactory {
         only_voter_closed_ballots(_candidate, _ballot_id)
     {
         Ballot memory ballot = id_to_ballot_mapping[_ballot_id];
-        Voter memory voter = address_to_voter_mapping[msg.sender];
         require(ballot.ballot_type == 1, "Wrong Ballot Type!");
         // require("Need to have locked value in ballot during registration!")
 
@@ -456,7 +452,6 @@ contract JamiiFactory is IJamiiFactory {
         only_voter(_candidate, _ballot_id)
     {
         Ballot memory ballot = id_to_ballot_mapping[_ballot_id];
-        Voter memory voter = address_to_voter_mapping[msg.sender];
         require(ballot.ballot_type == 2, "Wrong Ballot Type!");
         // require("Enough tokens for This Vote")
         ballot.current_winner = _candidate;
@@ -471,7 +466,6 @@ contract JamiiFactory is IJamiiFactory {
     {
         // require(election_type == 2);
         Ballot memory ballot = id_to_ballot_mapping[_ballot_id];
-        Voter memory voter = address_to_voter_mapping[msg.sender];
         require(ballot.ballot_type == 3, "Wrong Ballot Type!");
         // require("Enough tokens for This Vote")
 
@@ -485,7 +479,6 @@ contract JamiiFactory is IJamiiFactory {
         only_voter(_candidate, _ballot_id)
     {
         uint256 int_ballot_id = _ballot_id - 100;
-        // require(int_ballot_id < max_ballots, "No such Ballot Exists!");
         Ballot memory ballot = ballots[int_ballot_id];
 
         // 0, 1, 2, 3, 4, 5, 6 => open free, closed free, open paid, closed paid,
@@ -556,12 +549,12 @@ contract JamiiFactory is IJamiiFactory {
         only_secret_ballot(_ballot_id)
         returns (address[] memory)
     {
-        Ballot storage ballot = id_to_ballot_mapping[_ballot_id];
         return ballot_voters_mapping[_ballot_id];
     }
 
     function find_winner(address _candidate, Ballot memory ballot)
         internal
+        view
         returns (bool)
     {
         if (
@@ -584,56 +577,52 @@ contract JamiiFactory is IJamiiFactory {
         only_secret_ballot(_ballot_id)
         returns (address)
     {
+        Ballot memory ballot = id_to_ballot_mapping[_ballot_id];
         require(
             _ballot_id <= ballot_count,
             "Ballot with that Id does NOT exist!"
         );
 
-        Ballot storage ballot = id_to_ballot_mapping[_ballot_id];
-        require(ballot.expired == true, "This Ballot is still Open!");
+        uint256 duration = (block.timestamp - ballot.open_date) / 60 / 60 / 24;
+        require(duration > ballot._days, "This Ballot is NOT yet Expired!");
 
-        if (ballot.ballot_type >= 4) {
-            require(
-                msg.sender == get_ballot_owner(_ballot_id),
-                "This is a Secret Ballot!"
-            );
-            if (ballot.tie == true) {
-                emit tied_ballot(ballot.tie);
-            } else {
-                address winner = ballot.current_winner;
-                return winner;
-            }
+        if (ballot.tie == true) {
+            emit tied_ballot(ballot.tie);
+            return address(0x0);
         } else {
-            revert("Insufficient Permissions!");
+            address winner = ballot.current_winner;
+            return winner;
         }
     }
 
-    // function end_open_ballot(uint256 _ballot_id) public {
-    //     require(msg.sender == ballot_owner, "You don't OWN this Ballot!");
-    //     Ballot storage ballot = ballots[_ballot_id - 100];
-    //     uint256 duration = (block.timestamp - ballot.open_date) / 60 / 60 / 24;
-    //     require(duration < ballot._days, "This Ballot is NOT yet Expired!");
-    //     payable(ballot_owner).transfer(address(this).balance);
+    function end_ballot(uint256 _ballot_id) public {
+        Ballot memory ballot = id_to_ballot_mapping[_ballot_id];
 
-    //     ballot.expired = true;
-    //     ballots_mapping[msg.sender].expired = true;
-    //     id_to_ballot_mapping[_ballot_id].expired = true;
-    // }
+        uint256 duration = (block.timestamp - ballot.open_date) / 60 / 60 / 24;
+        require(duration < ballot._days, "This Ballot is NOT yet Expired!");
 
-    // function end_election(uint256 _election_id) public {
-    //     require(msg.sender == owner);
-    //     payable(owner).transfer(address(this).balance);
-    //     Election memory election = get_election(_election_id);
-    //     election.open = false;
-    // }
+        require(msg.sender == ballot.chair, "Insufficient Permissions!");
 
-    function withdraw(bool _destroy) public {
+        ballot.expired = true;
+        ballots_mapping[msg.sender].expired = true;
+        id_to_ballot_mapping[_ballot_id].expired = true;
+
+        emit ended_ballot(_ballot_id);
+    }
+
+    function withdraw(uint256 _ballot_id, bool _destroy) public {
         // after ballot ends
-        require(msg.sender == owner);
+        Ballot memory ballot = id_to_ballot_mapping[_ballot_id];
+        uint256 duration = (block.timestamp - ballot.open_date) / 60 / 60 / 24;
+        require(duration < ballot._days, "This Ballot is NOT yet Expired!");
+
+        require(msg.sender == owner, "Insuffcient Permissions!");
+        ballot.balance = true;
+
         if (_destroy) {
-            payable(owner).transfer(address(this).balance);
+            payable(owner).transfer(ballot_fee);
         } else {
-            payable(owner).transfer(address(this).balance);
+            payable(owner).transfer(ballot_fee);
         }
     }
 }
