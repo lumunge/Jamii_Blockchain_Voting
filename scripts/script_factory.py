@@ -1,4 +1,11 @@
-from brownie import accounts, JamiiFactory, network, config
+from brownie import (
+    JamiiFactory,
+    network,
+    config,
+    ProxyAdmin,
+    TransparentUpgradeableProxy,
+    Contract,
+)
 from scripts.utils import ballot_cost, get_account
 from web3 import Web3
 
@@ -33,10 +40,32 @@ ballot1 = [  # 101
 candidate = ballot0[1][1]
 
 
-def deploy_jamii(text="Genesis"):
-    new_jamii = JamiiFactory.deploy(text, {"from": fee_addr})
-    print(f"Deployed Contract ('{text}')")
-    return new_jamii
+def deploy_jamii():  # deploy upgradeable contract
+    account = get_account()
+    new_jamii = JamiiFactory.deploy(
+        {"from": fee_addr},
+        publish_source=config["networks"][network.show_active()].get("verify"),
+    )
+    proxy_admin = ProxyAdmin.deploy({"from": account})
+
+    proxy = TransparentUpgradeableProxy.deploy(
+        new_jamii.address,
+        proxy_admin.address,
+        "f62d18880000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000767656e6573697300000000000000000000000000000000000000000000000000",
+        {"from": account},
+    )
+    proxy_factory = Contract.from_abi("JamiiFactory", proxy.address, JamiiFactory.abi)
+    print(f"PROXY FACTORY: {proxy_factory}")
+
+
+# def deploy_jamii(text="Genesis"): # non-upgradeable
+#     new_jamii = JamiiFactory.deploy(
+#         text,
+#         {"from": fee_addr},
+#         publish_source=config["networks"][network.show_active()].get("verify"),
+#     )
+#     print(f"Deployed Contract ('{text}')")
+#     return new_jamii
 
 
 def create_ballot_type(_ballot_type, _ballot_name):
@@ -215,24 +244,24 @@ def get_voters(_id_number, _id_number1, _ballot_id):
 
 def main():
     deploy_jamii()
-    create_ballot_type(7, "closed_closed")
-    create_ballot(
-        ballot0[0],
-        ballot0[1],
-        ballot0[2],
-        ballot0[3],
-        ballot0[4],
-    )
-    register_voter(id_number, ballot_id)
-    assign_voting_rights(random_voter, ballot_id, id_number)
-    vote(id_number, candidate, ballot_id)  # open-free*
-    # vote(id_number, candidate1, ballot_id1)  # closed-free**
-    # vote(id_number, candidate2, ballot_id2)  # open-paid*
-    # vote(id_number, candidate3, ballot_id3)  # closed-paid**
+    # create_ballot_type(7, "closed_closed")
+    # create_ballot(
+    #     ballot0[0],
+    #     ballot0[1],
+    #     ballot0[2],
+    #     ballot0[3],
+    #     ballot0[4],
+    # )
+    # register_voter(id_number, ballot_id)
+    # assign_voting_rights(random_voter, ballot_id, id_number)
+    # vote(id_number, candidate, ballot_id)  # open-free*
+    # # vote(id_number, candidate1, ballot_id1)  # closed-free**
+    # # vote(id_number, candidate2, ballot_id2)  # open-paid*
+    # # vote(id_number, candidate3, ballot_id3)  # closed-paid**
 
-    get_ballot_owner(ballot_id)
-    get_ballot(ballot_id)
-    get_candidate(candidate)
-    get_candidates(ballot_id)
-    get_voter(id_number, random_voter, ballot_id)
-    get_voters(id_number, id_number1, ballot_id)
+    # get_ballot_owner(ballot_id)
+    # get_ballot(ballot_id)
+    # get_candidate(candidate)
+    # get_candidates(ballot_id)
+    # get_voter(id_number, random_voter, ballot_id)
+    # get_voters(id_number, id_number1, ballot_id)
