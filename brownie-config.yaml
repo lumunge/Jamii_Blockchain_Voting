@@ -1,9 +1,11 @@
 dependencies:
   - OpenZeppelin/openzeppelin-contracts-upgradeable@4.7.1
+  - OpenZeppelin/openzeppelin-contracts@4.7.1
 compiler:
   solc:
     remappings:
-      - "@openzeppelin=OpenZeppelin/openzeppelin-contracts-upgradeable@4.7.1"
+      - "@openzeppelin-upgradeable=OpenZeppelin/openzeppelin-contracts-upgradeable@4.7.1"
+      - "@openzeppelin=OpenZeppelin/openzeppelin-contracts@4.7.1"
 dotenv: .env
 owner:
   addr: ${FEE}
