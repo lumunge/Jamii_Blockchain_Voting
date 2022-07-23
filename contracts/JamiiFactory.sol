@@ -1,27 +1,22 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: UNLICENSED
 
 pragma solidity 0.8.8;
 
 import "../interfaces/IJamiiFactory.sol";
+import "./JamiiBase.sol";
 
-contract JamiiFactory is IJamiiFactory {
+contract JamiiFactory is IJamiiFactory, JamiiBase {
     Ballot[] private ballots;
     Voter[] private voters;
 
     // numbers
     uint256 private ballot_fee = 340000000000000000; // $
-    uint256 private candidates_count;
     uint256 private ballot_count;
     uint256[] private voter_ids;
     uint256[] internal ballot_types_arr = [0, 1, 2, 3, 4, 5, 6];
     uint256 internal ballot_types = ballot_types_arr.length;
-    uint256 private uid;
-
-    // addresses
-    address private fee_addr = 0x91B01E14032f8AAAa88d66DfF50dB471208bDC19;
 
     // mappings
-    mapping(uint256 => string) private ballot_types_mapping;
     mapping(address => Ballot) private ballots_mapping;
     mapping(uint256 => Ballot) private id_to_ballot_mapping;
     mapping(uint256 => address[]) private ballot_candidate_mapping;
@@ -32,7 +27,7 @@ contract JamiiFactory is IJamiiFactory {
     mapping(address => bytes32) private voter_to_unique_id;
     mapping(uint256 => address) private id_to_voter;
     mapping(address => uint256[]) private voter_to_ballots;
-    mapping(address => uint256[]) public voted_to_ballots;
+    mapping(address => uint256[]) private voted_to_ballots;
     mapping(uint256 => uint256[]) private voter_id_to_ballots;
 
     modifier only_voter(address _candidate, uint256 _ballot_id) {
@@ -112,6 +107,10 @@ contract JamiiFactory is IJamiiFactory {
         _;
     }
 
+    function initialize(string memory _arbitrary_text) public initializer {
+        JamiiBase.initialize();
+    }
+
     function exists(uint256[] memory _voter_ballots, uint256 _target)
         internal
         pure
@@ -126,31 +125,10 @@ contract JamiiFactory is IJamiiFactory {
         return false;
     }
 
-    constructor(string memory _arbitray_text) {
-        bytes memory bytes_text = bytes(_arbitray_text);
-        require(bytes_text.length > 0, "Enter a valid text!");
-        require(msg.sender == fee_addr, "Insufficient Permissions!");
-        fee_addr = msg.sender;
-        uid = 100;
-        candidates_count = 1000;
-        create_ballot_types();
-    }
-
-    function create_ballot_types() private {
-        ballot_types_mapping[0] = "open-free";
-        ballot_types_mapping[1] = "closed-free";
-        ballot_types_mapping[2] = "open-paid";
-        ballot_types_mapping[3] = "closed-paid";
-        ballot_types_mapping[4] = "closed-free-secret";
-        ballot_types_mapping[5] = "open-paid-secret";
-        ballot_types_mapping[6] = "closed-paid-secret";
-    }
-
     function create_ballot_type(
         uint256 _ballot_type,
         string memory _ballot_name
-    ) public {
-        require(msg.sender == fee_addr, "This Action is NOT permitted!");
+    ) public onlyOwner {
         require(
             _ballot_type > (ballot_types - 1) &&
                 _ballot_type < (ballot_types + 1),
@@ -208,7 +186,6 @@ contract JamiiFactory is IJamiiFactory {
             false,
             _registration_period,
             address(0x0),
-            false,
             false
         );
         id_to_ballot_mapping[uid] = new_ballot;
@@ -597,7 +574,7 @@ contract JamiiFactory is IJamiiFactory {
     }
 
     function end_ballot(uint256 _ballot_id) public {
-        Ballot memory ballot = id_to_ballot_mapping[_ballot_id];
+        Ballot storage ballot = id_to_ballot_mapping[_ballot_id];
 
         uint256 duration = (block.timestamp - ballot.open_date) / 60 / 60 / 24;
         require(duration < ballot._days, "This Ballot is NOT yet Expired!");
@@ -611,19 +588,7 @@ contract JamiiFactory is IJamiiFactory {
         emit ended_ballot(_ballot_id);
     }
 
-    function withdraw(uint256 _ballot_id, bool _destroy) public {
-        // after ballot ends
-        Ballot memory ballot = id_to_ballot_mapping[_ballot_id];
-        uint256 duration = (block.timestamp - ballot.open_date) / 60 / 60 / 24;
-        require(duration < ballot._days, "This Ballot is NOT yet Expired!");
-
-        require(msg.sender == fee_addr, "Insuffcient Permissions!");
-        ballot.balance = true;
-
-        if (_destroy) {
-            payable(fee_addr).transfer(ballot_fee);
-        } else {
-            payable(fee_addr).transfer(ballot_fee);
-        }
+    function withdraw() public onlyOwner {
+        payable(fee_addr).transfer(address(this).balance);
     }
 }
