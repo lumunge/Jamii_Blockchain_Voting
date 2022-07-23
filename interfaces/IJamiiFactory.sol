@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: UNLICENSED
 
 pragma solidity 0.8.8;
 
@@ -27,7 +27,6 @@ interface IJamiiFactory {
         uint256 registration_window;
         address current_winner;
         bool tie;
-        bool balance;
     }
 
     /*
@@ -257,5 +256,5 @@ interface IJamiiFactory {
      */
     function end_ballot(uint256 _ballot_id) external;
 
-    function withdraw(uint256 _ballot_id, bool _destroy) external;
+    // function withdraw(uint256 _ballot_id, bool _destroy) external;
 }
