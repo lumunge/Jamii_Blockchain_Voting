@@ -7,12 +7,10 @@ import "@openzeppelin_upgradeable/contracts/access/OwnableUpgradeable.sol";
 
 contract JamiiBase is Initializable, OwnableUpgradeable {
     address internal fee_addr;
-    uint256 internal uid;
     uint256 internal candidates_count;
     mapping(uint256 => string) internal ballot_types_mapping;
 
     function initialize() internal onlyInitializing {
-        uid = 100;
         candidates_count = 1000;
         create_ballot_types();
         __Ownable_init();

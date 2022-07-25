@@ -16,7 +16,7 @@ interface IJamiiFactory {
      * @arg tie True is there is a tie between candidates False otherwise
      */
     struct Ballot {
-        uint256 ballot_id;
+        string ballot_id;
         uint256 ballot_type;
         string ballot_name;
         address chair;
@@ -38,7 +38,7 @@ interface IJamiiFactory {
      */
     struct Candidate {
         uint256 candidate_id;
-        uint256 ballot_id;
+        string ballot_id;
         address candidate_address;
         uint256 vote_count;
         // implement other stats(party, funding)
@@ -57,7 +57,7 @@ interface IJamiiFactory {
     struct Voter {
         uint256 voter_id;
         address voter_address;
-        uint256 ballot_id;
+        string ballot_id;
         bool registered;
         bool rights;
         bool voted;
@@ -93,7 +93,7 @@ interface IJamiiFactory {
     /*
      * @dev Emitted when a ballot chair ends a ballot with `_ballot_id`.
      */
-    event ended_ballot(uint256 _ballot_id);
+    event ended_ballot(string _ballot_id);
 
     /*
      * @dev creates a new open ballot
@@ -109,6 +109,7 @@ interface IJamiiFactory {
      *  - ballots.length <= limit
      */
     function create_ballot(
+        string memory _ballot_id,
         string memory _ballot_name,
         address[] memory _ballot_candidates,
         uint256 _ballot_type,
@@ -116,7 +117,8 @@ interface IJamiiFactory {
         uint256 _registration_window
     ) external payable;
 
-    function register_voter(uint256 _id_number, uint256 _ballot_id) external;
+    function register_voter(uint256 _id_number, string memory _ballot_id)
+        external;
 
     /*
      * @dev assign voting rights
@@ -133,7 +135,8 @@ interface IJamiiFactory {
      *  - msg.sender == registered voter
      *  - voting_rights == None
      */
-    function assign_voting_rights(address _voter, uint256 _ballot_id) external;
+    function assign_voting_rights(address _voter, string memory _ballot_id)
+        external;
 
     /*
      * @dev voter votes for a candidate
@@ -147,7 +150,7 @@ interface IJamiiFactory {
      *  - _candidate is a valid candidate
      *  - ballot_id is valid
      */
-    function vote(address _candidate, uint256 _ballot_id) external;
+    function vote(address _candidate, string memory _ballot_id) external;
 
     /*
      * @dev msg.sender gets the owner of a ballot.
@@ -158,7 +161,7 @@ interface IJamiiFactory {
      *
      *
      */
-    function get_ballot_owner(uint256 _ballot_id)
+    function get_ballot_owner(string memory _ballot_id)
         external
         view
         returns (address);
@@ -172,7 +175,7 @@ interface IJamiiFactory {
      *
      *
      */
-    function get_ballot(uint256 _ballot_id)
+    function get_ballot(string memory _ballot_id)
         external
         view
         returns (Ballot memory);
@@ -201,7 +204,7 @@ interface IJamiiFactory {
      *
      *
      */
-    function get_voter(address _voter_address, uint256 _ballot_id)
+    function get_voter(address _voter_address, string memory _ballot_id)
         external
         view
         returns (Voter memory);
@@ -215,7 +218,7 @@ interface IJamiiFactory {
      *
      *
      */
-    function get_candidates(uint256 _ballot_id)
+    function get_candidates(string memory _ballot_id)
         external
         view
         returns (address[] memory);
@@ -229,7 +232,7 @@ interface IJamiiFactory {
      *
      *
      */
-    function get_voters(uint256 _ballot_id)
+    function get_voters(string memory _ballot_id)
         external
         view
         returns (address[] memory);
@@ -244,7 +247,7 @@ interface IJamiiFactory {
      *  - if ballot_type >= 1, Require msg.sender == ballot_owner || authorized owner
      *  - ballot is over(closed)
      */
-    function get_winner(uint256 _ballot_id) external returns (address);
+    function get_winner(string memory _ballot_id) external returns (address);
 
     /*
      * @dev ends a ballot
@@ -254,7 +257,7 @@ interface IJamiiFactory {
      *  - time for ballot is up block_number >= set_block_number
      *  - msg.sender == ballot_owner
      */
-    function end_ballot(uint256 _ballot_id) external;
+    function end_ballot(string memory _ballot_id) external;
 
-    // function withdraw(uint256 _ballot_id, bool _destroy) external;
+    // function withdraw(string memory _ballot_id, bool _destroy) external;
 }
