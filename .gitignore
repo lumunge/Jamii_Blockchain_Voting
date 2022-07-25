@@ -4,7 +4,7 @@ __pycache__
 .hypothesis/
 build/
 reports/
-README.md
 JamiiBlock.md
+JamiiBlockII.md
 node_modules
 .next
