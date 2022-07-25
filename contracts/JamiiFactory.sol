@@ -10,7 +10,8 @@ contract JamiiFactory is IJamiiFactory, JamiiBase {
     Voter[] private voters;
 
     // numbers
-    uint256 private ballot_fee = 340000000000000000; // $
+    // uint256 private ballot_fee = 340000000000000000; // $
+    uint256 private ballot_fee = 10000000000000000; // $
     uint256 private ballot_count;
     uint256[] private voter_ids;
     uint256[] internal ballot_types_arr = [0, 1, 2, 3, 4, 5, 6];
