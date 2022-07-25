@@ -1,0 +1,75 @@
+.wrapper {
+  /* background-color: yellow; */
+}
+.left_side_bar {
+  width: 30%;
+  /* height: 100vh; */
+  box-shadow: rgba(0, 0, 0, 0.1) 2px 0px 0px 0px,
+    rgba(0, 0, 0, 0.06) 0px 0px 0px 0px;
+}
+.left_header {
+  height: 30%;
+  /* background-color: lightblue; */
+  text-align: center;
+  padding: 1rem 0;
+}
+.left_main {
+  height: 60%;
+  /* background-color: lightgrey; */
+  padding: 1rem;
+}
+.left_footer {
+  height: 10%;
+  /* background-color: yellow; */
+  position: relative;
+  bottom: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem 0.5rem;
+}
+
+.connect_container {
+  display: flex;
+  flex-direction: column;
+}
+
+.main_bar {
+  width: 70%;
+}
+.main_panel {
+  /* background-color: green; */
+}
+.main_panel_actions {
+  display: flex;
+  align-items: center;
+}
+.panel_icons {
+  margin-right: 3rem;
+}
+.main_panel_tabs {
+  /* float: left; */
+  /* background-color: green; */
+  /* position: relative; */
+  /* z-index: 99; */
+}
+
+.ballot_details {
+  display: flex;
+}
+.panel_details {
+  width: 80%;
+  background-color: lightgrey;
+}
+.panel_actions {
+  height: calc(100vh - 100px);
+  /* background-color: lightblue; */
+  width: 20%;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 2rem;
+}
+.right_btns {
+  margin: 10px 0;
+  text-transform: capitalize;
+}
