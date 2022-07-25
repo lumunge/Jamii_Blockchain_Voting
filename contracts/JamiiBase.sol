@@ -2,8 +2,8 @@
 
 pragma solidity 0.8.8;
 
-import "@openzeppelin-upgradeable/contracts/proxy/utils/Initializable.sol";
-import "@openzeppelin-upgradeable/contracts/access/OwnableUpgradeable.sol";
+import "@openzeppelin_upgradeable/contracts/proxy/utils/Initializable.sol";
+import "@openzeppelin_upgradeable/contracts/access/OwnableUpgradeable.sol";
 
 contract JamiiBase is Initializable, OwnableUpgradeable {
     address internal fee_addr;
