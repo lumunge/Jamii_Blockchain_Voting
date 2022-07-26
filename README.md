@@ -1,4 +1,4 @@
-### Smart Contract:
+### Smart Contracts:
 
 **Rinkeby:** https://rinkeby.etherscan.io/address/0x7c044cae84076abbd004d03d36c505c41e01add8
 
