@@ -12,7 +12,7 @@ dotenv: .env
 owner:
   addr: ${FEE}
 wallets:
-  from_key: ${PRIVATE_KEY2}
+  from_key: ${PRIVATE_KEY_LOCAL}
 networks:
   default: development
   rinkeby:
