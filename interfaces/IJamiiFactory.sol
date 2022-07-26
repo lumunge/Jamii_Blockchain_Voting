@@ -153,20 +153,6 @@ interface IJamiiFactory {
     function vote(address _candidate, string memory _ballot_id) external;
 
     /*
-     * @dev msg.sender gets the owner of a ballot.
-     * @param _ballot_id The unique Id of a Ballot!
-     *
-     * @require:
-     *
-     *
-     *
-     */
-    function get_ballot_owner(string memory _ballot_id)
-        external
-        view
-        returns (address);
-
-    /*
      * @dev msg.sender gets a ballot.
      * @param _ballot_id The unique Id of a Ballot!
      *
