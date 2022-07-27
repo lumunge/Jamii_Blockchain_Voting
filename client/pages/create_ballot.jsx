@@ -1,10 +1,12 @@
 import Head from "next/head";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useState, useEffect } from "react";
 import { v4 as uuid } from "uuid";
 import map from "../../build/deployments/map.json";
 import { getEthereum } from "../utils/getEthereum";
 import { getWeb3 } from "../utils/getWeb3";
+import { get_candidate } from "../wrapper/wrapper";
 import { convert_time } from "../utils/functions.js";
 import PropTypes from "prop-types";
 import {
@@ -31,7 +33,7 @@ import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import styles from "../styles/create_ballot.module.css";
 
 const create_ballot = () => {
-  const [value, setValue] = useState(0);
+  const [value, set_value] = useState(0);
   const [error, set_error] = useState("");
   const router = useRouter();
   let test_ballot_candidates = [
@@ -50,6 +52,7 @@ const create_ballot = () => {
 
   const [ballot, set_ballot] = useState(initial_ballot_state);
   const [initial_ballot, set_initial_ballot] = useState(initial_ballot_state);
+  const [ballot_candidates, set_ballot_candidates] = useState([]);
 
   const set_initial_ballot_state = () => {
     set_ballot(initial_ballot_state);
@@ -62,8 +65,19 @@ const create_ballot = () => {
     [3, "closed_secret"],
   ]);
 
-  const handleChange = (event, newValue) => {
-    setValue(newValue);
+  const handle_tab_change = async (e, new_value) => {
+    set_value(new_value);
+
+    if (new_value == 2) {
+      let candidates_data = await get_candidates_data(
+        process_candidates(initial_ballot.ballot_candidates)
+      );
+      set_ballot_candidates(candidates_data);
+    }
+
+    console.log("BALLOT CANDIDATES: ", ballot_candidates);
+
+    // console.log(new_value);
   };
 
   const handle_ballot_data = (e) => {
@@ -76,6 +90,8 @@ const create_ballot = () => {
       ...initial_ballot,
       [e.target.name]: data,
     });
+
+    console.log("TYPE: ", ballot.ballot_candidates);
   };
 
   TabPanel.propTypes = {
@@ -262,6 +278,29 @@ const create_ballot = () => {
     console.log(ballot);
   };
 
+  const get_candidate_votes = async (_candidate_address) => {
+    const candidate = await factory.methods
+      .get_candidate(_candidate_address)
+      .call();
+    const candidate_vote_count = candidate.vote_count;
+    console.log("Candidate:", candidate);
+    return candidate_vote_count;
+  };
+
+  const get_candidates_data = async (_candidates) => {
+    let candidates_data = [];
+    let n = _candidates.length;
+    for (let i = 0; i < n; i++) {
+      const candidate = await factory.methods
+        .get_candidate(_candidates[i])
+        .call();
+      candidates_data.push(candidate);
+    }
+    // set_ballot_candidates(candidates_data);
+    // console.log(candidates_data);
+    return candidates_data;
+  };
+
   // const get_ballot_with_addr = async (e) => {};
 
   const process_candidates = (candidates_str) => {
@@ -373,7 +412,7 @@ const create_ballot = () => {
               <div className={styles.main_panel_tabs}>
                 <Tabs
                   value={value}
-                  onChange={handleChange}
+                  onChange={handle_tab_change}
                   aria-label="basic tabs example"
                 >
                   <Tab label="Create Ballot" {...a11yProps(0)} />
@@ -414,7 +453,6 @@ const create_ballot = () => {
                       value={initial_ballot.ballot_type}
                       onChange={handle_ballot_data}
                       label="ballot type"
-                      // onChange={handleChange}
                     >
                       <MenuItem value={0}>Open Free</MenuItem>
                       <MenuItem value={1}>Closed Free</MenuItem>
@@ -482,7 +520,7 @@ const create_ballot = () => {
                       <h4>Ballot Name: {ballot.ballot_name}</h4>
                       <h4>Ballot Admin: {accounts[0]} </h4>
                       <h4>
-                        Total Votes:{" "}
+                        Ballot Registered Voters:{" "}
                         {ballot_id.length > 1 ? ballot.voters_count : 0}
                       </h4>
                       <h4>
@@ -511,9 +549,29 @@ const create_ballot = () => {
                         )}
                       </h4>
                       <h4>Candidates: {initial_ballot.ballot_candidates}</h4>
+                      {/* <Link
+                        target="_blank"
+                        href={`register_voter/${encodeURIComponent(ballot_id)}`}
+                        href="#!"
+                        onClick={() =>
+                          router.push(`register_voter/${ballot_id}`)
+                        }
+                      >
+                        {`register_voter/${ballot_id}`}
+                      </Link> */}
                       <a
+                        target="_blank"
+                        href={`register_voter/${encodeURIComponent(ballot_id)}`}
+                      >{`register_voter/${ballot_id}`}</a>
+                      {/* <button
+                        onClick={() =>
+                          router.push(`register_voter/${ballot_id}`)
+                        }
+                      >{`register_voter/${ballot_id}`}</button> */}
+
+                      {/* <a
                         href={`jamii_ballots/${ballot_id}`}
-                      >{`jamii_ballots/${ballot_id}`}</a>
+                      >{`jamii_ballots/${ballot_id}`}</a> */}
                     </>
                   ) : (
                     <>
@@ -527,6 +585,9 @@ const create_ballot = () => {
                     <>
                       <button onClick={(e) => get_ballot(e)}>
                         reload ballot
+                      </button>
+                      <button onClick={(e) => handle_tab_change(e, 2)}>
+                        reload candidates
                       </button>
                       <div>TIMER HERE</div>
                       <h4>
@@ -550,6 +611,18 @@ const create_ballot = () => {
                           <span>Ongoing</span>
                         )}
                       </h4>
+
+                      <h4>Total Votes: {ballot.voters_count}</h4>
+
+                      <>
+                        {Object.keys(ballot_candidates).map((key) => (
+                          <div key={key}>
+                            <h4>Address: {ballot_candidates[key][2]}</h4>
+                            <h4>Votes: {ballot_candidates[key][3]}</h4>
+                          </div>
+                        ))}
+                      </>
+
                       <button>End Ballot</button>
                     </>
                   ) : (
@@ -589,3 +662,13 @@ const create_ballot = () => {
 };
 
 export default create_ballot;
+
+// export const getServerSideProps = async (pageContext) => {
+//   const ballot_id = pageContext.query.ballot_id;
+
+//   return {
+//     props: {
+//       ballot_id: ballot_id,
+//     },
+//   };
+// };
