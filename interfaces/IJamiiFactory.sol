@@ -118,7 +118,8 @@ interface IJamiiFactory {
     ) external payable;
 
     function register_voter(uint256 _id_number, string memory _ballot_id)
-        external;
+        external
+        returns (bytes32);
 
     /*
      * @dev assign voting rights
@@ -190,7 +191,7 @@ interface IJamiiFactory {
      *
      *
      */
-    function get_voter(address _voter_address, string memory _ballot_id)
+    function get_voter(address _voter_address)
         external
         view
         returns (Voter memory);
