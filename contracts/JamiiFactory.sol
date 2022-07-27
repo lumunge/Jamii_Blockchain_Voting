@@ -243,7 +243,7 @@ contract JamiiFactory is IJamiiFactory, JamiiBase, Utils {
     function create_voter_open_ballot(
         uint256 _id_number,
         string memory _ballot_id
-    ) internal {
+    ) internal returns (bytes32) {
         Ballot storage ballot = id_to_ballot_mapping[_ballot_id];
 
         ballot_voters_mapping[_ballot_id].push(msg.sender);
@@ -268,12 +268,14 @@ contract JamiiFactory is IJamiiFactory, JamiiBase, Utils {
         voter_id_to_ballots[_id_number].push(_ballot_id);
 
         emit registered_voter(unique_voter_id);
+
+        return unique_voter_id;
     }
 
     function create_voter_closed_ballot(
         uint256 _id_number,
         string memory _ballot_id
-    ) internal {
+    ) internal returns (bytes32) {
         Ballot storage ballot = id_to_ballot_mapping[_ballot_id];
 
         ballot_voters_mapping[_ballot_id].push(msg.sender);
@@ -299,34 +301,53 @@ contract JamiiFactory is IJamiiFactory, JamiiBase, Utils {
         voter_id_to_ballots[_id_number].push(_ballot_id);
 
         emit registered_voter(unique_voter_id);
+
+        return unique_voter_id;
     }
 
     function register_voter_open_ballot(
         uint256 _id_number,
         string memory _ballot_id
-    ) internal only_register_voter(_id_number, _ballot_id) {
-        create_voter_open_ballot(_id_number, _ballot_id);
+    ) internal only_register_voter(_id_number, _ballot_id) returns (bytes32) {
+        bytes32 unique_voter_id = create_voter_open_ballot(
+            _id_number,
+            _ballot_id
+        );
+        return unique_voter_id;
     }
 
     function register_voter_closed_ballot(
         uint256 _id_number,
         string memory _ballot_id
-    ) internal only_register_voter(_id_number, _ballot_id) {
+    ) internal only_register_voter(_id_number, _ballot_id) returns (bytes32) {
         // require("You need to lock value in the Ballot! -> redistributed after ballot!");
-        create_voter_closed_ballot(_id_number, _ballot_id);
+        bytes32 unique_voter_id = create_voter_closed_ballot(
+            _id_number,
+            _ballot_id
+        );
+        return unique_voter_id;
     }
 
     function register_voter(uint256 _id_number, string memory _ballot_id)
         public
         only_register_voter(_id_number, _ballot_id)
+        returns (bytes32)
     {
         Ballot memory ballot = id_to_ballot_mapping[_ballot_id];
 
         // 0, 1, 2, 3 -> open, closed, open secret, closed secret,
         if (ballot.ballot_type == 0 || ballot.ballot_type == 2) {
-            register_voter_open_ballot(_id_number, _ballot_id);
+            bytes32 unique_voter_id = register_voter_open_ballot(
+                _id_number,
+                _ballot_id
+            );
+            return unique_voter_id;
         } else if (ballot.ballot_type == 1 || ballot.ballot_type == 3) {
-            register_voter_closed_ballot(_id_number, _ballot_id);
+            bytes32 unique_voter_id = register_voter_closed_ballot(
+                _id_number,
+                _ballot_id
+            );
+            return unique_voter_id;
         }
     }
 
@@ -458,7 +479,7 @@ contract JamiiFactory is IJamiiFactory, JamiiBase, Utils {
         return address_to_candidate_mapping[_candidate_addr];
     }
 
-    function get_voter(address _voter_address, string memory _ballot_id)
+    function get_voter(address _voter_address)
         public
         view
         only_secret_ballot(_ballot_id)
