@@ -108,7 +108,7 @@ contract JamiiFactory is IJamiiFactory, JamiiBase, Utils {
 
     modifier only_secret_ballot(string memory _ballot_id) {
         Ballot memory ballot = id_to_ballot_mapping[_ballot_id];
-        require(ballot.ballot_type < 4, "This is a Secret Ballot!");
+        require(ballot.ballot_type < 3, "This is a Secret Ballot!");
         _;
     }
 
@@ -482,7 +482,7 @@ contract JamiiFactory is IJamiiFactory, JamiiBase, Utils {
     function get_voter(address _voter_address)
         public
         view
-        only_secret_ballot(_ballot_id)
+        only_secret_ballot("")
         returns (Voter memory)
     {
         return address_to_voter_mapping[_voter_address];
