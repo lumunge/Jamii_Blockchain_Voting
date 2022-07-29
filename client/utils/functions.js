@@ -24,3 +24,9 @@ export const convert_time = (unix_time) => {
     date + " " + month + " " + year + " " + hour + ":" + min + ":" + sec;
   return time;
 };
+
+export const convert_time_unix = (date_str) => {
+  const date = new Date(date_str);
+  const unix_time = Math.floor(date.getTime() / 1000);
+  return unix_time;
+};
