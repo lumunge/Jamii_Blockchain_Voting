@@ -48,3 +48,10 @@ export const ballot_types_map = new Map([
   [2, "open_secret"],
   [3, "closed_secret"],
 ]);
+
+export const nav_items_map = new Map([
+  ["Use Cases", "/use_cases"],
+  ["Success Stories", "/sucess_stories"],
+  ["Help Center", "/help_center"],
+  ["Blog", "/blog"],
+]);
