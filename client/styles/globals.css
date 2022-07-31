@@ -11,10 +11,22 @@ body {
 :root {
   --sub-headings: #053bfe;
   --info-text: #a9aca9;
-  --main-background: rgb(14, 22, 43);
+  /* --main-background: rgb(14, 22, 43); */
+
+  --background: white;
+  --text-primary: black;
+  --text-secondary: royalblue;
+  --accent: purple;
 }
 
-@media (prefers-color-scheme: dark) {
+[data-theme="dark"] {
+  --background: black;
+  --text-primary: white;
+  --text-secondary: grey;
+  --accent: darkred;
+}
+
+/* @media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;
   }
@@ -22,4 +34,4 @@ body {
     color: white;
     background: black;
   }
-}
+} */
