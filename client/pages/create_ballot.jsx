@@ -1,13 +1,20 @@
 import Head from "next/head";
-import Link from "next/link";
-import { useRouter } from "next/router";
+// import Link from "next/link";
+// import { useRouter } from "next/router";
 import React, { useState, useEffect } from "react";
+
+import { useDispatch, useSelector } from "react-redux";
+import { login } from "../store/auth-slice";
+import { add_ballot } from "../store/ballot_slice";
+
 import { v4 as uuid } from "uuid";
 import map from "../../build/deployments/map.json";
-import { getEthereum } from "../utils/getEthereum";
 import { getWeb3 } from "../utils/getWeb3";
-import { get_candidate } from "../wrapper/wrapper";
-import { convert_time } from "../utils/functions.js";
+import {
+  convert_time,
+  convert_time_unix,
+  ballot_types_map,
+} from "../utils/functions.js";
 import PropTypes from "prop-types";
 import {
   Grid,
@@ -18,28 +25,26 @@ import {
   Typography,
   Divider,
   TextField,
-  InputLabel,
-  Select,
-  MenuItem,
-  Alert,
   Paper,
+  Modal,
+  Checkbox,
+  FormControlLabel,
 } from "@mui/material";
 // import Notification from "../components/Notification";
 import TabPanel from "../components/TabPanel";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import CachedIcon from "@mui/icons-material/Cached";
 import styles from "../styles/create_ballot.module.css";
 
 const create_ballot = () => {
-  const [value, set_value] = useState(0);
-  const [error, set_error] = useState("");
-  const router = useRouter();
-  let test_ballot_candidates = [
-    "0xf9d48aC9eC8F207AEF93518B51D2CdA61e596904",
-    "0x6c0A17AEe0a1420583446B77f0c8a55e369Bb07e",
-  ];
+  // const router = useRouter();
+  const dispatch = useDispatch();
+
+  const connected = useSelector((state) => state.auth.is_connected);
 
   const initial_ballot_state = {
     ballot_type: "",
@@ -50,34 +55,48 @@ const create_ballot = () => {
     registration_period: "",
   };
 
+  const ballot_fee = 10000000000000000;
+
+  let ballot_dates = [];
+
+  const [value, set_value] = useState(0);
+  const [error, set_error] = useState("");
+  const [wallet_color, set_wallet_color] = useState("red");
+
+  const [web_3, set_web_3] = useState(null);
+  const [accounts, set_accounts] = useState(null);
+  const [chain_id, set_chain_id] = useState(0);
+
+  const [create_ballot, set_create_ballot] = useState("Create Ballot");
+  const [end_ballot, set_end_ballot] = useState("End Ballot");
+
+  const [type_open, set_type_open] = useState(false);
+  const [schedule_open, set_schedule_open] = useState(false);
+  const [ballot_id, set_ballot_id] = useState("");
   const [ballot, set_ballot] = useState(initial_ballot_state);
   const [initial_ballot, set_initial_ballot] = useState(initial_ballot_state);
   const [ballot_candidates, set_ballot_candidates] = useState([]);
+  const [factory, set_factory] = useState(null);
+
+  const [start_registration, set_start_registration] = useState("");
+  const [end_registration, set_end_registration] = useState("");
+  const [start_voting, set_start_voting] = useState("");
+
+  const [candidates, set_candidates] = useState([
+    {
+      address: "",
+    },
+  ]);
+  const [candidates_arr, set_candidates_arr] = useState([]);
+
+  const open_ballot_type = () => set_type_open(true);
+  const close_ballot_type = () => set_type_open(false);
+  const open_ballot_schedule = () => set_schedule_open(true);
+  const close_ballot_schedule = () => set_schedule_open(false);
 
   const set_initial_ballot_state = () => {
     set_ballot(initial_ballot_state);
-  };
-
-  const ballot_types_map = new Map([
-    [0, "open"],
-    [1, "closed"],
-    [2, "open_secret"],
-    [3, "closed_secret"],
-  ]);
-
-  const handle_tab_change = async (e, new_value) => {
-    set_value(new_value);
-
-    if (new_value == 2) {
-      let candidates_data = await get_candidates_data(
-        process_candidates(initial_ballot.ballot_candidates)
-      );
-      set_ballot_candidates(candidates_data);
-    }
-
-    console.log("BALLOT CANDIDATES: ", ballot_candidates);
-
-    // console.log(new_value);
+    set_initial_ballot(initial_ballot_state);
   };
 
   const handle_ballot_data = (e) => {
@@ -90,8 +109,79 @@ const create_ballot = () => {
       ...initial_ballot,
       [e.target.name]: data,
     });
+  };
 
-    console.log("TYPE: ", ballot.ballot_candidates);
+  const handle_ballot_dates = (e) => {
+    ballot_dates.push(e.target.value);
+  };
+
+  const set_ballot_dates = () => {
+    console.log("BALLOT DATES: ", ballot_dates);
+
+    let ballot_begin = convert_time_unix(
+      new Date().toISOString().split("T")[0]
+    );
+    let ballot_end = convert_time_unix(ballot_dates[3]);
+    let ballot_days = (ballot_end - ballot_begin) / 86400;
+
+    let registration_period =
+      (convert_time_unix(ballot_dates[1]) -
+        convert_time_unix(ballot_dates[0])) /
+      86400;
+
+    console.log("Ballot Days: ", ballot_days);
+    console.log("Registration Window: ", registration_period);
+
+    initial_ballot.ballot_days = ballot_days;
+    initial_ballot.registration_period = registration_period;
+    ballot.ballot_days = ballot_days;
+    ballot.registration_period = registration_period;
+
+    set_start_registration(ballot_dates[0]);
+    set_end_registration(ballot_dates[1]);
+    set_start_voting(ballot_dates[2]);
+  };
+
+  // candidates input
+  const add_candidate = (e) => {
+    e.preventDefault();
+    set_candidates([
+      ...candidates,
+      {
+        address: "",
+      },
+    ]);
+  };
+
+  const remove_candidate = (e, index) => {
+    e.preventDefault();
+    const rows = [...candidates];
+    rows.splice(index, 1);
+    set_candidates(rows);
+  };
+
+  const handle_candidates = (index, e) => {
+    const { name, value } = e.target;
+    const list = [...candidates];
+    list[index][name] = value;
+    set_candidates(list);
+    let candidates_arr = list.map((a) => a.address);
+    set_candidates_arr(candidates_arr);
+    console.log("CANDIDATES LIST: ", candidates_arr);
+    initial_ballot.ballot_candidates = candidates_arr;
+    ballot.ballot_candidates = candidates_arr;
+  };
+  // end candidates input
+
+  // tabs
+  const handle_tab_change = async (e, new_value) => {
+    set_value(new_value);
+
+    if (new_value == 2) {
+      set_ballot_candidates(candidates_arr);
+    }
+
+    console.log("BALLOT CANDIDATES: ", ballot_candidates);
   };
 
   TabPanel.propTypes = {
@@ -106,72 +196,42 @@ const create_ballot = () => {
       "aria-controls": `simple-tabpanel-${index}`,
     };
   };
-
-  // const connect_wallet = async () => {
-  //   if (
-  //     typeof window !== "undefined" &&
-  //     typeof window.ethereum !== "undefined"
-  //   ) {
-  //     try {
-  //       await window.ethereum.request({ method: "eth_requestAccounts" });
-  //       web3 = new Web3(window.ethereum);
-  //       setWeb3(web3);
-  //       const accounts = await web3.eth.getAccounts();
-  //       set_user_addr(accounts[0]);
-  //       is_connected(true);
-  //       const temp_factory = JamiiFactory(web3);
-  //       set_factory(temp_factory);
-  //       console.log(accounts);
-  //       console.log(temp_factory);
-  //       // set_notification(true);
-  //     } catch (error) {
-  //       // set_error(error.message);
-  //       if (error.message == "User rejected the request.") {
-  //         set_error("Connect your Metamask Wallet!");
-  //         // set_notification(!notification);
-  //       } else {
-  //         set_error(error.message);
-  //         // set_notification(!notification);
-  //         // notify(error, "You have to connect your Metamask Wallet!")
-  //       }
-  //     }
-  //   }
-  // };
-
-  // const disconnect_wallet = () => {
-  //   alert("will be disconnected here!");
-  // };
-  const ballot_fee = 10000000000000000;
-  const [web_3, set_web_3] = useState(null);
-  const [accounts, set_accounts] = useState(null);
-  const [chain_id, set_chain_id] = useState(0);
-  const [factory, set_factory] = useState(null);
-  const [ballot_id, set_ballot_id] = useState("");
-
-  const connected = accounts ? accounts.length > 0 : false;
+  // end tabs
 
   const init = async () => {
     const web3 = await getWeb3();
 
-    try {
-      const ethereum = await getEthereum();
-      ethereum.enable();
-    } catch (e) {
-      console.log(`Could not enable accounts. Interaction with contracts not available.
-            Use a modern browser with a Web3 plugin to fix this issue.`);
-      console.log(e);
+    if (
+      typeof window !== "undefined" &&
+      typeof window.ethereum !== "undefined"
+    ) {
+      try {
+        await window.ethereum.request({ method: "eth_requestAccounts" });
+        const accounts = await web3.eth.getAccounts();
+        const chain_id = parseInt(await web3.eth.getChainId());
+
+        console.log("GOTTEN CHAIN ID: ", chain_id);
+
+        set_web_3(web3);
+        set_accounts(accounts);
+        set_chain_id(chain_id);
+        set_wallet_color("orange");
+
+        dispatch(login());
+
+        await load_initial_contracts();
+      } catch (error) {
+        if (error.message == "User rejected the request.") {
+          set_error("Connect your Metamask Wallet!");
+          // set_notification(!notification);
+        } else {
+          // set_error("Connect Metamask Wallet!!");
+          console.log(error);
+          // set_notification(!notification);
+          // notify(error, "You have to connect your Metamask Wallet!")
+        }
+      }
     }
-
-    const accounts = await web3.eth.getAccounts();
-    const chain_id = parseInt(await web3.eth.getChainId());
-
-    console.log("GOTTEN CHAIN ID: ", chain_id);
-
-    set_web_3(web3);
-    set_accounts(accounts);
-    set_chain_id(chain_id);
-
-    await load_initial_contracts();
   };
 
   const load_initial_contracts = async () => {
@@ -190,8 +250,6 @@ const create_ballot = () => {
       _chain_id = 1337;
     }
     console.log("_CHAIN_ID:", _chain_id);
-
-    console.log("BEFORE SET!! ", web_3);
 
     const _jamii_factory = await load_contract(_chain_id, "JamiiFactory");
 
@@ -231,6 +289,9 @@ const create_ballot = () => {
       return undefined;
     }
     console.log("WEB_3# ", web_3);
+    if (web_3 !== null) {
+      set_wallet_color("green");
+    }
     return new web3.eth.Contract(contract_artifact.abi, address);
   };
 
@@ -238,7 +299,7 @@ const create_ballot = () => {
     e.preventDefault();
     let ballot_id = uuid();
     let ballot_name = ballot.ballot_name;
-    let candidates = process_candidates(ballot.ballot_candidates);
+    let candidates = ballot.ballot_candidates;
     let ballot_type = ballot.ballot_type;
     let ballot_days = ballot.ballot_days;
     let registration_period = ballot.registration_period;
@@ -258,6 +319,17 @@ const create_ballot = () => {
       .on("receipt", async () => {
         // notification
         set_ballot_id(ballot_id);
+        set_create_ballot(
+          `Created Ballot: ${new Date().toString().slice(4, 25)}`
+        );
+        set_end_ballot(
+          `Results: ${convert_time(
+            new Date().getTime() / 1000 + ballot_days * 86400
+          )}`
+        );
+
+        dispatch(add_ballot(ballot_id));
+
         console.log("Ballot created Successfully!!");
       });
     console.log(
@@ -271,55 +343,17 @@ const create_ballot = () => {
   };
 
   const get_ballot = async (e) => {
+    init();
     e.preventDefault();
     const ballot = await factory.methods.get_ballot(ballot_id).call();
     set_ballot(ballot);
     console.log("BALLOT ID:", ballot_id);
-    console.log(ballot);
+    console.log("THE BALLOT HERE: ", ballot);
   };
 
-  const get_candidate_votes = async (_candidate_address) => {
-    const candidate = await factory.methods
-      .get_candidate(_candidate_address)
-      .call();
-    const candidate_vote_count = candidate.vote_count;
-    console.log("Candidate:", candidate);
-    return candidate_vote_count;
-  };
-
-  const get_candidates_data = async (_candidates) => {
-    let candidates_data = [];
-    let n = _candidates.length;
-    for (let i = 0; i < n; i++) {
-      const candidate = await factory.methods
-        .get_candidate(_candidates[i])
-        .call();
-      candidates_data.push(candidate);
-    }
-    // set_ballot_candidates(candidates_data);
-    // console.log(candidates_data);
-    return candidates_data;
-  };
-
-  // const get_ballot_with_addr = async (e) => {};
-
-  const process_candidates = (candidates_str) => {
-    let candidates_nospace = candidates_str.replaceAll(/\s/g, "");
-    let candidates = candidates_nospace.split(",");
-    return candidates;
-  };
-
-  const test = () => {
+  useEffect(() => {
     init();
-    console.log(web_3);
-    console.log(accounts);
-    console.log(chain_id);
-    console.log(factory);
-  };
-
-  // useEffect(() => {
-  //   init();
-  // }, []);
+  }, [ballot.ballot_name]);
 
   return (
     <div className={styles.wrapper}>
@@ -377,24 +411,25 @@ const create_ballot = () => {
                 <div>Ballot Owner: {user_addr}</div>
               </div>
             ) : ( */}
+            <div>{error && <small>{error}</small>}</div>
+
             <div className={styles.connect_container}>
-              <div>
-                <small>{error}</small>
-              </div>
-              <div>
-                <Button onClick={test}>
-                  <AccountBalanceWalletOutlinedIcon sx={{ color: "#FF5733" }} />
-                </Button>
-              </div>
-            </div>
-            {/* )} */}
-            {/* <Button onClick={connect_wallet()}>
+              {/* )} */}
+              {/* <Button onClick={connect_wallet()}>
               <AccountBalanceWalletOutlinedIcon sx={{ color: "#FF5733" }} />
             </Button> */}
-            <div>
-              <Button>
-                <SettingsOutlinedIcon />
-              </Button>
+              <div>
+                <Button>
+                  <AccountBalanceWalletOutlinedIcon
+                    sx={{ color: wallet_color }}
+                  />
+                </Button>
+              </div>
+              <div>
+                <Button>
+                  <SettingsOutlinedIcon />
+                </Button>
+              </div>
             </div>
           </footer>
         </Grid>
@@ -415,16 +450,19 @@ const create_ballot = () => {
                   onChange={handle_tab_change}
                   aria-label="basic tabs example"
                 >
-                  <Tab label="Create Ballot" {...a11yProps(0)} />
+                  <Tab label={create_ballot} {...a11yProps(0)} />
                   <Tab label="Open Ballot" {...a11yProps(1)} />
-                  <Tab label="End Ballot" {...a11yProps(2)} />
+                  <Tab label={end_ballot} {...a11yProps(2)} />
                 </Tabs>
               </div>
               <div className={styles.main_panel_actions}>
                 <Button className={styles.panel_icons}>
                   <ContentCopyIcon />
                 </Button>
-                <Button className={styles.panel_icons}>
+                <Button
+                  className={styles.panel_icons}
+                  onClick={() => set_initial_ballot_state()}
+                >
                   <DeleteOutlineOutlinedIcon />
                 </Button>
               </div>
@@ -432,85 +470,290 @@ const create_ballot = () => {
             <div className={styles.ballot_details}>
               <div className={styles.panel_details}>
                 <TabPanel value={value} index={0}>
-                  Details about ballot creation. ---- BACKGROUND BALLOT IMAGE
-                  <form onSubmit={(e) => create_new_ballot(e)}>
-                    <TextField
-                      id="filled-basic"
-                      label="ballot name"
-                      variant="filled"
-                      name="ballot_name"
-                      value={initial_ballot.ballot_name}
-                      onChange={handle_ballot_data}
-                    />
-                    {/* _ballot_candidates_addr ->> array */}
-                    <InputLabel id="demo-simple-select-label">
-                      ballot type
-                    </InputLabel>
-                    <Select
-                      labelId="demo-simple-select-label"
-                      id="demo-simple-select"
-                      name="ballot_type"
-                      value={initial_ballot.ballot_type}
-                      onChange={handle_ballot_data}
-                      label="ballot type"
-                    >
-                      <MenuItem value={0}>Open Free</MenuItem>
-                      <MenuItem value={1}>Closed Free</MenuItem>
-                      <MenuItem value={2}>Open Paid</MenuItem>
-                      <MenuItem value={3}>Closed Paid</MenuItem>
-                      <MenuItem value={4}>Closed Paid(secret ballot)</MenuItem>
-                      <MenuItem value={5}>Closed Paid(secret ballot)</MenuItem>
-                      <MenuItem value={6}>Closed Paid(secret ballot)</MenuItem>
-                    </Select>
-                    <div>
-                      <TextField
-                        id="filled-basic"
-                        label="ballot days"
-                        variant="filled"
-                        name="ballot_days"
-                        value={initial_ballot.ballot_days}
-                        onChange={handle_ballot_data}
-                      />
-                    </div>
-                    <div>
-                      <TextField
-                        id="filled-basic"
-                        label="Registration days"
-                        variant="filled"
-                        name="registration_period"
-                        value={initial_ballot.registration_period}
-                        onChange={handle_ballot_data}
-                        helperText="Once a ballot is created, voter registration starts."
-                      />
-                    </div>
-                    <div>
-                      <p>Candidates</p>
-                      <div>
-                        <TextField
-                          id="filled-basic"
-                          label="candidate address"
-                          variant="filled"
-                          name="ballot_candidates"
-                          value={initial_ballot.ballot_candidates}
-                          onChange={handle_ballot_data}
-                        />
+                  <div className={styles.ballot_container}>
+                    {ballot_id.length == 0 ? (
+                      <div className={styles.ballot_form}>
+                        <form onSubmit={(e) => create_new_ballot(e)}>
+                          <div className={styles.form_item}>
+                            <TextField
+                              id="filled-basic"
+                              label="ballot name"
+                              variant="filled"
+                              name="ballot_name"
+                              value={initial_ballot.ballot_name}
+                              onChange={handle_ballot_data}
+                              fullWidth
+                            />
+                          </div>
+                          {/* _ballot_candidates_addr ->> array */}
+                          <div className={styles.form_item}>
+                            <Button onClick={open_ballot_type}>
+                              Ballot Type
+                            </Button>
+                            <Modal
+                              open={type_open}
+                              onClose={close_ballot_type}
+                              aria-labelledby="modal-modal-title"
+                              aria-describedby="modal-modal-description"
+                            >
+                              <Box className={styles.ballot_type_box}>
+                                <Typography
+                                  id="modal-modal-title"
+                                  variant="h6"
+                                  component="h2"
+                                  sx={{ color: "#fff", textAlign: "center" }}
+                                >
+                                  Select a Ballot Type
+                                </Typography>
+                                <div className={styles.ballot_types}>
+                                  <div className={styles.ballot_type}>
+                                    <div>
+                                      <Typography
+                                        variant="button"
+                                        className={styles.type_heading}
+                                      >
+                                        Open Ballot
+                                      </Typography>
+                                      <Typography
+                                        className={styles.type_details}
+                                      >
+                                        In an open ballot anyone can register
+                                        and vote.
+                                      </Typography>
+                                    </div>
+                                    <div>
+                                      <FormControlLabel
+                                        control={
+                                          <Checkbox
+                                            type="checkbox"
+                                            name="ballot_type"
+                                            value="0"
+                                            onChange={handle_ballot_data}
+                                            sx={{ color: "#fff" }}
+                                          />
+                                        }
+                                        // label="Open Ballot"
+                                      />
+                                    </div>
+                                  </div>
+                                  <Divider />
+                                  <div className={styles.ballot_type}>
+                                    <div>
+                                      <Typography
+                                        variant="button"
+                                        className={styles.type_heading}
+                                      >
+                                        Closed Ballot
+                                      </Typography>
+                                      <Typography
+                                        className={styles.type_details}
+                                      >
+                                        In a closed ballot, anyone can register
+                                        although voters need voting rights to
+                                        vote.
+                                      </Typography>
+                                    </div>
+                                    <div>
+                                      <FormControlLabel
+                                        control={
+                                          <Checkbox
+                                            type="checkbox"
+                                            name="ballot_type"
+                                            value="1"
+                                            onChange={handle_ballot_data}
+                                            sx={{ color: "#fff" }}
+                                          />
+                                        }
+                                        // label="Closed Ballot"
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                              </Box>
+                            </Modal>
+                          </div>
+                          <div className={styles.form_item}>
+                            <Button onClick={open_ballot_schedule}>
+                              Schedule Ballot
+                            </Button>
+                            <Modal
+                              open={schedule_open}
+                              onClose={close_ballot_schedule}
+                              aria-labelledby="modal-modal-title"
+                              aria-describedby="modal-modal-description"
+                            >
+                              <div className={styles.ballot_dates}>
+                                <TextField
+                                  // label="Start Voter Registration"
+                                  type="date"
+                                  defaultValue={Date.now()}
+                                  className={styles.date_field}
+                                  name="start_registration"
+                                  onChange={(e) => handle_ballot_dates(e)}
+                                />
+                                <TextField
+                                  // label="End Voter Registration"
+                                  type="date"
+                                  className={styles.date_field}
+                                  name="end_registration"
+                                  onChange={(e) => handle_ballot_dates(e)}
+                                />
+                                <TextField
+                                  // label="End Voter Registration"
+                                  type="date"
+                                  className={styles.date_field}
+                                  name="start_voting"
+                                  onChange={(e) => handle_ballot_dates(e)}
+                                />
+                                <TextField
+                                  // label="Ballot End Date"
+                                  type="date"
+                                  className={styles.date_field}
+                                  name="end_ballot"
+                                  onChange={(e) => handle_ballot_dates(e)}
+                                />
+                                <Button onClick={() => set_ballot_dates()}>
+                                  Set Dates
+                                </Button>
+                              </div>
+                            </Modal>
+                          </div>
+                          <div className={styles.form_item}>
+                            <TextField
+                              id="filled-basic"
+                              label="ballot days"
+                              variant="filled"
+                              name="ballot_days"
+                              value={initial_ballot.ballot_days}
+                              onChange={handle_ballot_data}
+                              fullWidth
+                            />
+                          </div>
+                          <div className={styles.form_item}>
+                            <TextField
+                              id="filled-basic"
+                              label="Registration days"
+                              variant="filled"
+                              name="registration_period"
+                              value={initial_ballot.registration_period}
+                              onChange={handle_ballot_data}
+                              fullWidth
+                            />
+                          </div>
+                          {/* new candidates */}
+                          <div>
+                            {candidates.map((data, index) => {
+                              const { address } = data;
+                              return (
+                                <div className={styles.add_candidate}>
+                                  <TextField
+                                    key={index}
+                                    label="candidate address"
+                                    variant="filled"
+                                    type="text"
+                                    onChange={(e) =>
+                                      handle_candidates(index, e)
+                                    }
+                                    value={address}
+                                    name="address"
+                                    fullWidth
+                                  />
+
+                                  <div>
+                                    {candidates.length !== 1 && (
+                                      <Button
+                                        onClick={(e) => remove_candidate(e)}
+                                      >
+                                        <DeleteOutlineOutlinedIcon />
+                                      </Button>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+
+                            <div>
+                              <Button onClick={(e) => add_candidate(e)}>
+                                <AddCircleOutlineIcon />
+                              </Button>
+                            </div>
+                          </div>
+                          {/* end new candidates */}
+                          {/* <div className={styles.form_item}>
+                          <p>Candidates</p>
+                          <div>
+                            <TextField
+                              id="filled-basic"
+                              label="candidate address"
+                              variant="filled"
+                              name="ballot_candidates"
+                              value={initial_ballot.ballot_candidates}
+                              onChange={handle_ballot_data}
+                              fullWidth
+                              helperText="Enter a list of candidate addresses."
+                            />
+                          </div>
+                        </div> */}
+                          <Button type="submit" disabled={!factory}>
+                            Submit
+                          </Button>
+                        </form>
                       </div>
-                    </div>
-                    <Button type="submit" disabled={!connected}>
-                      Submit
-                    </Button>
-                    <Button onClick={() => set_initial_ballot_state()}>
-                      Reset
-                    </Button>
-                  </form>
+                    ) : (
+                      <div className={styles.ballot_creation_details}>
+                        <header>
+                          <h4>
+                            ID: {ballot_id} Name: {ballot.ballot_name} Type:{" "}
+                            {`${ballot_types_map.get(
+                              parseInt(ballot.ballot_type)
+                            )} Ballot`}
+                          </h4>
+                          <h4>
+                            Candidates: {initial_ballot.ballot_candidates}
+                          </h4>
+                          <h4>Admin: {accounts[0]} </h4>
+                        </header>
+                        <main>
+                          <h3>Ballot Dates</h3>
+                          <h4>
+                            Voter Registration Starts: {start_registration}
+                          </h4>
+                          <h4>Registration Ends: {end_registration}</h4>
+                          <h4>Ballot Day: {start_voting}</h4>
+                        </main>
+                        <footer>
+                          <a
+                            target="_blank"
+                            href={`register_voter/${encodeURIComponent(
+                              ballot_id
+                            )}`}
+                          >{`register_voter/${ballot_id}`}</a>
+                        </footer>
+                      </div>
+                    )}
+                  </div>
                 </TabPanel>
                 <TabPanel value={value} index={1}>
                   {ballot_id.length > 1 ? (
                     <>
-                      <button onClick={(e) => get_ballot(e)}>
-                        reload ballot
-                      </button>
-                      <h4>Ballot Id: {ballot_id}</h4>
+                      <header className={styles.details_2_header}>
+                        <button onClick={(e) => get_ballot(e)}>
+                          <CachedIcon />
+                        </button>
+                        <div>
+                          Status:{" "}
+                          {ballot.expired ? (
+                            <h4>
+                              Completed <span className={styles.status}></span>
+                            </h4>
+                          ) : (
+                            <h4>
+                              Open <span className={styles.status}></span>
+                            </h4>
+                          )}
+                        </div>
+                      </header>
+                      <h4>Ballot Id: {ballot.ballot_id}</h4>
                       <h4>
                         Ballot Type:{" "}
                         {`${ballot_types_map.get(
@@ -518,60 +761,16 @@ const create_ballot = () => {
                         )} Ballot`}{" "}
                       </h4>
                       <h4>Ballot Name: {ballot.ballot_name}</h4>
-                      <h4>Ballot Admin: {accounts[0]} </h4>
+                      <h4>Ballot Admin: {ballot.chair} </h4>
                       <h4>
                         Ballot Registered Voters:{" "}
                         {ballot_id.length > 1 ? ballot.voters_count : 0}
                       </h4>
-                      <h4>
-                        Start Date: {convert_time(parseInt(ballot.open_date))}
-                      </h4>
 
-                      <h4>
-                        Registration Ends on{" "}
-                        {convert_time(
-                          parseInt(ballot.open_date) +
-                            parseInt(ballot.registration_window) * 86400
-                        )}{" "}
-                      </h4>
-                      <h4>
-                        Ballot Day:{" "}
-                        {convert_time(
-                          parseInt(ballot.open_date) +
-                            parseInt(ballot.registration_window) * 86400
-                        )}
-                      </h4>
-                      <h4>
-                        End Date:{" "}
-                        {convert_time(
-                          parseInt(ballot.open_date) +
-                            parseInt(ballot._days) * 86400
-                        )}
-                      </h4>
-                      <h4>Candidates: {initial_ballot.ballot_candidates}</h4>
-                      {/* <Link
-                        target="_blank"
-                        href={`register_voter/${encodeURIComponent(ballot_id)}`}
-                        href="#!"
-                        onClick={() =>
-                          router.push(`register_voter/${ballot_id}`)
-                        }
-                      >
-                        {`register_voter/${ballot_id}`}
-                      </Link> */}
                       <a
                         target="_blank"
                         href={`register_voter/${encodeURIComponent(ballot_id)}`}
                       >{`register_voter/${ballot_id}`}</a>
-                      {/* <button
-                        onClick={() =>
-                          router.push(`register_voter/${ballot_id}`)
-                        }
-                      >{`register_voter/${ballot_id}`}</button> */}
-
-                      {/* <a
-                        href={`jamii_ballots/${ballot_id}`}
-                      >{`jamii_ballots/${ballot_id}`}</a> */}
                     </>
                   ) : (
                     <>
@@ -583,9 +782,9 @@ const create_ballot = () => {
                 <TabPanel value={value} index={2}>
                   {ballot_id.length > 1 ? (
                     <>
-                      <button onClick={(e) => get_ballot(e)}>
+                      {/* <button onClick={(e) => get_ballot(e)}>
                         reload ballot
-                      </button>
+                      </button> */}
                       <button onClick={(e) => handle_tab_change(e, 2)}>
                         reload candidates
                       </button>
@@ -648,11 +847,17 @@ const create_ballot = () => {
                 >
                   Print Results
                 </Button>
-                {!connected && (
-                  <Paper elevation={4}>Connect Wallet to Create Ballot</Paper>
-                )}
+                <div>
+                  {!connected && (
+                    <>
+                      <Paper elevation={4} sx={{ padding: "10px" }}>
+                        <span>Connect Wallet to Create Ballot</span>
+                        <div>{3} Test Ballots Left</div>
+                      </Paper>
+                    </>
+                  )}
+                </div>
               </div>
-              <div>3 Free Votes</div>
             </div>
           </Box>
         </Grid>
@@ -662,13 +867,3 @@ const create_ballot = () => {
 };
 
 export default create_ballot;
-
-// export const getServerSideProps = async (pageContext) => {
-//   const ballot_id = pageContext.query.ballot_id;
-
-//   return {
-//     props: {
-//       ballot_id: ballot_id,
-//     },
-//   };
-// };
