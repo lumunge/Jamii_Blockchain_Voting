@@ -25,13 +25,14 @@
   bottom: 0;
   width: 100%;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   padding: 1rem 0.5rem;
 }
 
 .connect_container {
   display: flex;
-  flex-direction: column;
+  /* flex-direction: column; */
+  justify-content: space-between;
 }
 
 .main_bar {
@@ -57,6 +58,10 @@
 .ballot_details {
   display: flex;
 }
+.ballot_creation_details {
+  display: flex;
+  flex-direction: column;
+}
 .panel_details {
   width: 80%;
   background-color: lightgrey;
@@ -72,4 +77,67 @@
 .right_btns {
   margin: 10px 0;
   text-transform: capitalize;
+}
+
+.ballot_container {
+  /* display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center; */
+}
+.ballot_form {
+  width: 90%;
+  padding: 1rem;
+  /* background-color: darkslateblue; */
+  margin: 0 auto;
+  /* display: flex; */
+  /* align-items: center; */
+  /* justify-content: center; */
+}
+.form_item {
+  margin: 1rem 0;
+}
+
+.ballot_type_box,
+.ballot_dates {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400;
+  background-color: var(--main-background);
+  border: 2px solid #4d5f7f;
+  box-shadow: 24;
+  padding: 1rem;
+  border-radius: 20px;
+  box-shadow: 0 32px 64px -12px rgb(102 51 225 / 14%),
+    0 4px 32px rgb(92 39 224 / 15%);
+}
+.ballot_types {
+  display: flex;
+  flex-direction: column;
+}
+.ballot_type_buttons {
+  display: flex;
+  flex-direction: column;
+  margin: 1rem 0;
+  background-color: #fff;
+}
+.type_heading {
+  color: var(--sub-headings);
+  font-weight: 600;
+  text-transform: capitalize;
+  font-size: 1.2rem;
+}
+.type_details {
+  color: var(--info-text);
+  text-transform: initial;
+}
+.ballot_type {
+  display: flex;
+  justify-content: space-between;
+}
+.add_candidate {
+  display: flex;
+  /* background-color: yellow; */
 }
