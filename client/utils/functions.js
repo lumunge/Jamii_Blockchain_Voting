@@ -41,3 +41,10 @@ export const url_format_reg = (_url, _ballot_id) => {
   let res1 = res.replace("[ballot_id]", _ballot_id);
   return res1;
 };
+
+export const ballot_types_map = new Map([
+  [0, "open"],
+  [1, "closed"],
+  [2, "open_secret"],
+  [3, "closed_secret"],
+]);
