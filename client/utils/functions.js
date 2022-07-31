@@ -30,3 +30,14 @@ export const convert_time_unix = (date_str) => {
   const unix_time = Math.floor(date.getTime() / 1000);
   return unix_time;
 };
+
+export const url_format = (_url, _ballot_id) => {
+  let res = _url.replace("[ballot_id]", _ballot_id);
+  return res;
+};
+
+export const url_format_reg = (_url, _ballot_id) => {
+  let res = _url.replace("register_voter", "vote");
+  let res1 = res.replace("[ballot_id]", _ballot_id);
+  return res1;
+};
