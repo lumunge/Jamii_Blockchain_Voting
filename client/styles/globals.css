@@ -17,13 +17,20 @@ body {
   --text-primary: black;
   --text-secondary: royalblue;
   --accent: purple;
+
+  --main-green: #78d64b;
+  --main-dark: #11111f;
 }
 
 [data-theme="dark"] {
   --background: black;
-  --text-primary: white;
+  --text-primary: #fff;
   --text-secondary: grey;
   --accent: darkred;
+}
+
+input[type="date"]:not(:valid)::-webkit-datetime-edit {
+  color: #fff;
 }
 
 /* @media (prefers-color-scheme: dark) {
@@ -35,3 +42,17 @@ body {
     background: black;
   }
 } */
+
+/* Greens:
+#78d64b
+#ffffff
+#f2fbed
+#d7f3c9
+#aee693
+
+Blacks:
+#11111f
+#ffffff
+#e7e7e9
+#b8b8bc
+#707079 */
