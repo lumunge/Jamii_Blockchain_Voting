@@ -1,6 +1,7 @@
 .container {
-  padding: 0 2rem;
+  /* padding: 0 2rem; */
   background-color: var(--background);
+  color: var(--text-primary);
 }
 
 .main {
@@ -13,25 +14,56 @@
   align-items: center;
 }
 
-.footer {
+.landing {
+  height: calc(100vh - 65px);
+  width: 100%;
+  background-image: url("../public/ballot_img3.png");
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-attachment: fixed;
+  -webkit-clip-path: polygon(80% 100%, 100% 96%, 100% 0, 0 0, 0 48%);
+  clip-path: polygon(80% 100%, 100% 96%, 100% 0, 0 0, 0 48%);
+}
+.landing_2 {
   display: flex;
-  flex: 1;
-  padding: 2rem 0;
-  border-top: 1px solid #eaeaea;
   justify-content: center;
   align-items: center;
+  width: 100%;
+  height: 70vh;
+  padding: 0 3rem;
+}
+.landing_2_left {
+  background-color: var(--main-green);
+  margin-right: 10px;
+  border-radius: 20px;
+  height: 50vh;
+  width: 50%;
 }
 
-.footer a {
+.landing_2_right {
+  background-color: var(--main-dark);
+  margin-left: 10px;
+  border-radius: 20px;
+  height: 50vh;
+  width: 50%;
+  color: #fff;
+}
+
+.section {
+  height: 80vh;
+  margin: 1rem 0;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-grow: 1;
+  width: 100%;
 }
 
-.footer_details {
-  color: #000;
-  text-decoration: none;
+.section_image {
+  position: relative;
+  width: 50%;
+}
+.section_text {
+  display: flex;
+  align-items: center;
+  width: 50%;
 }
 
 .title a {
