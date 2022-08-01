@@ -1,0 +1,43 @@
+.copy_link {
+  /* --height: 36px; */
+  height: 40px;
+  display: flex;
+  max-width: 250px;
+}
+
+.copy_link_input {
+  flex-grow: 1;
+  padding: 0 8px;
+  font-size: 14px;
+  border: 1px solid #cccccc;
+  border-right: none;
+  outline: none;
+  border-radius: 20px 0 0 20px;
+}
+
+.copy_link_input:hover {
+  background: #eeeeee;
+}
+
+.copy_link_button {
+  flex-shrink: 0;
+  width: var(--height);
+  height: var(--height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #dddddd;
+  color: #333333;
+  outline: none;
+  border: 1px solid #cccccc;
+  border-radius: 0 20px 20px 0;
+  cursor: pointer;
+}
+
+.copy_link_button:hover {
+  background: #cccccc;
+}
+
+.user_id_input {
+  border-radius: 20px 0 0 20px;
+}
