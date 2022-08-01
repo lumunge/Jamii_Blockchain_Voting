@@ -1,26 +1,23 @@
 .wrapper {
-  /* background-color: yellow; */
+  /* margin: 70px 0;
+  min-height: calc(100vh - 70px); */
 }
 .left_side_bar {
   width: 30%;
-  /* height: 100vh; */
   box-shadow: rgba(0, 0, 0, 0.1) 2px 0px 0px 0px,
     rgba(0, 0, 0, 0.06) 0px 0px 0px 0px;
 }
 .left_header {
   height: 30%;
-  /* background-color: lightblue; */
   text-align: center;
   padding: 1rem 0;
 }
 .left_main {
   height: 60%;
-  /* background-color: lightgrey; */
   padding: 1rem;
 }
 .left_footer {
   height: 10%;
-  /* background-color: yellow; */
   position: relative;
   bottom: 0;
   width: 100%;
@@ -31,7 +28,6 @@
 
 .connect_container {
   display: flex;
-  /* flex-direction: column; */
   justify-content: space-between;
 }
 
@@ -93,9 +89,33 @@
   /* display: flex; */
   /* align-items: center; */
   /* justify-content: center; */
+  /* text-align: center; */
 }
 .form_item {
   margin: 1rem 0;
+}
+.form_item_2 {
+  display: flex;
+  justify-content: space-between;
+}
+
+.form_item_3 {
+  display: flex;
+  justify-content: space-between;
+}
+
+.date {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.date_field {
+  color: #fff;
+}
+
+.add_candidate {
+  cursor: pointer;
 }
 
 .ballot_type_box,
@@ -105,10 +125,10 @@
   left: 50%;
   transform: translate(-50%, -50%);
   width: 400;
-  background-color: var(--main-background);
+  background-color: var(--main-dark);
   border: 2px solid #4d5f7f;
   box-shadow: 24;
-  padding: 1rem;
+  padding: 2rem 1rem;
   border-radius: 20px;
   box-shadow: 0 32px 64px -12px rgb(102 51 225 / 14%),
     0 4px 32px rgb(92 39 224 / 15%);
@@ -141,3 +161,58 @@
   display: flex;
   /* background-color: yellow; */
 }
+
+.create_button {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+/* Created ballot page */
+.ballot_details_header {
+  display: flex;
+  justify-content: space-between;
+}
+.ballot_details_candidates {
+  display: flex;
+}
+.copy_link {
+  /* --height: 36px; */
+  height: 40px;
+  display: flex;
+  max-width: 250px;
+}
+
+.copy_link_input {
+  flex-grow: 1;
+  padding: 0 8px;
+  font-size: 14px;
+  border: 1px solid #cccccc;
+  border-right: none;
+  outline: none;
+  border-radius: 20px 0 0 20px;
+}
+
+.copy_link_input:hover {
+  background: #eeeeee;
+}
+
+.copy_link_button {
+  flex-shrink: 0;
+  width: var(--height);
+  height: var(--height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #dddddd;
+  color: #333333;
+  outline: none;
+  border: 1px solid #cccccc;
+  border-radius: 0 20px 20px 0;
+  cursor: pointer;
+}
+
+.copy_link_button:hover {
+  background: #cccccc;
+}
+/* end created ballot page */
