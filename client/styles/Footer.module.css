@@ -1,0 +1,29 @@
+.footer {
+  display: flex;
+  flex: 1;
+  padding: 2rem 0;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--main-dark);
+}
+
+.footer a {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-grow: 1;
+}
+
+.footer_details {
+  color: #fff;
+  text-decoration: none;
+}
+
+.footer_image_container {
+  position: absolute;
+  right: 10px;
+  z-index: 99;
+}
+.footer_image {
+  position: relative;
+}
