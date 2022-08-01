@@ -2,10 +2,12 @@ import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import { HYDRATE, createWrapper } from "next-redux-wrapper";
 import auth from "./auth-slice";
 import ballot from "./ballot_slice";
+import theme from "./theme_slice";
 
 const combinedReducer = combineReducers({
   auth,
   ballot,
+  theme,
 });
 
 const masterReducer = (state, action) => {
@@ -20,11 +22,12 @@ const masterReducer = (state, action) => {
         factory: action.payload.auth.factory,
       },
       ballot: {
-        ballot_ids: [
-          ...action.payload.ballot.ballot_ids,
-          ...state.ballot.ballot_ids,
-        ],
+        ballots: [...action.payload.ballot.ballots, ...state.ballot.ballots],
         ballot_candidates: action.payload.ballot.ballot_candidates,
+        ballot_status: action.payload.ballot.ballot_status,
+      },
+      theme: {
+        current_theme: action.payload.theme.current_theme,
       },
     };
     return nextState;
