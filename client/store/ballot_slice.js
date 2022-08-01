@@ -1,8 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  ballot_ids: [],
+  ballots: [],
   ballot_candidates: [],
+  ballot_status: true,
 };
 
 export const ballot_slice = createSlice({
@@ -10,14 +11,18 @@ export const ballot_slice = createSlice({
   initialState,
   reducers: {
     add_ballot: (state, action) => {
-      state.ballot_ids = [...state.ballot_ids, action.payload];
+      state.ballots = [...state.ballots, action.payload];
     },
     add_ballot_candidates: (state, action) => {
       state.ballot_candidates = action.payload;
     },
+    add_ballot_status: (state, action) => {
+      state.ballot_status = action.payload;
+    },
   },
 });
 
-export const { add_ballot, add_ballot_candidates } = ballot_slice.actions;
+export const { add_ballot, add_ballot_candidates, add_ballot_status } =
+  ballot_slice.actions;
 
 export default ballot_slice.reducer;
