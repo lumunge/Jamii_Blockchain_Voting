@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { getWeb3 } from "../../utils/getWeb3";
+
+import { ballot_types_map } from "../../utils/functions";
+
 import map from "../../../build/deployments/map.json";
 import { useRouter } from "next/router";
 import {
@@ -7,11 +10,20 @@ import {
   vote,
   get_account,
 } from "../../wrapper/wrapper";
-// import { Paper, TextField } from "@mui/material";
+import {
+  TextField,
+  Container,
+  Button,
+  Chip,
+  Typography,
+  Box,
+  Grid,
+  Divider,
+} from "@mui/material";
 
 import { useDispatch, useSelector } from "react-redux";
 import { wrapper } from "../../store/store";
-import { add_ballot_candidates } from "../../store/ballot_slice";
+import { add_ballot, add_ballot_candidates } from "../../store/ballot_slice";
 import {
   login,
   add_connected_account,
@@ -19,10 +31,14 @@ import {
   add_web_3,
   add_factory,
 } from "../../store/auth-slice";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import styles from "../../styles/vote.module.css";
 
 const Vote = () => {
   const router = useRouter();
   const dispatch = useDispatch();
+
+  const [error, set_error] = useState("");
 
   const { ballot_id } = router.query;
   const [selected_candidate, set_selected_candidate] = useState("");
@@ -34,6 +50,8 @@ const Vote = () => {
   // const chain_id = useSelector((state) => state.auth.chain_id);
   const jamii_factory = useSelector((state) => state.auth.factory);
   const account = useSelector((state) => state.auth.connected_account);
+
+  const ballot = useSelector((state) => state.ballot.ballots[2]);
 
   const ballot_candidates = useSelector(
     (state) => state.ballot.ballot_candidates
@@ -109,24 +127,25 @@ const Vote = () => {
   };
 
   const load = async () => {
-    const _jamii_factory = await load_contract(chain_id, "JamiiFactory");
-    const ballot = await _jamii_factory?.methods.get_ballot(ballot_id).call();
-    const candidates = await _jamii_factory?.methods
+    const jamii_factory = await load_contract(chain_id, "JamiiFactory");
+    const ballot = await jamii_factory?.methods.get_ballot(ballot_id).call();
+    const candidates = await jamii_factory?.methods
       .get_candidates(ballot_id)
       .call();
     const account = await get_account();
 
+    dispatch(add_factory(jamii_factory));
+    dispatch(add_ballot(ballot));
     dispatch(add_connected_account(account));
-    dispatch(add_factory(_jamii_factory));
     dispatch(add_ballot_candidates(candidates));
 
-    console.log("GAGAGAA: ", _jamii_factory);
+    console.log("GAGAGAA: ", jamii_factory);
     console.log("BALLOTELLI: ", ballot);
     console.log("ACCOUNT: ", account);
     console.log("ChAIN_ID: ", chain_id);
     console.log("WEB#: ", web_3);
     console.log("CANDIDATES: : ", candidates);
-    return _jamii_factory;
+    return jamii_factory;
   };
 
   const cast_vote = async (e) => {
@@ -141,49 +160,182 @@ const Vote = () => {
       });
   };
 
+  const test = () => {
+    console.log(ballot);
+    console.log(account);
+  };
+
   useEffect(() => {
     init();
     load();
   }, []);
 
   return (
-    <>
+    <Container maxWidth="sm" sx={{ height: "100vh" }}>
       {!ballot_candidates ? (
-        <>
-          <button onClick={() => load()}>Enter Ballot</button>
-        </>
+        <Container>
+          <small>{error}</small>
+          <Typography variant="h3" sx={{ textAlign: "center" }}>
+            Jamii Voting
+          </Typography>
+          <Box sx={{ position: "relative", top: "40%" }}>
+            <Chip
+              label={ballot_id}
+              variant="outlined"
+              sx={{
+                padding: "6% 9% 6% 0",
+                position: "relative",
+                left: "2rem",
+                fontSize: "1.2rem",
+              }}
+              // onClick={handleClick}
+            />
+            {/* <h4>Ballot {ballot_id}</h4> */}
+            <Button
+              variant="outlined"
+              onClick={() => load()}
+              disabled={jamii_factory}
+              sx={{
+                borderRadius: "50%",
+                padding: "4% 0",
+              }}
+            >
+              <ArrowForwardIosIcon />
+            </Button>
+          </Box>
+          {/* <button onClick={() => load()} disabled={ballot}>
+               Start Registration
+             </button> */}
+          {/* </Container>
+        <Container maxWidth="sm" sx={{ height: "100vh" }}>
+          <button onClick={() => load()}>Enter Ballot</button>*/}
+        </Container>
       ) : (
         <>
           {!voted ? (
-            <form onSubmit={(e) => cast_vote(e)}>
-              {ballot_candidates && (
-                <>
-                  {Object.keys(ballot_candidates)?.map((key) => (
-                    <div key={key}>
-                      <input
-                        type="checkbox"
-                        name="candidate"
-                        value={ballot_candidates[key]}
-                        onChange={handle_box_change}
-                      />
-                      <label for="candidate">
-                        Candidate: {ballot_candidates[key]}
-                      </label>
-                      <br></br>
-                    </div>
-                  ))}
-                </>
+            <>
+              <form onSubmit={(e) => cast_vote(e)}>
+                {ballot && (
+                  <>
+                    <h1>Countdown timer here</h1>
+
+                    <Grid container>
+                      <Grid item xs={8} mb={4}>
+                        <Typography variant="h5">
+                          {ballot.ballot_name}{" "}
+                          <Typography variant="caption">{`${ballot_types_map.get(
+                            parseInt(ballot.ballot_type)
+                          )} Ballot`}</Typography>
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={4}>
+                        <Chip
+                          label={ballot.ballot_id}
+                          sx={{ backgroundColor: status }}
+                          // onClick={handleClick}
+                        />
+                      </Grid>
+                    </Grid>
+
+                    <Grid
+                      item
+                      mb={4}
+                      xs={12}
+                      sx={{ display: "flex", alignItems: "center" }}
+                    >
+                      <Typography variant="h5" pr={4}>
+                        {" "}
+                        Organizer:{" "}
+                      </Typography>
+                      <Typography variant="body1">{ballot.chair}</Typography>
+                    </Grid>
+
+                    <Grid container>
+                      <Grid item xs={12}>
+                        <Typography variant="h5">
+                          Tick a Single Checkbox
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} mb={4}>
+                        {Object.keys(ballot_candidates)?.map((key) => (
+                          <>
+                            <Grid
+                              container
+                              key={key}
+                              pt={2}
+                              pb={2}
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                textAlign: "center",
+                              }}
+                            >
+                              <Grid item xs={9}>
+                                <label for="candidate">
+                                  <Typography variant="body1">
+                                    {ballot_candidates[key]}
+                                  </Typography>
+                                </label>
+                              </Grid>
+                              <Grid item xs={3}>
+                                <input
+                                  type="checkbox"
+                                  name="candidate"
+                                  value={ballot_candidates[key]}
+                                  onChange={handle_box_change}
+                                  className={styles.check_box}
+                                />
+                              </Grid>
+                              <br></br>
+                            </Grid>
+                            <Divider />
+                          </>
+                        ))}
+                      </Grid>
+                    </Grid>
+                  </>
+                )}
+                <Grid
+                  item
+                  xs={12}
+                  mb={4}
+                  sx={{ display: "flex", justifyContent: "center" }}
+                >
+                  <Button
+                    variant="contained"
+                    type="submit"
+                    disabled={selected_candidate.length == 0}
+                  >
+                    Vote
+                  </Button>
+                </Grid>
+              </form>
+              {ballot && (
+                <Grid
+                  item
+                  xs={12}
+                  sx={{ display: "flex", justifyContent: "center" }}
+                >
+                  <Typography>Casted Votes: {ballot.voters_count} </Typography>
+                </Grid>
               )}
-              <button type="submit">Vote</button>
-            </form>
+            </>
           ) : (
             <>
               <h1>You already cast your vote in this</h1>
+              <h1>Modal Here</h1>
+              <div>
+                <h1>Tick Icon Here</h1>
+                <p>Your vote has bee casted</p>
+                <button>
+                  Back to voting Page With State changed and countdown timer
+                </button>
+              </div>
             </>
           )}
         </>
       )}
-    </>
+    </Container>
   );
 };
 

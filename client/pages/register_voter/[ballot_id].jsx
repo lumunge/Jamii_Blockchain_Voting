@@ -3,13 +3,33 @@ import { getWeb3 } from "../../utils/getWeb3";
 import map from "../../../build/deployments/map.json";
 
 import { useDispatch, useSelector } from "react-redux";
+import {
+  add_ballot_candidates,
+  add_ballot_status,
+} from "../../store/ballot_slice";
 // import { wrapper } from "../../store/store";
-import { login, add_factory } from "../../store/auth-slice";
+import {
+  login,
+  add_factory,
+  add_connected_account,
+} from "../../store/auth-slice";
 import { useRouter } from "next/router";
 
-import { url_format, url_format_reg } from "../../utils/functions";
+import { ballot_types_map } from "../../utils/functions";
 import { get_account } from "../../wrapper/wrapper";
-import { TextField } from "@mui/material";
+import {
+  TextField,
+  Container,
+  Button,
+  Chip,
+  Typography,
+  Box,
+  Grid,
+} from "@mui/material";
+
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import styles from "../../styles/register_voter.module.css";
 
 const voter_registration = () => {
   const router = useRouter();
@@ -29,9 +49,15 @@ const voter_registration = () => {
   // const ballot_id = useSelector((state) => state.ballot.ballot_ids[0]);
 
   const factory = useSelector((state) => state.auth.factory);
+  const ballot_candidates = useSelector(
+    (state) => state.ballot.ballot_candidates
+  );
 
   const is_connected = useSelector((state) => state.auth.is_connected);
   const user_address = useSelector((state) => state.auth.account);
+  const connected_account = useSelector(
+    (state) => state.auth.connected_account
+  );
 
   const init = async () => {
     const web3 = await getWeb3();
@@ -101,13 +127,18 @@ const voter_registration = () => {
   const load = async () => {
     const _jamii_factory = await load_contract(chain_id, "JamiiFactory");
     const ballot = await _jamii_factory?.methods.get_ballot(ballot_id).call();
+    const ballot_candidates = await _jamii_factory?.methods
+      .get_candidates(ballot_id)
+      .call();
+
     const account = await get_account();
 
-    set_account(account);
+    // set_account(account);
     // set_factory(_jamii_factory);
     set_ballot(ballot);
-
+    dispatch(add_connected_account(account));
     dispatch(add_factory(_jamii_factory));
+    dispatch(add_ballot_candidates(ballot_candidates));
 
     console.log("GAGAGAA: ", _jamii_factory);
     console.log("BALLOTELLI: ", ballot);
@@ -119,7 +150,7 @@ const voter_registration = () => {
     e.preventDefault();
     await factory?.methods
       .register_voter(_user_id, _ballot_id)
-      .send({ from: account, gas: 3000000 })
+      .send({ from: connected_account, gas: 3000000 })
       .on("receipt", async () => {
         // notification
         set_voting_link(true);
@@ -140,74 +171,186 @@ const voter_registration = () => {
     <>
       <>
         {!ballot ? (
-          <>
+          <Container maxWidth="sm" sx={{ height: "100vh" }}>
             <small>{error}</small>
-            <h4>Ballot {ballot_id}</h4>
-            <button onClick={() => load()} disabled={ballot}>
-              Start Registration
-            </button>
-          </>
+            <Typography variant="h3" sx={{ textAlign: "center" }}>
+              Ballot Registration
+            </Typography>
+            <Box sx={{ position: "relative", top: "40%" }}>
+              <Chip
+                label={ballot_id}
+                variant="outlined"
+                sx={{
+                  padding: "6% 9% 6% 0",
+                  position: "relative",
+                  left: "2rem",
+                  fontSize: "1.2rem",
+                }}
+                // onClick={handleClick}
+              />
+              {/* <h4>Ballot {ballot_id}</h4> */}
+              <Button
+                variant="outlined"
+                onClick={() => load()}
+                disabled={ballot}
+                sx={{
+                  borderRadius: "50%",
+                  padding: "4% 0",
+                }}
+              >
+                <ArrowForwardIosIcon />
+              </Button>
+            </Box>
+            {/* <button onClick={() => load()} disabled={ballot}>
+               Start Registration
+             </button> */}
+          </Container>
         ) : (
           <>
             {!ballot.expired ? (
-              <>
-                <h4>Name: {ballot.ballot_name}</h4>
-                <h4>Type: {ballot.ballot_type}</h4>
-                <h4>Chair: {ballot.chair}</h4>
-                <h4>
-                  Days Remaining Till Registration Ends:{" "}
-                  {ballot.registration_window}
-                </h4>
-                <form>
-                  <TextField
-                    id="standard-basic"
-                    label="Valid National ID Number"
-                    variant="standard"
-                    name="user_id"
-                    type="text"
-                    value={user_id}
-                    onChange={(e) => set_user_id(e.target.value)}
-                  />
-                  <button
-                    type="submit"
-                    onClick={(e) => register_new_voter(e, user_id, ballot_id)}
-                  >
-                    Register
-                  </button>
-                </form>
+              <Container maxWidth="sm" sx={{ height: "100vh" }}>
+                <Grid item xs={12} mb={4}>
+                  <h4>
+                    Days Remaining Till Registration Ends:{" "}
+                    {ballot.registration_window}
+                  </h4>
+                </Grid>
+                <Grid container>
+                  <Grid item xs={8} mb={4}>
+                    <Typography variant="h5">
+                      {ballot.ballot_name}{" "}
+                      <Typography variant="caption">{`${ballot_types_map.get(
+                        parseInt(ballot.ballot_type)
+                      )} Ballot`}</Typography>
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={4}>
+                    <Chip
+                      label={ballot.ballot_id}
+                      sx={{ backgroundColor: status }}
+                      // onClick={handleClick}
+                    />
+                  </Grid>
+                </Grid>
+
+                <Grid
+                  item
+                  mb={4}
+                  xs={12}
+                  sx={{ display: "flex", alignItems: "center" }}
+                >
+                  <Typography variant="h5" pr={4}>
+                    {" "}
+                    Organizer:{" "}
+                  </Typography>
+                  <Typography variant="body1">{ballot.chair}</Typography>
+                </Grid>
+
+                <Grid mb={4} item xs={12}>
+                  <div>
+                    <Typography variant="h5">Ballot Candidates</Typography>
+                  </div>
+
+                  <>
+                    {Object.keys(ballot_candidates).map((key) => (
+                      <div key={key}>
+                        <Typography variant="body1">
+                          {ballot_candidates[key]}
+                        </Typography>
+                      </div>
+                    ))}
+                  </>
+                </Grid>
+
+                <Grid item xs={12}>
+                  <form>
+                    <TextField
+                      id="standard-basic"
+                      label="Valid National ID Number"
+                      variant="outlined"
+                      name="user_id"
+                      type="text"
+                      value={user_id}
+                      onChange={(e) => set_user_id(e.target.value)}
+                      InputProps={{
+                        className: styles.user_id_input,
+                      }}
+                      sx={{ height: "13px" }}
+                    />
+                    <Button
+                      variant="contained"
+                      onClick={(e) => register_new_voter(e, user_id, ballot_id)}
+                      sx={{
+                        right: "10px",
+                        height: "55px",
+                        borderRadius: "0 20px 20px 0",
+                      }}
+                    >
+                      Register
+                    </Button>
+                  </form>
+                </Grid>
                 <h1>{user_address}</h1>
                 {account === ballot.chair.toLowerCase() && (
-                  <p>
-                    Copy & Share Link{" "}
-                    <em>
-                      <b>
-                        <a
-                          href={url_format(router.pathname, ballot_id)}
-                          target="_blank"
-                        >
-                          {url_format(router.pathname, ballot_id)}
-                        </a>
-                      </b>
-                    </em>
-                  </p>
+                  <Grid item xs={12}>
+                    <div>
+                      <Typography variant="caption">
+                        Registration link:
+                      </Typography>{" "}
+                    </div>
+                    <div className={styles.copy_link}>
+                      <input
+                        onFocus={(e) => e.target.select()}
+                        type="text"
+                        className={styles.copy_link_input}
+                        value={`register_voter/${ballot_id}`}
+                        readonly
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard.writeText(
+                            `register_voter/51927f0d-f299-46fa-8336-7742e8b9dbb4`
+                          );
+                        }}
+                        className={styles.copy_link_button}
+                      >
+                        <span className={styles.material_icons}>
+                          <ContentCopyIcon />
+                        </span>
+                      </button>
+                    </div>
+                  </Grid>
                 )}
 
-                {voting_link && (
-                  <p>
-                    Voting Link{" "}
-                    <em>
-                      <b>
-                        <a
-                          href={url_format_reg(router.pathname, ballot_id)}
-                          target="_blank"
-                        >
-                          {url_format_reg(router.pathname, ballot_id)}
-                        </a>
-                      </b>
-                    </em>
-                  </p>
+                {!voting_link && (
+                  <Grid item xs={12}>
+                    <div>
+                      <Typography variant="caption">Voting Link:</Typography>{" "}
+                    </div>
+                    <div className={styles.copy_link}>
+                      <input
+                        onFocus={(e) => e.target.select()}
+                        type="text"
+                        className={styles.copy_link_input}
+                        value={`vote/${ballot_id}`}
+                        readonly
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard.writeText(`vote/${ballot_id}`);
+                        }}
+                        className={styles.copy_link_button}
+                      >
+                        <span className={styles.material_icons}>
+                          <ContentCopyIcon />
+                        </span>
+                      </button>
+                    </div>
+                  </Grid>
                 )}
-              </>
+              </Container>
             ) : (
               <>
                 <h4>Registration Closed!</h4>
