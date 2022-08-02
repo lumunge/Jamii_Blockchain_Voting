@@ -3,13 +3,11 @@ import { getWeb3 } from "../../utils/getWeb3";
 
 import { ballot_types_map } from "../../utils/functions";
 
+import CountdownTimer from "../../components/CountdownTimer";
+
 import map from "../../../build/deployments/map.json";
 import { useRouter } from "next/router";
-import {
-  get_ballot_candidates,
-  vote,
-  get_account,
-} from "../../wrapper/wrapper";
+import { get_account } from "../../wrapper/wrapper";
 import {
   TextField,
   Container,
@@ -23,7 +21,11 @@ import {
 
 import { useDispatch, useSelector } from "react-redux";
 import { wrapper } from "../../store/store";
-import { add_ballot, add_ballot_candidates } from "../../store/ballot_slice";
+import {
+  add_ballot,
+  add_ballot_candidates,
+  add_ballot_event,
+} from "../../store/ballot_slice";
 import {
   login,
   add_connected_account,
@@ -168,6 +170,7 @@ const Vote = () => {
   useEffect(() => {
     init();
     load();
+    dispatch(add_ballot_event("voting"));
   }, []);
 
   return (
@@ -217,7 +220,15 @@ const Vote = () => {
               <form onSubmit={(e) => cast_vote(e)}>
                 {ballot && (
                   <>
-                    <h1>Countdown timer here</h1>
+                    <Grid item xs={12} mb={4}>
+                      <CountdownTimer
+                        target_date={
+                          (parseInt(ballot.open_date) +
+                            parseInt(ballot.registration_window)) *
+                          1000
+                        }
+                      />
+                    </Grid>
 
                     <Grid container>
                       <Grid item xs={8} mb={4}>
