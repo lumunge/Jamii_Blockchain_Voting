@@ -22,6 +22,7 @@ const masterReducer = (state, action) => {
         factory: action.payload.auth.factory,
       },
       ballot: {
+        event: action.payload.ballot.event,
         ballots: [...action.payload.ballot.ballots, ...state.ballot.ballots],
         ballot_candidates: action.payload.ballot.ballot_candidates,
         ballot_status: action.payload.ballot.ballot_status,
