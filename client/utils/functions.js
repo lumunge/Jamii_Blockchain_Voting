@@ -31,6 +31,36 @@ export const convert_time_unix = (date_str) => {
   return unix_time;
 };
 
+export const convert_seconds = (seconds) => {
+  if (seconds < 0) {
+    return "Invalid Dates!!";
+  }
+
+  const days = Math.floor(seconds / (3600 * 24));
+
+  seconds -= days * 3600 * 24;
+
+  const hours = Math.floor(seconds / 3600);
+
+  seconds -= hours * 3600;
+
+  const mins = Math.floor(seconds / 60);
+
+  seconds -= mins * 60;
+
+  const tmp = [];
+
+  days && tmp.push(days + "d");
+
+  (days || hours) && tmp.push(hours + "h");
+
+  (days || hours || mins) && tmp.push(mins + "m");
+
+  tmp.push(Math.floor(seconds) + "s");
+
+  return tmp.join(" ");
+};
+
 export const ballot_types_map = new Map([
   [0, "open"],
   [1, "closed"],
