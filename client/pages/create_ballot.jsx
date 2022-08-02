@@ -14,7 +14,9 @@ import {
   convert_time,
   convert_time_unix,
   ballot_types_map,
+  convert_seconds,
 } from "../utils/functions.js";
+
 import PropTypes from "prop-types";
 
 import {
@@ -59,8 +61,6 @@ const create_ballot = () => {
 
   const ballot_fee = 10000000000000000;
 
-  let ballot_dates = [];
-
   const [value, set_value] = useState(0);
   const [error, set_error] = useState("");
   const [wallet_color, set_wallet_color] = useState("red");
@@ -79,11 +79,11 @@ const create_ballot = () => {
   const [initial_ballot, set_initial_ballot] = useState(initial_ballot_state);
   const [ballot_candidates, set_ballot_candidates] = useState([]);
   const [factory, set_factory] = useState(null);
-  const [registration_link, set_registration_link] = useState("");
 
   const [start_registration, set_start_registration] = useState("");
   const [end_registration, set_end_registration] = useState("");
   const [start_voting, set_start_voting] = useState("");
+  const [end_ballot_1, set_end_ballot_1] = useState("");
 
   const [candidates, set_candidates] = useState([
     {
@@ -114,23 +114,19 @@ const create_ballot = () => {
     });
   };
 
-  const handle_ballot_dates = (e) => {
-    ballot_dates.push(e.target.value);
-  };
-
   const set_ballot_dates = () => {
-    console.log("BALLOT DATES: ", ballot_dates);
+    console.log("Start registration: ", start_registration);
+    console.log("End Regiusrtation ", end_registration);
+    console.log("Start Voting: ", start_voting);
+    console.log("End Voting: ", end_ballot_1);
 
-    let ballot_begin = convert_time_unix(
-      new Date().toISOString().split("T")[0]
-    );
-    let ballot_end = convert_time_unix(ballot_dates[3]);
-    let ballot_days = (ballot_end - ballot_begin) / 86400;
+    let ballot_begin = new Date().getTime();
+    let ballot_end = convert_time_unix(end_ballot_1) * 1000;
 
+    let ballot_days = ballot_end - ballot_begin;
     let registration_period =
-      (convert_time_unix(ballot_dates[1]) -
-        convert_time_unix(ballot_dates[0])) /
-      86400;
+      convert_time_unix(end_registration) -
+      convert_time_unix(start_registration);
 
     console.log("Ballot Days: ", ballot_days);
     console.log("Registration Window: ", registration_period);
@@ -140,9 +136,9 @@ const create_ballot = () => {
     ballot.ballot_days = ballot_days;
     ballot.registration_period = registration_period;
 
-    set_start_registration(ballot_dates[0]);
-    set_end_registration(ballot_dates[1]);
-    set_start_voting(ballot_dates[2]);
+    set_start_registration(start_registration);
+    set_end_registration(end_registration);
+    set_start_voting(end_ballot_1);
   };
 
   // candidates input
@@ -325,9 +321,11 @@ const create_ballot = () => {
         set_create_ballot(
           `Created Ballot: ${new Date().toString().slice(4, 25)}`
         );
+
         set_end_ballot(
           `Results: ${convert_time(
-            new Date().getTime() / 1000 + ballot_days * 86400
+            convert_time_unix(new Date().toISOString().split(".")[0]) +
+              ballot_days
           )}`
         );
 
@@ -609,20 +607,17 @@ const create_ballot = () => {
                                       Major Ballot Dates
                                     </Typography>
                                     <div className={styles.date}>
-                                      <Typography
-                                        variant="caption"
-                                        sx={{ color: "#fff" }}
-                                      >
-                                        Start Voter Registration:{" "}
-                                      </Typography>
                                       <TextField
                                         // label="Start Voter Registration"
-                                        type="date"
+                                        type="datetime-local"
                                         defaultValue={Date.now()}
                                         className={styles.date_field}
                                         name="start_registration"
-                                        onChange={(e) => handle_ballot_dates(e)}
-                                        label="dd/mm/yyyy"
+                                        // value={start_registration}
+                                        onChange={(e) =>
+                                          set_start_registration(e.target.value)
+                                        }
+                                        label="Start Registration"
                                         InputLabelProps={{
                                           style: {
                                             color: "#fff",
@@ -631,19 +626,16 @@ const create_ballot = () => {
                                       />
                                     </div>
                                     <div className={styles.date}>
-                                      <Typography
-                                        variant="caption"
-                                        sx={{ color: "#fff" }}
-                                      >
-                                        End Voter Registration:{" "}
-                                      </Typography>
                                       <TextField
                                         // label="End Voter Registration"
-                                        type="date"
+                                        type="datetime-local"
                                         className={styles.date_field}
                                         name="end_registration"
-                                        onChange={(e) => handle_ballot_dates(e)}
-                                        label="dd/mm/yyyy"
+                                        // value={end_registration}
+                                        onChange={(e) =>
+                                          set_end_registration(e.target.value)
+                                        }
+                                        label="End Registration"
                                         InputLabelProps={{
                                           style: {
                                             color: "#fff",
@@ -652,19 +644,16 @@ const create_ballot = () => {
                                       />
                                     </div>
                                     <div className={styles.date}>
-                                      <Typography
-                                        variant="caption"
-                                        sx={{ color: "#fff" }}
-                                      >
-                                        Start Voting:{" "}
-                                      </Typography>
                                       <TextField
                                         // label="End Voter Registration"
-                                        type="date"
+                                        type="datetime-local"
                                         className={styles.date_field}
                                         name="start_voting"
-                                        onChange={(e) => handle_ballot_dates(e)}
-                                        label="dd/mm/yyyy"
+                                        // value={start_voting}
+                                        onChange={(e) =>
+                                          set_start_voting(e.target.value)
+                                        }
+                                        label="Start Voting"
                                         InputLabelProps={{
                                           style: {
                                             color: "#fff",
@@ -673,19 +662,16 @@ const create_ballot = () => {
                                       />
                                     </div>
                                     <div className={styles.date}>
-                                      <Typography
-                                        variant="caption"
-                                        sx={{ color: "#fff" }}
-                                      >
-                                        End Voting:{" "}
-                                      </Typography>
                                       <TextField
                                         // label="Ballot End Date"
-                                        type="date"
+                                        type="datetime-local"
                                         className={styles.date_field}
                                         name="end_ballot"
-                                        onChange={(e) => handle_ballot_dates(e)}
-                                        label="dd/mm/yyyy"
+                                        // value={end_ballot}
+                                        onChange={(e) =>
+                                          set_end_ballot_1(e.target.value)
+                                        }
+                                        label="End Voting"
                                         InputLabelProps={{
                                           style: {
                                             color: "#fff",
@@ -707,17 +693,20 @@ const create_ballot = () => {
                                 <Typography>
                                   Ballot - Type :{" "}
                                   {ballot_types_map.get(
-                                    parseInt(initial_ballot.ballot_type)
+                                    parseInt(ballot.ballot_type)
                                   )}{" "}
                                 </Typography>
                               </div>
                               <div>
                                 <Typography>
-                                  Ballot - Period: {initial_ballot.ballot_days}
+                                  Ballot - Period:{" "}
+                                  {convert_seconds(
+                                    parseInt(ballot.ballot_days) / 1000
+                                  )}{" "}
                                 </Typography>
                                 <Typography>
                                   Registration - Period:{" "}
-                                  {initial_ballot.registration_period}
+                                  {convert_seconds(ballot.registration_period)}{" "}
                                 </Typography>
                               </div>
                             </div>
@@ -839,7 +828,7 @@ const create_ballot = () => {
 
                           <Grid item mb={4} xs={12}>
                             <Typography variant="h5" pb={1}>
-                              Important Dates
+                              Important Dates and Times
                             </Typography>
                             <div>
                               <Typography variant="h6">
