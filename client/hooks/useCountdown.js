@@ -30,4 +30,4 @@ const return_dates = (count_down) => {
   return [days, hours, minutes, seconds];
 };
 
-export { useCountdown };
+export { useCountdown, return_dates };
