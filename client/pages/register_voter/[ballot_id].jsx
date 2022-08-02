@@ -5,9 +5,8 @@ import map from "../../../build/deployments/map.json";
 import { useDispatch, useSelector } from "react-redux";
 import {
   add_ballot_candidates,
-  add_ballot_status,
+  add_ballot_event,
 } from "../../store/ballot_slice";
-// import { wrapper } from "../../store/store";
 import {
   login,
   add_factory,
@@ -15,7 +14,9 @@ import {
 } from "../../store/auth-slice";
 import { useRouter } from "next/router";
 
-import { ballot_types_map } from "../../utils/functions";
+import CountdownTimer from "../../components/CountdownTimer";
+
+import { ballot_types_map, convert_time_unix } from "../../utils/functions";
 import { get_account } from "../../wrapper/wrapper";
 import {
   TextField,
@@ -37,12 +38,9 @@ const voter_registration = () => {
   const [account, set_account] = useState("");
   const [ballot, set_ballot] = useState(null);
   const [user_id, set_user_id] = useState(0);
-  const [unique_voter_id, set_unique_voter_id] = useState("");
-  const [loading, set_loading] = useState(true);
   const [error, set_error] = useState("");
   const [web_3, set_web_3] = useState({});
   const [chain_id, set_chain_id] = useState(0);
-  // const [factory, set_factory] = useState({});
   const [voting_link, set_voting_link] = useState(false);
 
   const dispatch = useDispatch();
@@ -53,7 +51,6 @@ const voter_registration = () => {
     (state) => state.ballot.ballot_candidates
   );
 
-  const is_connected = useSelector((state) => state.auth.is_connected);
   const user_address = useSelector((state) => state.auth.account);
   const connected_account = useSelector(
     (state) => state.auth.connected_account
@@ -165,6 +162,7 @@ const voter_registration = () => {
   useEffect(() => {
     init();
     load();
+    dispatch(add_ballot_event("registration"));
   }, []);
 
   return (
@@ -210,10 +208,13 @@ const voter_registration = () => {
             {!ballot.expired ? (
               <Container maxWidth="sm" sx={{ height: "100vh" }}>
                 <Grid item xs={12} mb={4}>
-                  <h4>
-                    Days Remaining Till Registration Ends:{" "}
-                    {ballot.registration_window}
-                  </h4>
+                  <CountdownTimer
+                    target_date={
+                      (parseInt(ballot.open_date) +
+                        parseInt(ballot.registration_window)) *
+                      1000
+                    }
+                  />
                 </Grid>
                 <Grid container>
                   <Grid item xs={8} mb={4}>
