@@ -1,6 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
+  show_form: false,
+  show_dates: false,
+  show_type: false,
   event: "",
   ballots: [],
   ballot_candidates: [],
@@ -11,6 +14,15 @@ export const ballot_slice = createSlice({
   name: "ballot",
   initialState,
   reducers: {
+    add_show_form: (state, action) => {
+      state.show_form = action.payload;
+    },
+    add_show_dates: (state, action) => {
+      state.show_dates = action.payload;
+    },
+    add_show_type: (state, action) => {
+      state.show_type = action.payload;
+    },
     add_ballot_event: (state, action) => {
       state.event = action.payload;
     },
@@ -27,6 +39,9 @@ export const ballot_slice = createSlice({
 });
 
 export const {
+  add_show_form,
+  add_show_dates,
+  add_show_type,
   add_ballot_event,
   add_ballot,
   add_ballot_candidates,
