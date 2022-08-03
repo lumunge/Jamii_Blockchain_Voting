@@ -4,12 +4,14 @@ import auth from "./auth-slice";
 import ballot from "./ballot_slice";
 import voter from "./voter_slice";
 import theme from "./theme_slice";
+import notification from "./notification_slice";
 
 const combinedReducer = combineReducers({
   auth,
   ballot,
   voter,
   theme,
+  notification,
 });
 
 const masterReducer = (state, action) => {
@@ -39,6 +41,11 @@ const masterReducer = (state, action) => {
       },
       theme: {
         current_theme: action.payload.theme.current_theme,
+      },
+      notification: {
+        open: action.payload.notification.open,
+        type: action.payload.notification.type,
+        message: action.payload.notification.message,
       },
     };
     return nextState;

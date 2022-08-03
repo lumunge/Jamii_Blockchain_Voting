@@ -1,27 +1,32 @@
-import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { add_notification } from "../store/notification_slice";
 import { Alert } from "@mui/material";
 
 const Notification = ({ type, message }) => {
-  const [notification, setNotification] = useState({
-    open: false,
-    type: "",
-    message: "",
-  });
+  const dispatch = useDispatch();
+
+  const show_notification = useSelector((state) => state.notification.open);
+  const type_notification = useSelector((state) => state.notification.type);
+  const message_notification = useSelector(
+    (state) => state.notification.message
+  );
 
   const handleClose = () => {
-      setNotification({
-          open: false,
-          type: "",
-          message: ""
+    dispatch(
+      add_notification({
+        open: false,
+        type: "",
+        message: "",
       })
+    );
   };
 
   return (
     <>
       <div>
-        {notification.open && (
-          <Alert onClose={handleClose} severity={type}>
-            {message}
+        {show_notification && (
+          <Alert onClose={handleClose} severity={type_notification}>
+            {message_notification}
           </Alert>
         )}
       </div>
