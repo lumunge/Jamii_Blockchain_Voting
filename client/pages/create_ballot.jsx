@@ -1,9 +1,7 @@
 import Head from "next/head";
 // import Link from "next/link";
-// import { useRouter } from "next/router";
+import { useRouter } from "next/router";
 import React, { useState, useEffect } from "react";
-
-import CountdownTimer from "../components/CountdownTimer";
 
 import { useDispatch, useSelector } from "react-redux";
 import { login, add_connected_account } from "../store/auth-slice";
@@ -46,20 +44,31 @@ import {
   ListItemText,
 } from "@mui/material";
 // import Notification from "../components/Notification";
-import TabPanel from "../components/TabPanel";
+
+// icons
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import CachedIcon from "@mui/icons-material/Cached";
-import styles from "../styles/create_ballot.module.css";
 import PersonAddAltOutlinedIcon from "@mui/icons-material/PersonAddAltOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 
+// Components
+import CreatedBallot from "../components/CreatedBallot";
+import OpenBallot from "../components/OpenBallot";
+import BallotResult from "../components/BallotResult";
+import TabPanel from "../components/TabPanel";
+import CountdownTimer from "../components/CountdownTimer";
+
+// styleshee
+import styles from "../styles/create_ballot.module.css";
+
 const create_ballot = () => {
-  // const router = useRouter();
+  const router = useRouter();
+  const localhost = "http://localhost:3000/";
   const dispatch = useDispatch();
 
   const connected = useSelector((state) => state.auth.is_connected);
@@ -888,255 +897,21 @@ const create_ballot = () => {
                           </form>
                         </div>
                       ) : (
-                        <div>
-                          <Grid container>
-                            <Grid item xs={8} mb={4}>
-                              <Typography variant="h5">
-                                {ballot.ballot_name}{" "}
-                                <Typography variant="caption">{`${ballot_types_map.get(
-                                  parseInt(ballot.ballot_type)
-                                )} Ballot`}</Typography>
-                              </Typography>
-                            </Grid>
-                            <Grid item xs={4}>
-                              <Chip
-                                label={ballot_id}
-                                // onClick={handleClick}
-                              />
-                            </Grid>
-                          </Grid>
-
-                          <Grid
-                            item
-                            mb={4}
-                            xs={12}
-                            sx={{ display: "flex", alignItems: "center" }}
-                          >
-                            <Typography variant="h5" pr={4}>
-                              {" "}
-                              Organizer:{" "}
-                            </Typography>
-                            <Typography variant="body1">
-                              {accounts[0]}
-                            </Typography>
-                          </Grid>
-
-                          <Grid mb={4} item xs={12}>
-                            <div>
-                              <Typography variant="h5">
-                                Ballot Candidates
-                              </Typography>
-                            </div>
-
-                            <>
-                              {Object.keys(ballot.ballot_candidates).map(
-                                (key) => (
-                                  <div key={key}>
-                                    <Typography variant="body1">
-                                      {ballot.ballot_candidates[key]}
-                                    </Typography>
-                                  </div>
-                                )
-                              )}
-                            </>
-                          </Grid>
-
-                          <Grid item mb={4} xs={12}>
-                            <Typography variant="h5" pb={1}>
-                              Important Dates and Times
-                            </Typography>
-                            <div>
-                              <Typography variant="h6">
-                                Registration:
-                              </Typography>{" "}
-                              <Typography variant="subtitle1">
-                                Starts:{" "}
-                                {new Date(start_registration).toDateString()}{" "}
-                                Ends:{" "}
-                                {new Date(end_registration).toDateString()}
-                              </Typography>
-                            </div>
-                            <div>
-                              <Typography variant="h6">Voting:</Typography>{" "}
-                              <Typography variant="subtitle1">
-                                Starts: {new Date(start_voting).toDateString()},
-                                Ends: {new Date(end_ballot_1).toDateString()}
-                              </Typography>
-                            </div>
-                          </Grid>
-
-                          <Grid item xs={12}>
-                            <div>
-                              <Typography variant="caption">
-                                Registration link:
-                              </Typography>{" "}
-                            </div>
-                            <div className={styles.copy_link}>
-                              <input
-                                onFocus={(e) => e.target.select()}
-                                type="text"
-                                className={styles.copy_link_input}
-                                value={`register_voter/${ballot_id}`}
-                                readonly
-                              />
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  navigator.clipboard.writeText(
-                                    `register_voter/${ballot_id}`
-                                  );
-                                }}
-                                className={styles.copy_link_button}
-                              >
-                                <span className={styles.material_icons}>
-                                  <ContentCopyIcon />
-                                </span>
-                              </button>
-                            </div>
-                          </Grid>
-                        </div>
+                        <CreatedBallot
+                          ballot={ballot}
+                          ballot_id={ballot_id}
+                          account={accounts[0]}
+                          start_registration={start_registration}
+                          end_registration={end_registration}
+                          start_voting={start_voting}
+                          end_ballot_1={end_ballot_1}
+                        />
                       )}
                     </div>
                   </TabPanel>
                   <TabPanel value={value} index={1}>
                     {ballots.length >= 1 ? (
-                      <Grid container>
-                        <Grid container>
-                          <Grid item xs={8} mb={4}>
-                            <Typography variant="h5">
-                              {ballots[active_ballot].ballot_name}{" "}
-                              <Typography variant="caption">{`${ballot_types_map.get(
-                                parseInt(ballot.ballot_type)
-                              )} Ballot`}</Typography>
-                            </Typography>
-                          </Grid>
-                          <Grid item xs={4}>
-                            <Chip
-                              label={ballots[active_ballot].ballot_id}
-                              // onClick={handleClick}
-                            />
-                          </Grid>
-                        </Grid>
-
-                        <Grid
-                          item
-                          mb={4}
-                          xs={12}
-                          sx={{ display: "flex", alignItems: "center" }}
-                        >
-                          <Typography variant="h5" pr={4}>
-                            {" "}
-                            Organizer:{" "}
-                          </Typography>
-                          <Typography variant="body1">
-                            {ballots[active_ballot].ballot_chair}
-                          </Typography>
-                        </Grid>
-
-                        <Grid mb={4} item xs={12}>
-                          <div>
-                            <Typography variant="h5">
-                              Ballot Candidates
-                            </Typography>
-                          </div>
-
-                          <>
-                            {Object.keys(
-                              ballots[active_ballot].ballot_candidates
-                            ).map((key) => (
-                              <div key={key}>
-                                <Typography variant="body1">
-                                  {
-                                    ballots[active_ballot].ballot_candidates[
-                                      key
-                                    ]
-                                  }
-                                </Typography>
-                              </div>
-                            ))}
-                          </>
-                        </Grid>
-
-                        <Grid item mb={4} xs={12}>
-                          <Typography variant="h5" pb={1}>
-                            Important Dates and Times
-                          </Typography>
-
-                          <Grid container xs={12} mb={4}>
-                            <Grid item xs={12} md={6}>
-                              <>
-                                <Typography variant="h6">
-                                  Voter Registration:
-                                </Typography>{" "}
-                              </>
-                              <>
-                                <CountdownTimer
-                                  target_date={
-                                    parseInt(ballots[active_ballot].open_date) +
-                                    parseInt(
-                                      ballots[active_ballot].registration_period
-                                    ) *
-                                      1000
-                                  }
-                                />
-                              </>
-                            </Grid>
-                            <Grid item xs={12} md={6}>
-                              <>
-                                <Typography variant="h6">Voting:</Typography>{" "}
-                              </>
-                              <>
-                                <CountdownTimer
-                                  target_date={
-                                    parseInt(ballots[active_ballot].open_date) +
-                                    parseInt(ballots[active_ballot].ballot_days)
-                                  }
-                                />
-                              </>
-                            </Grid>
-                          </Grid>
-                        </Grid>
-
-                        <Grid item xs={12}>
-                          <Typography variant="body1">
-                            Registered Voters:{" "}
-                            <Typography variant="body2">0</Typography>
-                          </Typography>
-                        </Grid>
-
-                        {connected_account ===
-                          ballots[active_ballot].ballot_chair && (
-                          <Grid item xs={12}>
-                            <div>
-                              <Typography variant="caption">
-                                Registration link:
-                              </Typography>{" "}
-                            </div>
-                            <div className={styles.copy_link}>
-                              <input
-                                onFocus={(e) => e.target.select()}
-                                type="text"
-                                className={styles.copy_link_input}
-                                value={`register_voter/${ballots[active_ballot].ballot_id}`}
-                                readonly
-                              />
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  navigator.clipboard.writeText(
-                                    `register_voter/${ballots[active_ballot].ballot_id}`
-                                  );
-                                }}
-                                className={styles.copy_link_button}
-                              >
-                                <span className={styles.material_icons}>
-                                  <ContentCopyIcon />
-                                </span>
-                              </button>
-                            </div>
-                          </Grid>
-                        )}
-                      </Grid>
+                      <OpenBallot />
                     ) : (
                       <Grid container>
                         <h4>You have no active Ballots!!</h4>
@@ -1146,49 +921,7 @@ const create_ballot = () => {
                   </TabPanel>
                   <TabPanel value={value} index={2}>
                     {ballot_id.length > 1 ? (
-                      <Grid container>
-                        <Grid item xs={12} md={6}>
-                          <>
-                            <Typography variant="h6">Voting:</Typography>{" "}
-                          </>
-                          <>
-                            <CountdownTimer
-                              target_date={
-                                parseInt(ballots[active_ballot].open_date) +
-                                parseInt(ballots[active_ballot].ballot_days)
-                              }
-                            />
-                          </>
-                        </Grid>
-
-                        <Grid item xs={12} mb={4}>
-                          <div>
-                            <Typography variant="h5">
-                              Ballot Candidates
-                            </Typography>
-                          </div>
-
-                          <>
-                            {Object.keys(
-                              ballots[active_ballot].ballot_candidates
-                            ).map((key) => (
-                              <div key={key}>
-                                <Typography variant="body1">
-                                  {
-                                    ballots[active_ballot].ballot_candidates[
-                                      key
-                                    ]
-                                  }
-                                </Typography>
-                              </div>
-                            ))}
-                          </>
-                        </Grid>
-
-                        <Grid item xs={12}>
-                          <Typography variant="h4">Total Votes: 0</Typography>
-                        </Grid>
-                      </Grid>
+                      <BallotResult />
                     ) : (
                       <Grid container>
                         <h4>You have no active Ballots!!</h4>
