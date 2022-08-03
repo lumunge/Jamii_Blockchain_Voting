@@ -38,6 +38,9 @@ import {
   Checkbox,
   FormControlLabel,
   Chip,
+  List,
+  ListItem,
+  ListItemText,
 } from "@mui/material";
 // import Notification from "../components/Notification";
 import TabPanel from "../components/TabPanel";
@@ -72,6 +75,7 @@ const create_ballot = () => {
   const show_dates = useSelector((state) => state.ballot.show_dates);
   const show_type = useSelector((state) => state.ballot.show_type);
   const show_form = useSelector((state) => state.ballot.show_form);
+  const ballots = useSelector((state) => state.ballot.ballots);
   const theme = useSelector((state) => state.theme.current_theme);
 
   const [value, set_value] = useState(0);
@@ -405,10 +409,18 @@ const create_ballot = () => {
           />
           <link rel="icon" href="/favicon.ico" />
         </Head>
-        <Grid container>
-          <Grid item xs={2} className={styles.left_side_bar}>
-            <header className={styles.left_header}>
-              <h2>Jamii Ballots</h2>
+        <Grid container xs={12}>
+          <Grid container xs={2}>
+            <Grid
+              item
+              xs={12}
+              sx={{
+                height: "20vh",
+                textAlign: "center",
+                padding: "10px",
+              }}
+            >
+              <Typography variant="h4">Jamii Ballots</Typography>
               <Button
                 variant="outlined"
                 color="success"
@@ -416,9 +428,13 @@ const create_ballot = () => {
               >
                 New Ballot
               </Button>
-            </header>
+            </Grid>
             <Divider />
-            <main className={styles.left_main}>
+            <Grid
+              item
+              xs={12}
+              sx={{ height: "60vh", overflowY: "auto", textAlign: "center" }}
+            >
               {/* <form onSubmit={(e) => get_ballot(e)}>
               <TextField
                 id="standard-basic"
@@ -430,17 +446,30 @@ const create_ballot = () => {
                 onChange={(e) => set_ballot_id(e.target.value)}
               />
               <button type="submit">search</button>
-            </form>
-            <div>Open Ballot</div>
-            <div>Open Ballot</div>
-            <div>Open Ballot</div>
-            <div>Open Ballot</div>
-            <div>Open Ballot</div> */}
-              <h4>Ballots here</h4>
-            </main>
+            </form> */}
+              <Typography variant="body1">Ballots here</Typography>
+              {Object.keys(ballots).map((key) => (
+                <List key={key}>
+                  <ListItem alignItems="flex-start">
+                    <ListItemText
+                      primary={ballots[key].ballot_name}
+                      secondary={<>{" — this is a ballot to vote in ..."}</>}
+                    />
+                  </ListItem>
+                  <Divider variant="inset" component="li" />
+                </List>
+              ))}
+            </Grid>
 
-            <footer className={styles.left_footer}>
-              {/* {connected ? (
+            <Grid
+              item
+              xs={12}
+              sx={{
+                height: "10vh",
+              }}
+            >
+              <footer className={styles.left_footer}>
+                {/* {connected ? (
               <div className={styles.connect_container}>
                 <div>
                   <small>{error}</small>
@@ -455,28 +484,30 @@ const create_ballot = () => {
                 <div>Ballot Owner: {user_addr}</div>
               </div>
             ) : ( */}
-              <div>{error && <small>{error}</small>}</div>
+                <div>{error && <small>{error}</small>}</div>
 
-              <div className={styles.connect_container}>
-                {/* )} */}
-                {/* <Button onClick={connect_wallet()}>
+                <div className={styles.connect_container}>
+                  {/* )} */}
+                  {/* <Button onClick={connect_wallet()}>
               <AccountBalanceWalletOutlinedIcon sx={{ color: "#FF5733" }} />
             </Button> */}
-                <div>
-                  <Button>
-                    <AccountBalanceWalletOutlinedIcon
-                      sx={{ color: wallet_color }}
-                    />
-                  </Button>
+                  <div>
+                    <Button>
+                      <AccountBalanceWalletOutlinedIcon
+                        sx={{ color: wallet_color }}
+                      />
+                    </Button>
+                  </div>
+                  <div>
+                    <Button>
+                      <SettingsOutlinedIcon />
+                    </Button>
+                  </div>
                 </div>
-                <div>
-                  <Button>
-                    <SettingsOutlinedIcon />
-                  </Button>
-                </div>
-              </div>
-            </footer>
+              </footer>
+            </Grid>
           </Grid>
+
           <Grid
             item
             xs={10}
