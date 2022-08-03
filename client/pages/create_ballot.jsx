@@ -3,10 +3,13 @@ import Head from "next/head";
 // import { useRouter } from "next/router";
 import React, { useState, useEffect } from "react";
 
+import CountdownTimer from "../components/CountdownTimer";
+
 import { useDispatch, useSelector } from "react-redux";
-import { login } from "../store/auth-slice";
+import { login, add_connected_account } from "../store/auth-slice";
 import {
   add_ballot,
+  add_active_ballot,
   add_show_dates,
   add_show_type,
   add_show_form,
@@ -68,6 +71,7 @@ const create_ballot = () => {
     ballot_candidates: [],
     ballot_days: "",
     registration_period: "",
+    open_date: "",
   };
 
   const ballot_fee = 10000000000000000;
@@ -76,7 +80,11 @@ const create_ballot = () => {
   const show_type = useSelector((state) => state.ballot.show_type);
   const show_form = useSelector((state) => state.ballot.show_form);
   const ballots = useSelector((state) => state.ballot.ballots);
+  const active_ballot = useSelector((state) => state.ballot.active_ballot);
   const theme = useSelector((state) => state.theme.current_theme);
+  const connected_account = useSelector(
+    (state) => state.auth.connected_account
+  );
 
   const [value, set_value] = useState(0);
   const [error, set_error] = useState("");
@@ -262,6 +270,7 @@ const create_ballot = () => {
         set_wallet_color("orange");
 
         dispatch(login());
+        dispatch(add_connected_account(accounts[0]));
 
         await load_initial_contracts();
       } catch (error) {
@@ -347,6 +356,10 @@ const create_ballot = () => {
     let ballot_type = ballot.ballot_type;
     let ballot_days = ballot.ballot_days;
     let registration_period = ballot.registration_period;
+
+    ballot.ballot_id = ballot_id;
+    ballot.ballot_chair = accounts[0];
+    ballot.open_date = Date.now();
 
     // validation here
 
@@ -449,7 +462,11 @@ const create_ballot = () => {
             </form> */}
               <Typography variant="body1">Ballots here</Typography>
               {Object.keys(ballots).map((key) => (
-                <List key={key}>
+                <List
+                  key={key}
+                  onClick={() => dispatch(add_active_ballot(key))}
+                  sx={{ cursor: "pointer" }}
+                >
                   <ListItem alignItems="flex-start">
                     <ListItemText
                       primary={ballots[key].ballot_name}
@@ -856,21 +873,6 @@ const create_ballot = () => {
                               </div>
                             </div>
                             {/* end new candidates */}
-                            {/* <div className={styles.form_item}>
-                          <p>Candidates</p>
-                          <div>
-                            <TextField
-                              id="filled-basic"
-                              label="candidate address"
-                              variant="filled"
-                              name="ballot_candidates"
-                              value={initial_ballot.ballot_candidates}
-                              onChange={handle_ballot_data}
-                              fullWidth
-                              helperText="Enter a list of candidate addresses."
-                            />
-                          </div>
-                        </div> */}
                             <Grid xs={12} mt={1}>
                               <Button type="submit" disabled={!factory}>
                                 Create Ballot
@@ -962,6 +964,7 @@ const create_ballot = () => {
                               </Typography>
                             </div>
                           </Grid>
+
                           <Grid item xs={12}>
                             <div>
                               <Typography variant="caption">
@@ -996,104 +999,201 @@ const create_ballot = () => {
                     </div>
                   </TabPanel>
                   <TabPanel value={value} index={1}>
-                    {ballot_id.length > 1 ? (
-                      <>
-                        <header className={styles.details_2_header}>
-                          <button onClick={(e) => get_ballot(e)}>
-                            <CachedIcon />
-                          </button>
-                          <div>
-                            Status:{" "}
-                            {ballot.expired ? (
-                              <h4>
-                                Completed{" "}
-                                <span className={styles.status}></span>
-                              </h4>
-                            ) : (
-                              <h4>
-                                Open <span className={styles.status}></span>
-                              </h4>
-                            )}
-                          </div>
-                        </header>
-                        <h4>Ballot Id: {ballot.ballot_id}</h4>
-                        <h4>
-                          Ballot Type:{" "}
-                          {`${ballot_types_map.get(
-                            parseInt(ballot.ballot_type)
-                          )} Ballot`}{" "}
-                        </h4>
-                        <h4>Ballot Name: {ballot.ballot_name}</h4>
-                        <h4>Ballot Admin: {ballot.chair} </h4>
-                        <h4>
-                          Ballot Registered Voters:{" "}
-                          {ballot_id.length > 1 ? ballot.voters_count : 0}
-                        </h4>
+                    {ballots.length >= 1 ? (
+                      <Grid container>
+                        <Grid container>
+                          <Grid item xs={8} mb={4}>
+                            <Typography variant="h5">
+                              {ballots[active_ballot].ballot_name}{" "}
+                              <Typography variant="caption">{`${ballot_types_map.get(
+                                parseInt(ballot.ballot_type)
+                              )} Ballot`}</Typography>
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={4}>
+                            <Chip
+                              label={ballots[active_ballot].ballot_id}
+                              // onClick={handleClick}
+                            />
+                          </Grid>
+                        </Grid>
 
-                        <a
-                          target="_blank"
-                          href={`register_voter/${encodeURIComponent(
-                            ballot_id
-                          )}`}
-                        >{`register_voter/${ballot_id}`}</a>
-                      </>
+                        <Grid
+                          item
+                          mb={4}
+                          xs={12}
+                          sx={{ display: "flex", alignItems: "center" }}
+                        >
+                          <Typography variant="h5" pr={4}>
+                            {" "}
+                            Organizer:{" "}
+                          </Typography>
+                          <Typography variant="body1">
+                            {ballots[active_ballot].ballot_chair}
+                          </Typography>
+                        </Grid>
+
+                        <Grid mb={4} item xs={12}>
+                          <div>
+                            <Typography variant="h5">
+                              Ballot Candidates
+                            </Typography>
+                          </div>
+
+                          <>
+                            {Object.keys(
+                              ballots[active_ballot].ballot_candidates
+                            ).map((key) => (
+                              <div key={key}>
+                                <Typography variant="body1">
+                                  {
+                                    ballots[active_ballot].ballot_candidates[
+                                      key
+                                    ]
+                                  }
+                                </Typography>
+                              </div>
+                            ))}
+                          </>
+                        </Grid>
+
+                        <Grid item mb={4} xs={12}>
+                          <Typography variant="h5" pb={1}>
+                            Important Dates and Times
+                          </Typography>
+
+                          <Grid container xs={12} mb={4}>
+                            <Grid item xs={12} md={6}>
+                              <>
+                                <Typography variant="h6">
+                                  Voter Registration:
+                                </Typography>{" "}
+                              </>
+                              <>
+                                <CountdownTimer
+                                  target_date={
+                                    parseInt(ballots[active_ballot].open_date) +
+                                    parseInt(
+                                      ballots[active_ballot].registration_period
+                                    ) *
+                                      1000
+                                  }
+                                />
+                              </>
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                              <>
+                                <Typography variant="h6">Voting:</Typography>{" "}
+                              </>
+                              <>
+                                <CountdownTimer
+                                  target_date={
+                                    parseInt(ballots[active_ballot].open_date) +
+                                    parseInt(ballots[active_ballot].ballot_days)
+                                  }
+                                />
+                              </>
+                            </Grid>
+                          </Grid>
+                        </Grid>
+
+                        <Grid item xs={12}>
+                          <Typography variant="body1">
+                            Registered Voters:{" "}
+                            <Typography variant="body2">0</Typography>
+                          </Typography>
+                        </Grid>
+
+                        {connected_account ===
+                          ballots[active_ballot].ballot_chair && (
+                          <Grid item xs={12}>
+                            <div>
+                              <Typography variant="caption">
+                                Registration link:
+                              </Typography>{" "}
+                            </div>
+                            <div className={styles.copy_link}>
+                              <input
+                                onFocus={(e) => e.target.select()}
+                                type="text"
+                                className={styles.copy_link_input}
+                                value={`register_voter/${ballots[active_ballot].ballot_id}`}
+                                readonly
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(
+                                    `register_voter/${ballots[active_ballot].ballot_id}`
+                                  );
+                                }}
+                                className={styles.copy_link_button}
+                              >
+                                <span className={styles.material_icons}>
+                                  <ContentCopyIcon />
+                                </span>
+                              </button>
+                            </div>
+                          </Grid>
+                        )}
+                      </Grid>
                     ) : (
-                      <>
+                      <Grid container>
                         <h4>You have no active Ballots!!</h4>
                         <small>create one?</small>
-                      </>
+                      </Grid>
                     )}
                   </TabPanel>
                   <TabPanel value={value} index={2}>
                     {ballot_id.length > 1 ? (
-                      <>
-                        {/* <button onClick={(e) => get_ballot(e)}>
-                        reload ballot
-                      </button> */}
-                        <button onClick={(e) => handle_tab_change(e, 2)}>
-                          reload candidates
-                        </button>
-                        <div>TIMER HERE</div>
-                        <h4>
-                          Ballot Status:{" "}
-                          {!ballot.expired ? <>Open</> : <>Closed</>}
-                        </h4>
-                        <h4>
-                          Election Date:{" "}
-                          {convert_time(
-                            parseInt(ballot.open_date) +
-                              parseInt(ballot.registration_window) * 86400
-                          )}
-                        </h4>
-                        <h4>
-                          Registration Status:{" "}
-                          {parseInt(ballot.open_date) +
-                            parseInt(ballot.registration_window) >
-                          parseInt(Date.now) ? (
-                            <span>Ended</span>
-                          ) : (
-                            <span>Ongoing</span>
-                          )}
-                        </h4>
+                      <Grid container>
+                        <Grid item xs={12} md={6}>
+                          <>
+                            <Typography variant="h6">Voting:</Typography>{" "}
+                          </>
+                          <>
+                            <CountdownTimer
+                              target_date={
+                                parseInt(ballots[active_ballot].open_date) +
+                                parseInt(ballots[active_ballot].ballot_days)
+                              }
+                            />
+                          </>
+                        </Grid>
 
-                        <h4>Total Votes: {ballot.voters_count}</h4>
+                        <Grid item xs={12} mb={4}>
+                          <div>
+                            <Typography variant="h5">
+                              Ballot Candidates
+                            </Typography>
+                          </div>
 
-                        <>
-                          {Object.keys(ballot_candidates).map((key) => (
-                            <div key={key}>
-                              <h4>Address: {ballot_candidates[key][2]}</h4>
-                              <h4>Votes: {ballot_candidates[key][3]}</h4>
-                            </div>
-                          ))}
-                        </>
+                          <>
+                            {Object.keys(
+                              ballots[active_ballot].ballot_candidates
+                            ).map((key) => (
+                              <div key={key}>
+                                <Typography variant="body1">
+                                  {
+                                    ballots[active_ballot].ballot_candidates[
+                                      key
+                                    ]
+                                  }
+                                </Typography>
+                              </div>
+                            ))}
+                          </>
+                        </Grid>
 
-                        <button>End Ballot</button>
-                      </>
+                        <Grid item xs={12}>
+                          <Typography variant="h4">Total Votes: 0</Typography>
+                        </Grid>
+                      </Grid>
                     ) : (
-                      <>
+                      <Grid container>
                         <h4>You have no active Ballots!!</h4>
                         <small>create one?</small>
-                      </>
+                      </Grid>
                     )}
                   </TabPanel>
                 </div>
