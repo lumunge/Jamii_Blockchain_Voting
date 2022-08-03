@@ -309,14 +309,14 @@ const voter_registration = () => {
                         onFocus={(e) => e.target.select()}
                         type="text"
                         className={styles.copy_link_input}
-                        value={`register_voter/${ballot_id}`}
+                        value={`${localhost}register_voter/${ballot_id}`}
                         readonly
                       />
                       <button
                         type="button"
                         onClick={() => {
                           navigator.clipboard.writeText(
-                            `register_voter/51927f0d-f299-46fa-8336-7742e8b9dbb4`
+                            `${localhost}register_voter/51927f0d-f299-46fa-8336-7742e8b9dbb4`
                           );
                         }}
                         className={styles.copy_link_button}
@@ -339,13 +339,15 @@ const voter_registration = () => {
                         onFocus={(e) => e.target.select()}
                         type="text"
                         className={styles.copy_link_input}
-                        value={`vote/${ballot_id}`}
+                        value={`${localhost}vote/${ballot_id}`}
                         readonly
                       />
                       <button
                         type="button"
                         onClick={() => {
-                          navigator.clipboard.writeText(`vote/${ballot_id}`);
+                          navigator.clipboard.writeText(
+                            `${localhost}vote/${ballot_id}`
+                          );
                         }}
                         className={styles.copy_link_button}
                       >
