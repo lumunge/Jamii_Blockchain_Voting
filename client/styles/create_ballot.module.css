@@ -7,11 +7,6 @@
   box-shadow: rgba(0, 0, 0, 0.1) 2px 0px 0px 0px,
     rgba(0, 0, 0, 0.06) 0px 0px 0px 0px;
 }
-.left_header {
-  height: 30%;
-  text-align: center;
-  padding: 1rem 0;
-}
 .left_main {
   height: 60%;
   padding: 1rem;
