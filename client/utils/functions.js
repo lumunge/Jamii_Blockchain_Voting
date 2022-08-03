@@ -33,7 +33,7 @@ export const convert_time_unix = (date_str) => {
 
 export const convert_seconds = (seconds) => {
   if (seconds < 0) {
-    return "Invalid Dates!!";
+    return false;
   }
 
   const days = Math.floor(seconds / (3600 * 24));
