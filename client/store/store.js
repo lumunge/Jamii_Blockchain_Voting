@@ -29,6 +29,7 @@ const masterReducer = (state, action) => {
         show_type: action.payload.show_type,
         event: action.payload.ballot.event,
         ballots: [...action.payload.ballot.ballots, ...state.ballot.ballots],
+        active_ballot: action.payload.active_ballot,
         ballot_candidates: action.payload.ballot.ballot_candidates,
         ballot_status: action.payload.ballot.ballot_status,
       },
