@@ -12,6 +12,7 @@ import {
   add_show_type,
   add_show_form,
 } from "../store/ballot_slice";
+import { add_notification } from "../store/notification_slice";
 
 import { v4 as uuid } from "uuid";
 import map from "../../build/deployments/map.json";
@@ -43,7 +44,6 @@ import {
   ListItem,
   ListItemText,
 } from "@mui/material";
-// import Notification from "../components/Notification";
 
 // icons
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
@@ -62,6 +62,7 @@ import OpenBallot from "../components/OpenBallot";
 import BallotResult from "../components/BallotResult";
 import TabPanel from "../components/TabPanel";
 import CountdownTimer from "../components/CountdownTimer";
+import Notification from "../components/Notification";
 
 // styleshee
 import styles from "../styles/create_ballot.module.css";
@@ -84,6 +85,12 @@ const create_ballot = () => {
   };
 
   const ballot_fee = 10000000000000000;
+
+  const show_notification = useSelector((state) => state.notification.open);
+  const type_notification = useSelector((state) => state.notification.type);
+  const message_notification = useSelector(
+    (state) => state.notification.message
+  );
 
   const show_dates = useSelector((state) => state.ballot.show_dates);
   const show_type = useSelector((state) => state.ballot.show_type);
@@ -132,7 +139,9 @@ const create_ballot = () => {
     dispatch(add_show_type(true));
   };
   const open_ballot_schedule = () => set_schedule_open(true);
-  const close_ballot_schedule = () => set_schedule_open(false);
+  const close_ballot_schedule = () => {
+    set_schedule_open(false);
+  };
 
   const set_initial_ballot_state = () => {
     set_ballot(initial_ballot_state);
@@ -184,6 +193,8 @@ const create_ballot = () => {
     set_end_ballot_1(end_ballot_1);
 
     dispatch(add_show_dates(true));
+
+    close_ballot_schedule();
   };
 
   // candidates input
@@ -359,52 +370,74 @@ const create_ballot = () => {
 
   const create_new_ballot = async (e) => {
     e.preventDefault();
-    let ballot_id = uuid();
-    let ballot_name = ballot.ballot_name;
-    let candidates = ballot.ballot_candidates;
-    let ballot_type = ballot.ballot_type;
-    let ballot_days = ballot.ballot_days;
-    let registration_period = ballot.registration_period;
+    try {
+      let ballot_id = uuid();
+      let ballot_name = ballot.ballot_name;
+      let candidates = ballot.ballot_candidates;
+      let ballot_type = ballot.ballot_type;
+      let ballot_days = ballot.ballot_days;
+      let registration_period = ballot.registration_period;
 
-    ballot.ballot_id = ballot_id;
-    ballot.ballot_chair = accounts[0];
-    ballot.open_date = Date.now();
+      ballot.ballot_id = ballot_id;
+      ballot.ballot_chair = accounts[0];
+      ballot.open_date = Date.now();
 
-    // validation here
+      // validation here
 
-    await factory.methods
-      .create_ballot(
+      await factory.methods
+        .create_ballot(
+          ballot_id,
+          ballot_name,
+          candidates,
+          ballot_type,
+          ballot_days,
+          registration_period
+        )
+        .send({ from: accounts[0], value: ballot_fee, gas: 3000000 })
+        .on("receipt", async () => {
+          // notification
+          set_ballot_id(ballot_id);
+          set_create_ballot(
+            `Created Ballot: ${new Date().toString().slice(4, 25)}`
+          );
+
+          set_end_ballot(`Results: ${new Date(end_ballot_1).toDateString()}`);
+
+          dispatch(add_ballot(ballot));
+
+          dispatch(add_show_form(false));
+
+          if (ballots.length === 2) {
+            dispatch(
+              add_notification({
+                open: true,
+                type: "info",
+                message: "Ballot Limit Reached",
+              })
+            );
+          }
+
+          console.log("Ballot created Successfully!!");
+        });
+      console.log(
         ballot_id,
         ballot_name,
         candidates,
         ballot_type,
         ballot_days,
         registration_period
-      )
-      .send({ from: accounts[0], value: ballot_fee, gas: 3000000 })
-      .on("receipt", async () => {
-        // notification
-        set_ballot_id(ballot_id);
-        set_create_ballot(
-          `Created Ballot: ${new Date().toString().slice(4, 25)}`
-        );
-
-        set_end_ballot(`Results: ${new Date(end_ballot_1).toDateString()}`);
-
-        dispatch(add_ballot(ballot));
-
-        dispatch(add_show_form(false));
-
-        console.log("Ballot created Successfully!!");
-      });
-    console.log(
-      ballot_id,
-      ballot_name,
-      candidates,
-      ballot_type,
-      ballot_days,
-      registration_period
-    );
+      );
+    } catch (error) {
+      dispatch(
+        add_notification({
+          open: true,
+          type: "error",
+          message: "An Error Occured!",
+        })
+      );
+      console.log("ERROR: ", error);
+      console.log(error.message);
+    }
   };
 
   const get_ballot = async (e) => {
@@ -587,9 +620,17 @@ const create_ballot = () => {
                     <div className={styles.ballot_container}>
                       {ballot_id.length == 0 || show_form === true ? (
                         <div className={styles.ballot_form}>
+                          <>
+                            <Notification
+                              open={show_notification}
+                              type={type_notification}
+                              message={message_notification}
+                            />
+                          </>
                           <form onSubmit={(e) => create_new_ballot(e)}>
                             <div className={styles.form_item}>
                               <TextField
+                                required
                                 id="filled-basic"
                                 label="ballot name"
                                 variant="filled"
@@ -604,9 +645,19 @@ const create_ballot = () => {
                               className={`${styles.form_item} ${styles.form_item_2}`}
                             >
                               <div>
-                                <Button onClick={open_ballot_type}>
-                                  Ballot Type
-                                </Button>
+                                <Grid
+                                  sx={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                  }}
+                                >
+                                  <Typography variant="caption">
+                                    Choose Ballot Type
+                                  </Typography>
+                                  <Button onClick={open_ballot_type}>
+                                    Ballot Type
+                                  </Button>
+                                </Grid>
                                 <Modal
                                   open={type_open}
                                   onClose={close_ballot_type}
@@ -693,9 +744,19 @@ const create_ballot = () => {
                                 </Modal>
                               </div>
                               <div>
-                                <Button onClick={open_ballot_schedule}>
-                                  Schedule Ballot
-                                </Button>
+                                <Grid
+                                  sx={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                  }}
+                                >
+                                  <Typography variant="caption">
+                                    Select Ballot and Registration Dates
+                                  </Typography>
+                                  <Button onClick={open_ballot_schedule}>
+                                    Schedule Ballot
+                                  </Button>
+                                </Grid>
                                 <Modal
                                   open={schedule_open}
                                   onClose={close_ballot_schedule}
@@ -808,18 +869,43 @@ const create_ballot = () => {
                               )}
                               {show_dates && (
                                 <div>
-                                  <Typography>
-                                    Ballot - Period:{" "}
-                                    {convert_seconds(
-                                      parseInt(ballot.ballot_days) / 1000
-                                    )}{" "}
-                                  </Typography>
-                                  <Typography>
-                                    Registration - Period:{" "}
-                                    {convert_seconds(
-                                      ballot.registration_period
-                                    )}{" "}
-                                  </Typography>
+                                  {convert_seconds(
+                                    parseInt(ballot.ballot_days) / 1000
+                                  ) === false ? (
+                                    <Typography
+                                      variant="subtitle2"
+                                      align="center"
+                                      sx={{ color: "red" }}
+                                    >
+                                      Invalid Ballot Dates
+                                    </Typography>
+                                  ) : (
+                                    <Typography>
+                                      Ballot - Period:{" "}
+                                      {convert_seconds(
+                                        parseInt(ballot.ballot_days) / 1000
+                                      )}{" "}
+                                    </Typography>
+                                  )}
+
+                                  {convert_seconds(
+                                    ballot.registration_period
+                                  ) === false ? (
+                                    <Typography
+                                      variant="subtitle2"
+                                      align="center"
+                                      sx={{ color: "red" }}
+                                    >
+                                      Invalid Registration Dates
+                                    </Typography>
+                                  ) : (
+                                    <Typography>
+                                      Registration - Period:{" "}
+                                      {convert_seconds(
+                                        ballot.registration_period
+                                      )}{" "}
+                                    </Typography>
+                                  )}
                                 </div>
                               )}
                             </div>
@@ -830,6 +916,8 @@ const create_ballot = () => {
                                 return (
                                   <div className={styles.add_candidate}>
                                     <TextField
+                                      helperText="Select more than 1 Candidate"
+                                      required
                                       key={index}
                                       label="candidate address"
                                       variant="filled"
@@ -883,7 +971,10 @@ const create_ballot = () => {
                             </div>
                             {/* end new candidates */}
                             <Grid xs={12} mt={1}>
-                              <Button type="submit" disabled={!factory}>
+                              <Button
+                                type="submit"
+                                disabled={!factory || ballots.length === 3}
+                              >
                                 Create Ballot
                               </Button>
                               <Button
@@ -950,11 +1041,20 @@ const create_ballot = () => {
                       <>
                         <Paper elevation={4} sx={{ padding: "10px" }}>
                           <span>Connect Wallet to Create Ballot</span>
-                          <div>{3} Test Ballots Left</div>
                         </Paper>
                       </>
                     )}
                   </div>
+                  <Typography variant="caption">
+                    {3 - ballots.length} Test Ballots Left
+                  </Typography>
+                  {ballots.length === 3 && (
+                    <Notification
+                      open={show_notification}
+                      type={type_notification}
+                      message={message_notification}
+                    />
+                  )}
                 </div>
               </div>
             </Box>
