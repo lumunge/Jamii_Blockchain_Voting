@@ -7,6 +7,7 @@ import {
   add_ballot_candidates,
   add_ballot_event,
 } from "../../store/ballot_slice";
+import { add_voter_registered } from "../../store/voter_slice";
 import {
   login,
   add_factory,
@@ -41,7 +42,7 @@ const voter_registration = () => {
   const [error, set_error] = useState("");
   const [web_3, set_web_3] = useState({});
   const [chain_id, set_chain_id] = useState(0);
-  const [voting_link, set_voting_link] = useState(false);
+  // const [voting_link, set_voting_link] = useState(false);
 
   const dispatch = useDispatch();
   // const ballot_id = useSelector((state) => state.ballot.ballot_ids[0]);
@@ -55,6 +56,8 @@ const voter_registration = () => {
   const connected_account = useSelector(
     (state) => state.auth.connected_account
   );
+
+  const registered = useSelector((state) => state.voter.registered);
 
   const init = async () => {
     const web3 = await getWeb3();
@@ -150,7 +153,8 @@ const voter_registration = () => {
       .send({ from: connected_account, gas: 3000000 })
       .on("receipt", async () => {
         // notification
-        set_voting_link(true);
+        // set_voting_link(true);
+        dispatch(add_voter_registered(true));
         console.log("Voter Registered Successfully!!");
       });
   };
@@ -277,6 +281,7 @@ const voter_registration = () => {
                         className: styles.user_id_input,
                       }}
                       sx={{ height: "13px" }}
+                      disabled={registered}
                     />
                     <Button
                       variant="contained"
@@ -324,7 +329,7 @@ const voter_registration = () => {
                   </Grid>
                 )}
 
-                {!voting_link && (
+                {registered && (
                   <Grid item xs={12}>
                     <div>
                       <Typography variant="caption">Voting Link:</Typography>{" "}

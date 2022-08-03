@@ -33,6 +33,7 @@ import {
   add_web_3,
   add_factory,
 } from "../../store/auth-slice";
+import { add_voted_voted } from "../../store/voter_slice";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import styles from "../../styles/vote.module.css";
 
@@ -47,7 +48,7 @@ const Vote = () => {
 
   const [chain_id, set_chain_id] = useState(0);
   const [web_3, set_web_3] = useState({});
-  const [voted, set_voted] = useState(false);
+  // const [voted, set_voted] = useState(false);
 
   // const chain_id = useSelector((state) => state.auth.chain_id);
   const jamii_factory = useSelector((state) => state.auth.factory);
@@ -58,6 +59,8 @@ const Vote = () => {
   const ballot_candidates = useSelector(
     (state) => state.ballot.ballot_candidates
   );
+
+  const voted = useSelector((state) => state.voter.voted);
 
   const handle_box_change = (e) => {
     set_selected_candidate(e.target.value);
@@ -142,7 +145,7 @@ const Vote = () => {
     dispatch(add_ballot_candidates(candidates));
 
     console.log("GAGAGAA: ", jamii_factory);
-    console.log("BALLOTELLI: ", ballot);
+    console.log("BALLOT: ", ballot);
     console.log("ACCOUNT: ", account);
     console.log("ChAIN_ID: ", chain_id);
     console.log("WEB#: ", web_3);
@@ -157,7 +160,7 @@ const Vote = () => {
       .send({ from: account, gas: 3000000 })
       .on("receipt", async () => {
         // notification
-        set_voted(true);
+        dispatch(add_voted_voted(true));
         console.log("Voter Successfully Voted!!");
       });
   };
@@ -224,7 +227,7 @@ const Vote = () => {
                       <CountdownTimer
                         target_date={
                           (parseInt(ballot.open_date) +
-                            parseInt(ballot.registration_window)) *
+                            parseInt(ballot._days) / 1000) *
                           1000
                         }
                       />
@@ -295,6 +298,7 @@ const Vote = () => {
                                   value={ballot_candidates[key]}
                                   onChange={handle_box_change}
                                   className={styles.check_box}
+                                  disabled={voted}
                                 />
                               </Grid>
                               <br></br>
