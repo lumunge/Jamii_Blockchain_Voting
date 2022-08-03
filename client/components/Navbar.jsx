@@ -6,6 +6,7 @@ import useLocalStorage from "use-local-storage";
 
 import { useDispatch } from "react-redux";
 
+import { useMedia } from "../hooks/useMedia";
 import { add_theme } from "../store/theme_slice";
 
 import {
@@ -29,10 +30,6 @@ import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import LanguageIcon from "@mui/icons-material/Language";
 
 import { nav_items_map } from "../utils/functions";
-
-const useMedia = (theme) => {
-  return theme;
-};
 
 const Navbar = (props) => {
   const dispatch = useDispatch();
