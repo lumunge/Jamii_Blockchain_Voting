@@ -6,27 +6,40 @@ body {
 
 * {
   box-sizing: border-box;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto,
+    Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji,
+    Segoe UI Symbol;
 }
 
 :root {
   --sub-headings: #053bfe;
   --info-text: #a9aca9;
-  /* --main-background: rgb(14, 22, 43); */
 
-  --background: white;
-  --text-primary: black;
-  --text-secondary: royalblue;
-  --accent: purple;
+  --background: rgb(242, 242, 242);
+  --card-background: #fff;
+  --card-text: rgba(17, 17, 31, 1);
+  --text-primary: rgba(17, 17, 31, 1);
+  --text-secondary: #11111f;
+  --heading-text: darkslateblue;
+
+  /* --button-hover: rgba(51, 168, 255, 1); */
+  --button-hover: darkslateblue;
 
   --main-green: #78d64b;
-  --main-dark: #11111f;
+  /* --main-blue: rgba(51, 168, 255, 1); */
+  --main-blue: darkslateblue;
+  --main-grey: #eaf6d7;
+  --main-dark: rgba(17, 17, 31, 1);
+  --main-light: #e7e7e9;
 }
 
 [data-theme="dark"] {
-  --background: black;
-  --text-primary: #fff;
-  --text-secondary: grey;
-  --accent: darkred;
+  --background: rgba(17, 17, 31, 1);
+  --card-background: #707079;
+  --card-text: #e7e7e9;
+  --text-primary: #e7e7e9;
+  --text-secondary: #707079;
+  --button-hover: #78d64b;
 }
 
 input[type="date"]:not(:valid)::-webkit-datetime-edit {
@@ -50,9 +63,32 @@ input[type="date"]:not(:valid)::-webkit-datetime-edit {
 #d7f3c9
 #aee693
 
-Blacks:
+Black:
 #11111f
 #ffffff
 #e7e7e9
 #b8b8bc
 #707079 */
+
+/*
+COLOR SCHEME
+
+Colors:
+#78d64b
+
+black
+
+white
+
+
+global: main-green: #78d64b
+
+
+Theme: LIGHT (default)
+body-bg: light-color
+
+
+Theme: DARK
+body-bg: dark-color
+
+*/
