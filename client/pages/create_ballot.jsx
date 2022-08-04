@@ -1,6 +1,4 @@
 import Head from "next/head";
-// import Link from "next/link";
-import { useRouter } from "next/router";
 import React, { useState, useEffect } from "react";
 
 import { useDispatch, useSelector } from "react-redux";
@@ -18,7 +16,6 @@ import { v4 as uuid } from "uuid";
 import map from "../../build/deployments/map.json";
 import { getWeb3 } from "../utils/getWeb3";
 import {
-  convert_time,
   convert_time_unix,
   ballot_types_map,
   convert_seconds,
@@ -39,19 +36,16 @@ import {
   Modal,
   Checkbox,
   FormControlLabel,
-  Chip,
   List,
   ListItem,
   ListItemText,
 } from "@mui/material";
 
 // icons
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
-import CachedIcon from "@mui/icons-material/Cached";
 import PersonAddAltOutlinedIcon from "@mui/icons-material/PersonAddAltOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
@@ -61,15 +55,12 @@ import CreatedBallot from "../components/CreatedBallot";
 import OpenBallot from "../components/OpenBallot";
 import BallotResult from "../components/BallotResult";
 import TabPanel from "../components/TabPanel";
-import CountdownTimer from "../components/CountdownTimer";
 import Notification from "../components/Notification";
 
 // styleshee
 import styles from "../styles/create_ballot.module.css";
 
 const create_ballot = () => {
-  const router = useRouter();
-  const localhost = "http://localhost:3000/";
   const dispatch = useDispatch();
 
   const connected = useSelector((state) => state.auth.is_connected);
@@ -104,6 +95,7 @@ const create_ballot = () => {
 
   const [value, set_value] = useState(0);
   const [error, set_error] = useState("");
+
   const [wallet_color, set_wallet_color] = useState("red");
 
   const [web_3, set_web_3] = useState(null);
@@ -371,6 +363,14 @@ const create_ballot = () => {
   const create_new_ballot = async (e) => {
     e.preventDefault();
     try {
+      dispatch(
+        add_notification({
+          open: true,
+          type: "info",
+          message: "Creating ballot...",
+        })
+      );
+
       let ballot_id = uuid();
       let ballot_name = ballot.ballot_name;
       let candidates = ballot.ballot_candidates;
@@ -395,18 +395,6 @@ const create_ballot = () => {
         )
         .send({ from: accounts[0], value: ballot_fee, gas: 3000000 })
         .on("receipt", async () => {
-          // notification
-          set_ballot_id(ballot_id);
-          set_create_ballot(
-            `Created Ballot: ${new Date().toString().slice(4, 25)}`
-          );
-
-          set_end_ballot(`Results: ${new Date(end_ballot_1).toDateString()}`);
-
-          dispatch(add_ballot(ballot));
-
-          dispatch(add_show_form(false));
-
           if (ballots.length === 2) {
             dispatch(
               add_notification({
@@ -417,16 +405,38 @@ const create_ballot = () => {
             );
           }
 
-          console.log("Ballot created Successfully!!");
+          console.log("Ballot created Successfully 1!!");
+          console.log("LOADING AFTER: ", show_notification);
         });
-      console.log(
-        ballot_id,
-        ballot_name,
-        candidates,
-        ballot_type,
-        ballot_days,
-        registration_period
+      // console.log(
+      //   ballot_id,
+      //   ballot_name,
+      //   candidates,
+      //   ballot_type,
+      //   ballot_days,
+      //   registration_period
+      // );
+
+      dispatch(
+        add_notification({
+          open: false,
+          type: "",
+          message: "",
+        })
       );
+
+      set_ballot_id(ballot_id);
+      set_create_ballot(
+        `Created Ballot: ${new Date().toString().slice(4, 25)}`
+      );
+
+      set_end_ballot(`Results: ${new Date(end_ballot_1).toDateString()}`);
+
+      dispatch(add_ballot(ballot));
+
+      dispatch(add_show_form(false));
+
+      console.log("Ballot created Successfully 3!!");
     } catch (error) {
       dispatch(
         add_notification({
@@ -438,15 +448,6 @@ const create_ballot = () => {
       console.log("ERROR: ", error);
       console.log(error.message);
     }
-  };
-
-  const get_ballot = async (e) => {
-    init();
-    e.preventDefault();
-    const ballot = await factory.methods.get_ballot(ballot_id).call();
-    set_ballot(ballot);
-    console.log("BALLOT ID:", ballot_id);
-    console.log("THE BALLOT HERE: ", ballot);
   };
 
   useEffect(() => {
@@ -627,7 +628,7 @@ const create_ballot = () => {
                               message={message_notification}
                             />
                           </>
-                          <form onSubmit={(e) => create_new_ballot(e)}>
+                          <form>
                             <div className={styles.form_item}>
                               <TextField
                                 required
@@ -652,11 +653,20 @@ const create_ballot = () => {
                                   }}
                                 >
                                   <Typography variant="caption">
-                                    Choose Ballot Type
+                                    Select Ballot Type
                                   </Typography>
                                   <Button onClick={open_ballot_type}>
                                     Ballot Type
                                   </Button>
+                                  {show_type && (
+                                    <div>
+                                      <Typography variant="caption">
+                                        {ballot_types_map.get(
+                                          parseInt(ballot.ballot_type)
+                                        )}{" "}
+                                      </Typography>
+                                    </div>
+                                  )}
                                 </Grid>
                                 <Modal
                                   open={type_open}
@@ -751,11 +761,60 @@ const create_ballot = () => {
                                   }}
                                 >
                                   <Typography variant="caption">
-                                    Select Ballot and Registration Dates
+                                    Select Ballot Dates
                                   </Typography>
                                   <Button onClick={open_ballot_schedule}>
                                     Schedule Ballot
                                   </Button>
+                                  {show_dates && (
+                                    <div>
+                                      {convert_seconds(
+                                        parseInt(ballot.ballot_days) / 1000
+                                      ) === false ? (
+                                        <Typography
+                                          variant="captiom"
+                                          component="p"
+                                          align="center"
+                                          sx={{ color: "red" }}
+                                        >
+                                          Invalid Ballot Dates
+                                        </Typography>
+                                      ) : (
+                                        <Typography
+                                          variant="captiom"
+                                          component="p"
+                                        >
+                                          Ballot - Period:{" "}
+                                          {convert_seconds(
+                                            parseInt(ballot.ballot_days) / 1000
+                                          )}{" "}
+                                        </Typography>
+                                      )}
+
+                                      {convert_seconds(
+                                        ballot.registration_period
+                                      ) === false ? (
+                                        <Typography
+                                          variant="captiom"
+                                          align="center"
+                                          sx={{ color: "red" }}
+                                          component="p"
+                                        >
+                                          Invalid Registration Dates
+                                        </Typography>
+                                      ) : (
+                                        <Typography
+                                          variant="captiom"
+                                          component="p"
+                                        >
+                                          Registration - Period:{" "}
+                                          {convert_seconds(
+                                            ballot.registration_period
+                                          )}{" "}
+                                        </Typography>
+                                      )}
+                                    </div>
+                                  )}
                                 </Grid>
                                 <Modal
                                   open={schedule_open}
@@ -854,61 +913,6 @@ const create_ballot = () => {
                                 </Modal>
                               </div>
                             </div>
-                            <div
-                              className={`${styles.form_item} ${styles.form_item_3}`}
-                            >
-                              {show_type && (
-                                <div>
-                                  <Typography>
-                                    Ballot - Type :{" "}
-                                    {ballot_types_map.get(
-                                      parseInt(ballot.ballot_type)
-                                    )}{" "}
-                                  </Typography>
-                                </div>
-                              )}
-                              {show_dates && (
-                                <div>
-                                  {convert_seconds(
-                                    parseInt(ballot.ballot_days) / 1000
-                                  ) === false ? (
-                                    <Typography
-                                      variant="subtitle2"
-                                      align="center"
-                                      sx={{ color: "red" }}
-                                    >
-                                      Invalid Ballot Dates
-                                    </Typography>
-                                  ) : (
-                                    <Typography>
-                                      Ballot - Period:{" "}
-                                      {convert_seconds(
-                                        parseInt(ballot.ballot_days) / 1000
-                                      )}{" "}
-                                    </Typography>
-                                  )}
-
-                                  {convert_seconds(
-                                    ballot.registration_period
-                                  ) === false ? (
-                                    <Typography
-                                      variant="subtitle2"
-                                      align="center"
-                                      sx={{ color: "red" }}
-                                    >
-                                      Invalid Registration Dates
-                                    </Typography>
-                                  ) : (
-                                    <Typography>
-                                      Registration - Period:{" "}
-                                      {convert_seconds(
-                                        ballot.registration_period
-                                      )}{" "}
-                                    </Typography>
-                                  )}
-                                </div>
-                              )}
-                            </div>
                             {/* new candidates */}
                             <div>
                               {candidates.map((data, index) => {
@@ -974,6 +978,7 @@ const create_ballot = () => {
                               <Button
                                 type="submit"
                                 disabled={!factory || ballots.length === 3}
+                                onClick={(e) => create_new_ballot(e)}
                               >
                                 Create Ballot
                               </Button>
@@ -988,15 +993,45 @@ const create_ballot = () => {
                           </form>
                         </div>
                       ) : (
-                        <CreatedBallot
-                          ballot={ballot}
-                          ballot_id={ballot_id}
-                          account={accounts[0]}
-                          start_registration={start_registration}
-                          end_registration={end_registration}
-                          start_voting={start_voting}
-                          end_ballot_1={end_ballot_1}
-                        />
+                        <>
+                          {show_notification ? (
+                            <Modal
+                              open={show_notification === true}
+                              onClose={show_notification === false}
+                              aria-labelledby="modal-modal-title"
+                              aria-describedby="modal-modal-description"
+                            >
+                              <Box
+                              //  sx={style}
+                              >
+                                <Typography
+                                  id="modal-modal-title"
+                                  variant="h6"
+                                  component="h2"
+                                >
+                                  Text in a modal
+                                </Typography>
+                                <Typography
+                                  id="modal-modal-description"
+                                  sx={{ mt: 2 }}
+                                >
+                                  Duis mollis, est non commodo luctus, nisi erat
+                                  porttitor ligula.
+                                </Typography>
+                              </Box>
+                            </Modal>
+                          ) : (
+                            <CreatedBallot
+                              ballot={ballot}
+                              ballot_id={ballot_id}
+                              account={accounts[0]}
+                              start_registration={start_registration}
+                              end_registration={end_registration}
+                              start_voting={start_voting}
+                              end_ballot_1={end_ballot_1}
+                            />
+                          )}
+                        </>
                       )}
                     </div>
                   </TabPanel>
