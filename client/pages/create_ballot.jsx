@@ -11,6 +11,7 @@ import {
   add_show_form,
 } from "../store/ballot_slice";
 import { add_notification } from "../store/notification_slice";
+import { add_theme } from "../store/theme_slice";
 
 import { v4 as uuid } from "uuid";
 import map from "../../build/deployments/map.json";
@@ -88,7 +89,7 @@ const create_ballot = () => {
   const show_form = useSelector((state) => state.ballot.show_form);
   const ballots = useSelector((state) => state.ballot.ballots);
   const active_ballot = useSelector((state) => state.ballot.active_ballot);
-  const theme = useSelector((state) => state.theme.current_theme);
+  const current_theme = useSelector((state) => state.theme.current_theme);
   const connected_account = useSelector(
     (state) => state.auth.connected_account
   );
@@ -124,6 +125,11 @@ const create_ballot = () => {
     },
   ]);
   const [candidates_arr, set_candidates_arr] = useState([]);
+
+  const switch_theme = () => {
+    const new_theme = current_theme === "light" ? "dark" : "light";
+    dispatch(add_theme(new_theme));
+  };
 
   const open_ballot_type = () => set_type_open(true);
   const close_ballot_type = () => {
@@ -367,7 +373,7 @@ const create_ballot = () => {
         add_notification({
           open: true,
           type: "info",
-          message: "Creating ballot...",
+          message: "Publishing Ballot...",
         })
       );
 
@@ -455,43 +461,43 @@ const create_ballot = () => {
   }, [ballot.ballot_name]);
 
   return (
-    <>
-      <div className={styles.wrapper}>
-        <Head>
-          <title>Jamii Blockchain Voting</title>
-          <meta
-            name="description"
-            content="A voting system that leverages blockchain technology!"
-          />
-          <link rel="icon" href="/favicon.ico" />
-        </Head>
-        <Grid container xs={12}>
-          <Grid container xs={2}>
-            <Grid
-              item
-              xs={12}
-              sx={{
-                height: "20vh",
-                textAlign: "center",
-                padding: "10px",
-              }}
+    <div className={styles.wrapper} data-theme={current_theme}>
+      <Head>
+        <title>Jamii Blockchain Voting</title>
+        <meta
+          name="description"
+          content="A voting system that leverages blockchain technology!"
+        />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+      <Grid container xs={12}>
+        <Grid container xs={2}>
+          <Grid
+            item
+            xs={12}
+            sx={{
+              height: "20vh",
+              textAlign: "center",
+              padding: "10px",
+            }}
+          >
+            <Typography variant="h4">Jamii Ballots</Typography>
+            <Button
+              variant="outlined"
+              color="success"
+              onClick={(e) => handle_new_ballot(e, 0)}
+              className={styles.right_btns}
             >
-              <Typography variant="h4">Jamii Ballots</Typography>
-              <Button
-                variant="outlined"
-                color="success"
-                onClick={(e) => handle_new_ballot(e, 0)}
-              >
-                New Ballot
-              </Button>
-            </Grid>
-            <Divider />
-            <Grid
-              item
-              xs={12}
-              sx={{ height: "60vh", overflowY: "auto", textAlign: "center" }}
-            >
-              {/* <form onSubmit={(e) => get_ballot(e)}>
+              New Ballot
+            </Button>
+          </Grid>
+          <Divider />
+          <Grid
+            item
+            xs={12}
+            sx={{ height: "60vh", overflowY: "auto", textAlign: "center" }}
+          >
+            {/* <form onSubmit={(e) => get_ballot(e)}>
               <TextField
                 id="standard-basic"
                 label="Search Ballots..."
@@ -503,33 +509,37 @@ const create_ballot = () => {
               />
               <button type="submit">search</button>
             </form> */}
-              <Typography variant="body1">Ballots here</Typography>
-              {Object.keys(ballots).map((key) => (
-                <List
-                  key={key}
-                  onClick={() => dispatch(add_active_ballot(key))}
-                  sx={{ cursor: "pointer" }}
-                >
-                  <ListItem alignItems="flex-start">
-                    <ListItemText
-                      primary={ballots[key].ballot_name}
-                      secondary={<>{" — this is a ballot to vote in ..."}</>}
-                    />
-                  </ListItem>
-                  <Divider variant="inset" component="li" />
-                </List>
-              ))}
-            </Grid>
+            <Typography variant="body1">Ballots</Typography>
+            {Object.keys(ballots).map((key) => (
+              <List
+                key={key}
+                onClick={() => dispatch(add_active_ballot(key))}
+                sx={{ cursor: "pointer" }}
+              >
+                <ListItem alignItems="flex-start">
+                  <ListItemText
+                    primary={ballots[key].ballot_name}
+                    secondary={
+                      <span className={styles.side_bar_text}>
+                        {" — this is a ballot to vote in ..."}
+                      </span>
+                    }
+                  />
+                </ListItem>
+                <Divider variant="inset" component="li" />
+              </List>
+            ))}
+          </Grid>
 
-            <Grid
-              item
-              xs={12}
-              sx={{
-                height: "10vh",
-              }}
-            >
-              <footer className={styles.left_footer}>
-                {/* {connected ? (
+          <Grid
+            item
+            xs={12}
+            sx={{
+              height: "10vh",
+            }}
+          >
+            <footer className={styles.left_footer}>
+              {/* {connected ? (
               <div className={styles.connect_container}>
                 <div>
                   <small>{error}</small>
@@ -544,559 +554,561 @@ const create_ballot = () => {
                 <div>Ballot Owner: {user_addr}</div>
               </div>
             ) : ( */}
-                <div>{error && <small>{error}</small>}</div>
+              <div>{error && <small>{error}</small>}</div>
 
-                <div className={styles.connect_container}>
-                  {/* )} */}
-                  {/* <Button onClick={connect_wallet()}>
+              <div className={styles.connect_container}>
+                {/* )} */}
+                {/* <Button onClick={connect_wallet()}>
               <AccountBalanceWalletOutlinedIcon sx={{ color: "#FF5733" }} />
             </Button> */}
-                  <div>
-                    <Button>
-                      <AccountBalanceWalletOutlinedIcon
-                        sx={{ color: wallet_color }}
-                      />
-                    </Button>
-                  </div>
-                  <div>
-                    <Button>
-                      <SettingsOutlinedIcon />
-                    </Button>
-                  </div>
-                </div>
-              </footer>
-            </Grid>
-          </Grid>
-
-          <Grid
-            item
-            xs={10}
-            className={styles.main_bar}
-            sx={{ display: "flex" }}
-          >
-            <Box sx={{ width: "100%" }}>
-              <Box
-                className={styles.main_panel}
-                sx={{
-                  borderBottom: 1,
-                  borderColor: "divider",
-                  display: "flex",
-                  justifyContent: "space-between",
-                }}
-              >
-                <div className={styles.main_panel_tabs}>
-                  <Tabs
-                    value={value}
-                    onChange={handle_tab_change}
-                    aria-label="basic tabs example"
-                  >
-                    <Tab label={create_ballot} {...a11yProps(0)} />
-                    <Tab label="Open Ballot" {...a11yProps(1)} />
-                    <Tab label={end_ballot} {...a11yProps(2)} />
-                  </Tabs>
-                </div>
-                <div className={styles.main_panel_actions}>
-                  <Button
-                    className={styles.panel_icons}
-                    onClick={() => dispatch(add_show_form(true))}
-                  >
-                    <ContentCopyIcon />
+                <div>
+                  <Button>
+                    <AccountBalanceWalletOutlinedIcon
+                      sx={{ color: wallet_color }}
+                    />
                   </Button>
-                  {theme === "dark" ? (
-                    // <Button onClick={switch_theme}>
-                    <Button>
-                      <DarkModeOutlinedIcon sx={{ color: "#000" }} />
-                    </Button>
-                  ) : (
-                    // <Button onClick={switch_theme}>
-                    <Button>
-                      <LightModeOutlinedIcon sx={{ color: "#000" }} />
-                    </Button>
-                  )}
                 </div>
-              </Box>
-              <div className={styles.ballot_details}>
-                <div className={styles.panel_details}>
-                  <TabPanel value={value} index={0}>
-                    <div className={styles.ballot_container}>
-                      {ballot_id.length == 0 || show_form === true ? (
-                        <div className={styles.ballot_form}>
-                          <>
-                            <Notification
-                              open={show_notification}
-                              type={type_notification}
-                              message={message_notification}
-                            />
-                          </>
-                          <form>
-                            <div className={styles.form_item}>
-                              <TextField
-                                required
-                                id="filled-basic"
-                                label="ballot name"
-                                variant="filled"
-                                name="ballot_name"
-                                value={initial_ballot.ballot_name}
-                                onChange={handle_ballot_data}
-                                fullWidth
-                              />
-                            </div>
-                            {/* _ballot_candidates_addr ->> array */}
-                            <div
-                              className={`${styles.form_item} ${styles.form_item_2}`}
-                            >
-                              <div>
-                                <Grid
-                                  sx={{
-                                    display: "flex",
-                                    flexDirection: "column",
-                                  }}
-                                >
-                                  <Typography variant="caption">
-                                    Select Ballot Type
-                                  </Typography>
-                                  <Button onClick={open_ballot_type}>
-                                    Ballot Type
-                                  </Button>
-                                  {show_type && (
-                                    <div>
-                                      <Typography variant="caption">
-                                        {ballot_types_map.get(
-                                          parseInt(ballot.ballot_type)
-                                        )}{" "}
-                                      </Typography>
-                                    </div>
-                                  )}
-                                </Grid>
-                                <Modal
-                                  open={type_open}
-                                  onClose={close_ballot_type}
-                                  aria-labelledby="modal-modal-title"
-                                  aria-describedby="modal-modal-description"
-                                >
-                                  <Box className={styles.ballot_type_box}>
-                                    <Typography
-                                      id="modal-modal-title"
-                                      variant="h6"
-                                      component="h2"
-                                      sx={{
-                                        color: "#fff",
-                                        textAlign: "center",
-                                      }}
-                                    >
-                                      Select a Ballot Type
-                                    </Typography>
-                                    <div className={styles.ballot_types}>
-                                      <div className={styles.ballot_type}>
-                                        <div>
-                                          <Typography
-                                            variant="button"
-                                            className={styles.type_heading}
-                                          >
-                                            Open Ballot
-                                          </Typography>
-                                          <Typography
-                                            className={styles.type_details}
-                                          >
-                                            In an open ballot anyone can
-                                            register and vote.
-                                          </Typography>
-                                        </div>
-                                        <div>
-                                          <FormControlLabel
-                                            control={
-                                              <Checkbox
-                                                type="checkbox"
-                                                name="ballot_type"
-                                                value="0"
-                                                onChange={handle_ballot_data}
-                                                sx={{ color: "#fff" }}
-                                              />
-                                            }
-                                            // label="Open Ballot"
-                                          />
-                                        </div>
-                                      </div>
-                                      <Divider />
-                                      <div className={styles.ballot_type}>
-                                        <div>
-                                          <Typography
-                                            variant="button"
-                                            className={styles.type_heading}
-                                          >
-                                            Closed Ballot
-                                          </Typography>
-                                          <Typography
-                                            className={styles.type_details}
-                                          >
-                                            In a closed ballot, anyone can
-                                            register although voters need voting
-                                            rights to vote.
-                                          </Typography>
-                                        </div>
-                                        <div>
-                                          <FormControlLabel
-                                            control={
-                                              <Checkbox
-                                                type="checkbox"
-                                                name="ballot_type"
-                                                value="1"
-                                                onChange={handle_ballot_data}
-                                                sx={{ color: "#fff" }}
-                                              />
-                                            }
-                                            // label="Closed Ballot"
-                                          />
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </Box>
-                                </Modal>
-                              </div>
-                              <div>
-                                <Grid
-                                  sx={{
-                                    display: "flex",
-                                    flexDirection: "column",
-                                  }}
-                                >
-                                  <Typography variant="caption">
-                                    Select Ballot Dates
-                                  </Typography>
-                                  <Button onClick={open_ballot_schedule}>
-                                    Schedule Ballot
-                                  </Button>
-                                  {show_dates && (
-                                    <div>
-                                      {convert_seconds(
-                                        parseInt(ballot.ballot_days) / 1000
-                                      ) === false ? (
-                                        <Typography
-                                          variant="captiom"
-                                          component="p"
-                                          align="center"
-                                          sx={{ color: "red" }}
-                                        >
-                                          Invalid Ballot Dates
-                                        </Typography>
-                                      ) : (
-                                        <Typography
-                                          variant="captiom"
-                                          component="p"
-                                        >
-                                          Ballot - Period:{" "}
-                                          {convert_seconds(
-                                            parseInt(ballot.ballot_days) / 1000
-                                          )}{" "}
-                                        </Typography>
-                                      )}
+                <div>
+                  <Button>
+                    <SettingsOutlinedIcon />
+                  </Button>
+                </div>
+              </div>
+            </footer>
+          </Grid>
+        </Grid>
 
-                                      {convert_seconds(
-                                        ballot.registration_period
-                                      ) === false ? (
-                                        <Typography
-                                          variant="captiom"
-                                          align="center"
-                                          sx={{ color: "red" }}
-                                          component="p"
-                                        >
-                                          Invalid Registration Dates
-                                        </Typography>
-                                      ) : (
-                                        <Typography
-                                          variant="captiom"
-                                          component="p"
-                                        >
-                                          Registration - Period:{" "}
-                                          {convert_seconds(
-                                            ballot.registration_period
-                                          )}{" "}
-                                        </Typography>
-                                      )}
-                                    </div>
-                                  )}
-                                </Grid>
-                                <Modal
-                                  open={schedule_open}
-                                  onClose={close_ballot_schedule}
-                                  aria-labelledby="modal-modal-title"
-                                  aria-describedby="modal-modal-description"
-                                >
-                                  <div className={styles.ballot_dates}>
-                                    <Typography
-                                      variant="body2"
-                                      sx={{
-                                        color: "#fff",
-                                        textAlign: "center",
-                                        marginBottom: "10px",
-                                      }}
-                                    >
-                                      Major Ballot Dates
-                                    </Typography>
-                                    <div className={styles.date}>
-                                      <TextField
-                                        // label="Start Voter Registration"
-                                        type="datetime-local"
-                                        defaultValue={Date.now()}
-                                        className={styles.date_field}
-                                        name="start_registration"
-                                        // value={start_registration}
-                                        onChange={(e) =>
-                                          set_start_registration(e.target.value)
-                                        }
-                                        label="Start Registration"
-                                        InputLabelProps={{
-                                          style: {
-                                            color: "#fff",
-                                          },
-                                        }}
-                                      />
-                                    </div>
-                                    <div className={styles.date}>
-                                      <TextField
-                                        // label="End Voter Registration"
-                                        type="datetime-local"
-                                        className={styles.date_field}
-                                        name="end_registration"
-                                        // value={end_registration}
-                                        onChange={(e) =>
-                                          set_end_registration(e.target.value)
-                                        }
-                                        label="End Registration"
-                                        InputLabelProps={{
-                                          style: {
-                                            color: "#fff",
-                                          },
-                                        }}
-                                      />
-                                    </div>
-                                    <div className={styles.date}>
-                                      <TextField
-                                        // label="End Voter Registration"
-                                        type="datetime-local"
-                                        className={styles.date_field}
-                                        name="start_voting"
-                                        // value={start_voting}
-                                        onChange={(e) =>
-                                          set_start_voting(e.target.value)
-                                        }
-                                        label="Start Voting"
-                                        InputLabelProps={{
-                                          style: {
-                                            color: "#fff",
-                                          },
-                                        }}
-                                      />
-                                    </div>
-                                    <div className={styles.date}>
-                                      <TextField
-                                        // label="Ballot End Date"
-                                        type="datetime-local"
-                                        className={styles.date_field}
-                                        name="end_ballot"
-                                        // value={end_ballot}
-                                        onChange={(e) =>
-                                          set_end_ballot_1(e.target.value)
-                                        }
-                                        label="End Voting"
-                                        InputLabelProps={{
-                                          style: {
-                                            color: "#fff",
-                                          },
-                                        }}
-                                      />
-                                    </div>
-                                    <Button onClick={() => set_ballot_dates()}>
-                                      Set Dates
-                                    </Button>
-                                  </div>
-                                </Modal>
-                              </div>
-                            </div>
-                            {/* new candidates */}
-                            <div>
-                              {candidates.map((data, index) => {
-                                const { address } = data;
-                                return (
-                                  <div className={styles.add_candidate}>
-                                    <TextField
-                                      helperText="Select more than 1 Candidate"
-                                      required
-                                      key={index}
-                                      label="candidate address"
-                                      variant="filled"
-                                      type="text"
-                                      onChange={(e) =>
-                                        handle_candidates(index, e)
-                                      }
-                                      value={address}
-                                      name="address"
-                                      fullWidth
-                                      className={styles.candidate_field}
-                                    />
-
-                                    <div>
-                                      {candidates.length !== 1 && (
-                                        <Button
-                                          onClick={(e) => remove_candidate(e)}
-                                        >
-                                          <DeleteOutlineOutlinedIcon />
-                                        </Button>
-                                      )}
-                                    </div>
-                                  </div>
-                                );
-                              })}
-
-                              <div>
-                                <Button
-                                  onClick={(e) => add_candidate(e)}
-                                  sx={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                  }}
-                                >
-                                  <>
-                                    <PersonAddAltOutlinedIcon />
-                                  </>
-                                  <>
-                                    <Typography
-                                      variant="caption"
-                                      pt={1}
-                                      pl={1}
-                                      sx={{ fontSize: "10px" }}
-                                    >
-                                      new candidate
-                                    </Typography>
-                                  </>
-                                </Button>
-                              </div>
-                            </div>
-                            {/* end new candidates */}
-                            <Grid xs={12} mt={1}>
-                              <Button
-                                type="submit"
-                                disabled={!factory || ballots.length === 3}
-                                onClick={(e) => create_new_ballot(e)}
-                              >
-                                Create Ballot
-                              </Button>
-                              <Button
-                                className={styles.panel_icons}
-                                onClick={() => set_initial_ballot_state()}
-                                sx={{ position: "relative", float: "right" }}
-                              >
-                                <DeleteOutlineOutlinedIcon />
-                              </Button>
-                            </Grid>
-                          </form>
+        <Grid item xs={10} className={styles.main_bar} sx={{ display: "flex" }}>
+          <Box sx={{ width: "100%" }}>
+            <Box
+              className={styles.main_panel}
+              sx={{
+                borderBottom: 1,
+                borderColor: "divider",
+                display: "flex",
+                justifyContent: "space-between",
+              }}
+            >
+              <div>
+                <Tabs
+                  value={value}
+                  onChange={handle_tab_change}
+                  aria-label="basic tabs example"
+                >
+                  <Tab
+                    className={styles.tab}
+                    label={create_ballot}
+                    {...a11yProps(0)}
+                  />
+                  <Tab
+                    className={styles.tab}
+                    label="Open Ballot"
+                    {...a11yProps(1)}
+                  />
+                  <Tab
+                    className={styles.tab}
+                    label={end_ballot}
+                    {...a11yProps(2)}
+                  />
+                </Tabs>
+              </div>
+              <div className={styles.main_panel_actions}>
+                <Button
+                  className={styles.panel_icons}
+                  onClick={() => dispatch(add_show_form(true))}
+                >
+                  {current_theme === "dark" ? (
+                    <ContentCopyIcon sx={{ color: "#fff" }} />
+                  ) : (
+                    <ContentCopyIcon sx={{ color: "#000" }} />
+                  )}
+                </Button>
+                {current_theme === "dark" ? (
+                  // <Button onClick={switch_theme}>
+                  <Button onClick={switch_theme}>
+                    <DarkModeOutlinedIcon sx={{ color: "#fff" }} />
+                  </Button>
+                ) : (
+                  // <Button onClick={switch_theme}>
+                  <Button onClick={switch_theme}>
+                    <LightModeOutlinedIcon sx={{ color: "#000" }} />
+                  </Button>
+                )}
+              </div>
+            </Box>
+            <div className={styles.ballot_details}>
+              <div className={styles.panel_details}>
+                <TabPanel
+                  value={value}
+                  index={0}
+                  className={styles.ballot_container}
+                >
+                  {ballot_id.length == 0 || show_form === true ? (
+                    <div className={styles.ballot_form}>
+                      <>
+                        <Notification
+                          open={show_notification}
+                          type={type_notification}
+                          message={message_notification}
+                        />
+                      </>
+                      <form>
+                        <div className={styles.form_item}>
+                          <TextField
+                            required
+                            id="filled-basic"
+                            label="ballot name"
+                            variant="filled"
+                            name="ballot_name"
+                            value={initial_ballot.ballot_name}
+                            onChange={handle_ballot_data}
+                            fullWidth
+                          />
                         </div>
-                      ) : (
-                        <>
-                          {show_notification ? (
+                        {/* _ballot_candidates_addr ->> array */}
+                        <div
+                          className={`${styles.form_item} ${styles.form_item_2}`}
+                        >
+                          <div>
+                            <Grid
+                              sx={{
+                                display: "flex",
+                                flexDirection: "column",
+                              }}
+                            >
+                              <Typography variant="caption">
+                                Select Ballot Type
+                              </Typography>
+                              <Button
+                                onClick={open_ballot_type}
+                                className={styles.right_btns}
+                              >
+                                Ballot Type
+                              </Button>
+                              {show_type && (
+                                <div>
+                                  <Typography variant="captiom" component="p">
+                                    {ballot_types_map.get(
+                                      parseInt(ballot.ballot_type)
+                                    )}{" "}
+                                  </Typography>
+                                </div>
+                              )}
+                            </Grid>
                             <Modal
-                              open={show_notification === true}
-                              onClose={show_notification === false}
+                              open={type_open}
+                              onClose={close_ballot_type}
                               aria-labelledby="modal-modal-title"
                               aria-describedby="modal-modal-description"
                             >
-                              <Box
-                              //  sx={style}
-                              >
+                              <Box className={styles.ballot_type_box}>
                                 <Typography
                                   id="modal-modal-title"
                                   variant="h6"
                                   component="h2"
+                                  sx={{
+                                    color: "#fff",
+                                    textAlign: "center",
+                                  }}
                                 >
-                                  Text in a modal
+                                  Select a Ballot Type
                                 </Typography>
-                                <Typography
-                                  id="modal-modal-description"
-                                  sx={{ mt: 2 }}
-                                >
-                                  Duis mollis, est non commodo luctus, nisi erat
-                                  porttitor ligula.
-                                </Typography>
+                                <div className={styles.ballot_types}>
+                                  <div className={styles.ballot_type}>
+                                    <div>
+                                      <Typography
+                                        variant="button"
+                                        className={styles.type_heading}
+                                      >
+                                        Open Ballot
+                                      </Typography>
+                                      <Typography
+                                        className={styles.type_details}
+                                      >
+                                        In an open ballot anyone can register
+                                        and vote.
+                                      </Typography>
+                                    </div>
+                                    <div>
+                                      <FormControlLabel
+                                        control={
+                                          <Checkbox
+                                            type="checkbox"
+                                            name="ballot_type"
+                                            value="0"
+                                            onChange={handle_ballot_data}
+                                            sx={{ color: "#fff" }}
+                                          />
+                                        }
+                                        // label="Open Ballot"
+                                      />
+                                    </div>
+                                  </div>
+                                  <Divider />
+                                  <div className={styles.ballot_type}>
+                                    <div>
+                                      <Typography
+                                        variant="button"
+                                        className={styles.type_heading}
+                                      >
+                                        Closed Ballot
+                                      </Typography>
+                                      <Typography
+                                        className={styles.type_details}
+                                      >
+                                        In a closed ballot, anyone can register
+                                        although voters need voting rights to
+                                        vote.
+                                      </Typography>
+                                    </div>
+                                    <div>
+                                      <FormControlLabel
+                                        control={
+                                          <Checkbox
+                                            type="checkbox"
+                                            name="ballot_type"
+                                            value="1"
+                                            onChange={handle_ballot_data}
+                                            sx={{ color: "#fff" }}
+                                          />
+                                        }
+                                        // label="Closed Ballot"
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
                               </Box>
                             </Modal>
-                          ) : (
-                            <CreatedBallot
-                              ballot={ballot}
-                              ballot_id={ballot_id}
-                              account={accounts[0]}
-                              start_registration={start_registration}
-                              end_registration={end_registration}
-                              start_voting={start_voting}
-                              end_ballot_1={end_ballot_1}
-                            />
-                          )}
-                        </>
-                      )}
+                          </div>
+                          <div>
+                            <Grid
+                              sx={{
+                                display: "flex",
+                                flexDirection: "column",
+                              }}
+                            >
+                              <Typography variant="caption">
+                                Select Ballot Dates
+                              </Typography>
+                              <Button
+                                onClick={open_ballot_schedule}
+                                className={styles.right_btns}
+                              >
+                                Schedule Ballot
+                              </Button>
+                              {show_dates && (
+                                <div>
+                                  {convert_seconds(
+                                    parseInt(ballot.ballot_days) / 1000
+                                  ) === false ? (
+                                    <Typography
+                                      variant="captiom"
+                                      component="p"
+                                      align="center"
+                                      sx={{ color: "red" }}
+                                    >
+                                      Invalid Ballot Dates
+                                    </Typography>
+                                  ) : (
+                                    <Typography variant="captiom" component="p">
+                                      Ballot - Period:{" "}
+                                      {convert_seconds(
+                                        parseInt(ballot.ballot_days) / 1000
+                                      )}{" "}
+                                    </Typography>
+                                  )}
+
+                                  {convert_seconds(
+                                    ballot.registration_period
+                                  ) === false ? (
+                                    <Typography
+                                      variant="captiom"
+                                      align="center"
+                                      sx={{ color: "red" }}
+                                      component="p"
+                                    >
+                                      Invalid Registration Dates
+                                    </Typography>
+                                  ) : (
+                                    <Typography variant="captiom" component="p">
+                                      Registration - Period:{" "}
+                                      {convert_seconds(
+                                        ballot.registration_period
+                                      )}{" "}
+                                    </Typography>
+                                  )}
+                                </div>
+                              )}
+                            </Grid>
+                            <Modal
+                              open={schedule_open}
+                              onClose={close_ballot_schedule}
+                              aria-labelledby="modal-modal-title"
+                              aria-describedby="modal-modal-description"
+                            >
+                              <div className={styles.ballot_dates}>
+                                <Typography
+                                  variant="body2"
+                                  sx={{
+                                    color: "#fff",
+                                    textAlign: "center",
+                                    marginBottom: "10px",
+                                  }}
+                                >
+                                  Major Ballot Dates
+                                </Typography>
+                                <div className={styles.date}>
+                                  <TextField
+                                    // label="Start Voter Registration"
+                                    type="datetime-local"
+                                    defaultValue={Date.now()}
+                                    className={styles.date_field}
+                                    name="start_registration"
+                                    // value={start_registration}
+                                    onChange={(e) =>
+                                      set_start_registration(e.target.value)
+                                    }
+                                    label="Start Registration"
+                                    InputLabelProps={{
+                                      style: {
+                                        color: "#fff",
+                                      },
+                                    }}
+                                  />
+                                </div>
+                                <div className={styles.date}>
+                                  <TextField
+                                    // label="End Voter Registration"
+                                    type="datetime-local"
+                                    className={styles.date_field}
+                                    name="end_registration"
+                                    // value={end_registration}
+                                    onChange={(e) =>
+                                      set_end_registration(e.target.value)
+                                    }
+                                    label="End Registration"
+                                    InputLabelProps={{
+                                      style: {
+                                        color: "#fff",
+                                      },
+                                    }}
+                                  />
+                                </div>
+                                <div className={styles.date}>
+                                  <TextField
+                                    // label="End Voter Registration"
+                                    type="datetime-local"
+                                    className={styles.date_field}
+                                    name="start_voting"
+                                    // value={start_voting}
+                                    onChange={(e) =>
+                                      set_start_voting(e.target.value)
+                                    }
+                                    label="Start Voting"
+                                    InputLabelProps={{
+                                      style: {
+                                        color: "#fff",
+                                      },
+                                    }}
+                                  />
+                                </div>
+                                <div className={styles.date}>
+                                  <TextField
+                                    // label="Ballot End Date"
+                                    type="datetime-local"
+                                    className={styles.date_field}
+                                    name="end_ballot"
+                                    // value={end_ballot}
+                                    onChange={(e) =>
+                                      set_end_ballot_1(e.target.value)
+                                    }
+                                    label="End Voting"
+                                    InputLabelProps={{
+                                      style: {
+                                        color: "#fff",
+                                      },
+                                    }}
+                                  />
+                                </div>
+                                <Button onClick={() => set_ballot_dates()}>
+                                  Set Dates
+                                </Button>
+                              </div>
+                            </Modal>
+                          </div>
+                        </div>
+                        {/* new candidates */}
+                        <div>
+                          {candidates.map((data, index) => {
+                            const { address } = data;
+                            return (
+                              <div className={styles.add_candidate}>
+                                <TextField
+                                  helperText="Select more than 1 Candidate"
+                                  required
+                                  key={index}
+                                  label="candidate address"
+                                  variant="filled"
+                                  type="text"
+                                  onChange={(e) => handle_candidates(index, e)}
+                                  value={address}
+                                  name="address"
+                                  fullWidth
+                                  className={styles.candidate_field}
+                                />
+
+                                <div>
+                                  {candidates.length !== 1 && (
+                                    <Button
+                                      onClick={(e) => remove_candidate(e)}
+                                    >
+                                      <DeleteOutlineOutlinedIcon />
+                                    </Button>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+
+                          <div>
+                            <Button
+                              onClick={(e) => add_candidate(e)}
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                              }}
+                              className={styles.right_btns}
+                            >
+                              <>
+                                <PersonAddAltOutlinedIcon />
+                              </>
+                              <>
+                                <Typography
+                                  variant="caption"
+                                  pt={1}
+                                  pl={1}
+                                  sx={{ fontSize: "10px" }}
+                                >
+                                  new candidate
+                                </Typography>
+                              </>
+                            </Button>
+                          </div>
+                        </div>
+                        {/* end new candidates */}
+                        <Grid
+                          xs={12}
+                          mt={1}
+                          sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <Button
+                            type="submit"
+                            className={styles.right_btns}
+                            disabled={
+                              !factory ||
+                              ballots.length === 3 ||
+                              show_notification
+                            }
+                            onClick={(e) => create_new_ballot(e)}
+                          >
+                            Create Ballot
+                          </Button>
+                          <Button
+                            className={styles.right_btns}
+                            onClick={() => set_initial_ballot_state()}
+                          >
+                            Reset Form
+                          </Button>
+                        </Grid>
+                      </form>
                     </div>
-                  </TabPanel>
-                  <TabPanel value={value} index={1}>
-                    {ballots.length >= 1 ? (
-                      <OpenBallot />
-                    ) : (
-                      <Grid container>
-                        <h4>You have no active Ballots!!</h4>
-                        <small>create one?</small>
-                      </Grid>
-                    )}
-                  </TabPanel>
-                  <TabPanel value={value} index={2}>
-                    {ballot_id.length > 1 ? (
-                      <BallotResult />
-                    ) : (
-                      <Grid container>
-                        <h4>You have no active Ballots!!</h4>
-                        <small>create one?</small>
-                      </Grid>
-                    )}
-                  </TabPanel>
-                </div>
-                <div className={styles.panel_actions}>
-                  <Button
-                    variant="outlined"
-                    color="success"
-                    className={styles.right_btns}
-                  >
-                    Preview Ballot
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    color="success"
-                    className={styles.right_btns}
-                  >
-                    Print Results
-                  </Button>
-                  <div>
-                    {!connected && (
-                      <>
-                        <Paper elevation={4} sx={{ padding: "10px" }}>
-                          <span>Connect Wallet to Create Ballot</span>
-                        </Paper>
-                      </>
-                    )}
-                  </div>
-                  <Typography variant="caption">
-                    {3 - ballots.length} Test Ballots Left
-                  </Typography>
-                  {ballots.length === 3 && (
-                    <Notification
-                      open={show_notification}
-                      type={type_notification}
-                      message={message_notification}
-                    />
+                  ) : (
+                    <>
+                      <CreatedBallot
+                        ballot={ballot}
+                        ballot_id={ballot_id}
+                        account={accounts[0]}
+                        start_registration={start_registration}
+                        end_registration={end_registration}
+                        start_voting={start_voting}
+                        end_ballot_1={end_ballot_1}
+                      />
+                    </>
+                  )}
+                </TabPanel>
+                <TabPanel
+                  value={value}
+                  index={1}
+                  className={styles.ballot_container}
+                >
+                  {ballots.length >= 1 ? (
+                    <OpenBallot />
+                  ) : (
+                    <Grid container>
+                      <h4>You have no active Ballots!!</h4>
+                      <small>create one?</small>
+                    </Grid>
+                  )}
+                </TabPanel>
+                <TabPanel
+                  value={value}
+                  index={2}
+                  className={styles.ballot_container}
+                >
+                  {ballot_id.length > 1 ? (
+                    <BallotResult />
+                  ) : (
+                    <Grid container>
+                      <h4>You have no active Ballots!!</h4>
+                      <small>create one?</small>
+                    </Grid>
+                  )}
+                </TabPanel>
+              </div>
+              <div className={styles.panel_actions}>
+                <Button
+                  variant="outlined"
+                  color="success"
+                  className={styles.right_btns}
+                >
+                  Preview Ballot
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="success"
+                  className={styles.right_btns}
+                >
+                  Print Results
+                </Button>
+                <div>
+                  {!connected && (
+                    <>
+                      <Paper elevation={4} sx={{ padding: "10px" }}>
+                        <span>Connect Wallet to Create Ballot</span>
+                      </Paper>
+                    </>
                   )}
                 </div>
+                <Typography variant="caption">
+                  {3 - ballots.length} Test Ballots Left
+                </Typography>
+                {ballots.length === 3 && (
+                  <Notification
+                    open={show_notification}
+                    type={type_notification}
+                    message={message_notification}
+                  />
+                )}
               </div>
-            </Box>
-          </Grid>
+            </div>
+          </Box>
         </Grid>
-      </div>
-    </>
+      </Grid>
+    </div>
   );
 };
 
