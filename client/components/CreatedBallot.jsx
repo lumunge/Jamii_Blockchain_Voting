@@ -22,7 +22,7 @@ const CreatedBallot = ({
     <>
       <Grid container>
         <Grid item xs={8} mb={4}>
-          <Typography variant="h5">
+          <Typography variant="h5" className={styles.heading}>
             {ballot.ballot_name}{" "}
             <Typography variant="caption">{`${ballot_types_map.get(
               parseInt(ballot.ballot_type)
@@ -42,7 +42,7 @@ const CreatedBallot = ({
           xs={12}
           sx={{ display: "flex", alignItems: "center" }}
         >
-          <Typography variant="h5" pr={4}>
+          <Typography variant="h5" pr={4} className={styles.heading}>
             {" "}
             Organizer:{" "}
           </Typography>
@@ -60,7 +60,9 @@ const CreatedBallot = ({
           }}
         >
           <div>
-            <Typography variant="h5">Ballot Candidates</Typography>
+            <Typography variant="h5" className={styles.heading}>
+              Ballot Candidates
+            </Typography>
           </div>
 
           <>
@@ -76,7 +78,7 @@ const CreatedBallot = ({
         </Grid>
 
         <Grid item mb={4} xs={12}>
-          <Typography variant="h5" pb={1}>
+          <Typography variant="h5" pb={1} className={styles.heading}>
             Important Dates and Times
           </Typography>
           <div>
