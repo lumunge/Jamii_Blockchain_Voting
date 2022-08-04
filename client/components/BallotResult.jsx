@@ -17,29 +17,31 @@ const BallotResult = () => {
     <>
       {connected_account === ballots[active_ballot].ballot_chair ? (
         <>
-          <Grid item xs={8} mb={4}>
-            <Typography variant="h5">
-              {ballots[active_ballot].ballot_name}{" "}
-              <Typography variant="caption">{`${ballot_types_map.get(
-                parseInt(ballots[active_ballot].ballot_type)
-              )} Ballot`}</Typography>
-            </Typography>
-          </Grid>
-          <Grid item xs={4}>
-            <Chip
-              label={ballots[active_ballot].ballot_id}
-              // onClick={handleClick}
-            />
+          <Grid container lg={12} sx={{ display: "flex" }}>
+            <Grid item xs={8} mb={4}>
+              <Typography variant="h5">
+                {ballots[active_ballot].ballot_name}{" "}
+                <Typography variant="caption">{`${ballot_types_map.get(
+                  parseInt(ballots[active_ballot].ballot_type)
+                )} Ballot`}</Typography>
+              </Typography>
+            </Grid>
+            <Grid item xs={4}>
+              <Chip
+                label={ballots[active_ballot].ballot_id}
+                // onClick={handleClick}
+              />
+            </Grid>
           </Grid>
 
           <Grid container>
             <Grid
               item
               item
-              mb={2}
-              xs={12}
-              md={6}
+              pb={4}
               lg={12}
+              md={12}
+              xs={12}
               sx={{
                 display: "flex",
                 flexDirection: "column",
@@ -47,7 +49,7 @@ const BallotResult = () => {
               }}
             >
               <>
-                <Typography variant="h6">Voting:</Typography>{" "}
+                <Typography variant="h6">Voting</Typography>{" "}
               </>
               <Grid item xs={12} md={6}>
                 <CountdownTimer
