@@ -1,7 +1,9 @@
 .wrapper {
-  /* margin: 70px 0;
-  min-height: calc(100vh - 70px); */
+  background-color: var(--background);
+  color: var(--text-primary);
+  height: 100vh;
 }
+
 .left_side_bar {
   width: 30%;
   box-shadow: rgba(0, 0, 0, 0.1) 2px 0px 0px 0px,
@@ -29,6 +31,29 @@
 .main_bar {
   width: 70%;
 }
+
+.side_bar_text {
+  color: var(--text-secondary);
+}
+
+/* mid styling */
+
+.tab {
+  /* background-color: red; */
+  text-transform: capitalize;
+  border: 1px solid var(--text-primary);
+  margin: 1rem 1rem;
+  padding: 0 2rem;
+  border-radius: 30px;
+  color: var(--text-primary);
+}
+.tab:hover {
+  color: var(--button-hover);
+  border: 1px solid var(--button-hover);
+  transition: 0.2s ease-in-out;
+}
+/* end panel styling */
+
 .main_panel {
   /* background-color: green; */
 }
@@ -38,12 +63,7 @@
 }
 .panel_icons {
   margin-right: 3rem;
-}
-.main_panel_tabs {
-  /* float: left; */
-  /* background-color: green; */
-  /* position: relative; */
-  /* z-index: 99; */
+  color: var(--button-hover);
 }
 
 .ballot_details {
@@ -68,23 +88,22 @@
 .right_btns {
   margin: 10px 0;
   text-transform: capitalize;
+  border: 1px solid var(--button-hover);
+  color: var(--button-hover);
+}
+.right_btns:hover {
+  transition: 0.2s ease-in-out;
+  color: var(--text-primary);
 }
 
 .ballot_container {
-  /* display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center; */
+  background-color: var(--card-background);
+  height: 100%;
 }
 .ballot_form {
   width: 90%;
   padding: 1rem;
-  /* background-color: darkslateblue; */
   margin: 0 auto;
-  /* display: flex; */
-  /* align-items: center; */
-  /* justify-content: center; */
-  /* text-align: center; */
 }
 .form_item {
   margin: 1rem 0;
@@ -161,6 +180,10 @@
   width: 100%;
   display: flex;
   justify-content: center;
+}
+
+.heading {
+  color: var(--heading-text);
 }
 
 /* Created ballot page */
