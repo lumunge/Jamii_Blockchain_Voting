@@ -126,7 +126,7 @@ const Navbar = (props) => {
               </Link>
               {theme === "dark" ? (
                 <Button onClick={switch_theme}>
-                  <DarkModeOutlinedIcon sx={{ color: "#000" }} />
+                  <DarkModeOutlinedIcon sx={{ color: "#fff" }} />
                 </Button>
               ) : (
                 <Button onClick={switch_theme}>
