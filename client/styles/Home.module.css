@@ -41,12 +41,12 @@
 }
 
 .landing_2_right {
-  background-color: var(--main-dark);
+  background-color: var(--card-background);
+  color: var(--card-text);
   margin-left: 10px;
   border-radius: 20px;
   height: 50vh;
   width: 50%;
-  color: #fff;
 }
 
 .section {
