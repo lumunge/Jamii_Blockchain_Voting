@@ -31,6 +31,9 @@ import LanguageIcon from "@mui/icons-material/Language";
 
 import { nav_items_map } from "../utils/functions";
 
+// styleshee
+import styles from "../styles/create_ballot.module.css";
+
 const Navbar = (props) => {
   const dispatch = useDispatch();
 
@@ -57,7 +60,7 @@ const Navbar = (props) => {
   const drawer = (
     <Box onClick={handleDrawerToggle} sx={{ textAlign: "center" }}>
       <Typography variant="h6" sx={{ my: 2 }}>
-        MUI
+        Jamii Ballots
       </Typography>
       <Divider />
       <List>
@@ -76,92 +79,95 @@ const Navbar = (props) => {
     window !== undefined ? () => window().document.body : undefined;
 
   return (
-    <>
-      <Box sx={{ display: "flex" }}>
-        <AppBar component="nav" sx={{ backgroundColor: "#fff" }}>
-          <Toolbar>
-            <IconButton
-              color="inherit"
-              aria-label="open drawer"
-              edge="start"
-              onClick={handleDrawerToggle}
-              sx={{ mr: 2, display: { sm: "none" } }}
-            >
-              {" "}
-              <MenuIcon />
-            </IconButton>
-            <Box
-              //   sx={{ flexGrow: 1 }}
-              sx={{ display: { xs: "none", sm: "block" }, flexGrow: 1 }}
-            >
-              {nav_items.map((item) => (
-                <Link href={nav_items_map.get(item)}>
-                  <Button
-                    key={item}
-                    sx={{
-                      //   display: { sm: "none" },
-                      flexGrow: 1,
-                      color: "#11111f",
-                      textTransform: "capitalize",
-                    }}
-                  >
-                    {item}
-                  </Button>
-                </Link>
-              ))}
-            </Box>
-            <Box sx={{ display: { xs: "none", sm: "block" } }}>
-              <Link href="/create_ballot">
-                <Button
-                  sx={{
-                    flexGrow: 1,
-                    color: "#11111f",
-                    textTransform: "capitalize",
-                    backgroundColor: "#78d64b",
-                    padding: "10px 1rem",
-                  }}
-                >
-                  Get Started
-                </Button>
-              </Link>
-              {theme === "dark" ? (
-                <Button onClick={switch_theme}>
-                  <DarkModeOutlinedIcon sx={{ color: "#fff" }} />
-                </Button>
-              ) : (
-                <Button onClick={switch_theme}>
-                  <LightModeOutlinedIcon sx={{ color: "#000" }} />
-                </Button>
-              )}
-              <Button>
-                <LanguageIcon sx={{ color: "#000" }} />
-              </Button>
-            </Box>
-          </Toolbar>
-        </AppBar>
-
-        <Box component="nav">
-          <Drawer
-            container={container}
-            variant="temporary"
-            open={mobileOpen}
-            onClose={handleDrawerToggle}
-            ModalProps={{
-              keepMounted: true, // Better open performance on mobile.
-            }}
+    <Box sx={{ display: "flex" }}>
+      <AppBar component="nav" className={styles.navbar}>
+        <Toolbar>
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            edge="start"
+            onClick={handleDrawerToggle}
+            sx={{ mr: 2, display: { sm: "none" } }}
+          >
+            {" "}
+            <MenuIcon />
+          </IconButton>
+          <Box
             sx={{
-              display: { xs: "block", sm: "none" },
-              "& .MuiDrawer-paper": {
-                boxSizing: "border-box",
-                width: drawerWidth,
-              },
+              display: { xs: "none", sm: "block" },
+              flexGrow: 1,
             }}
           >
-            {drawer}
-          </Drawer>
-        </Box>
+            {nav_items.map((item) => (
+              <Link href={nav_items_map.get(item)}>
+                <Button
+                  key={item}
+                  sx={{
+                    //   display: { sm: "none" },
+                    flexGrow: 1,
+                  }}
+                  className={styles.nav_links}
+                >
+                  {item}
+                </Button>
+              </Link>
+            ))}
+          </Box>
+          <Box sx={{ display: { xs: "none", sm: "block" } }}>
+            <Link href="/create_ballot">
+              <Button
+                sx={{
+                  flexGrow: 1,
+                  color: "#11111f",
+                  textTransform: "capitalize",
+                  backgroundColor: "#78d64b",
+                  padding: "10px 1rem",
+                }}
+              >
+                Get Started
+              </Button>
+            </Link>
+            {theme === "dark" ? (
+              <Button onClick={switch_theme}>
+                <DarkModeOutlinedIcon sx={{ color: "#fff" }} />
+              </Button>
+            ) : (
+              <Button onClick={switch_theme}>
+                <LightModeOutlinedIcon sx={{ color: "#000" }} />
+              </Button>
+            )}
+            <Button>
+              {theme === "dark" ? (
+                <LanguageIcon sx={{ color: "#fff" }} />
+              ) : (
+                <LanguageIcon sx={{ color: "#000" }} />
+              )}
+            </Button>
+          </Box>
+        </Toolbar>
+      </AppBar>
+
+      <Box component="nav">
+        <Drawer
+          container={container}
+          variant="temporary"
+          open={mobileOpen}
+          onClose={handleDrawerToggle}
+          ModalProps={{
+            keepMounted: true, // Better open performance on mobile.
+          }}
+          sx={{
+            display: { xs: "block", sm: "none" },
+            "& .MuiDrawer-paper": {
+              boxSizing: "border-box",
+              width: drawerWidth,
+            },
+          }}
+        >
+          {drawer}
+        </Drawer>
       </Box>
-    </>
+    </Box>
   );
 };
 
