@@ -19,7 +19,7 @@ const BallotResult = () => {
         <>
           <Grid container lg={12} sx={{ display: "flex" }}>
             <Grid item xs={8} mb={4}>
-              <Typography variant="h5">
+              <Typography variant="h5" className={styles.heading}>
                 {ballots[active_ballot].ballot_name}{" "}
                 <Typography variant="caption">{`${ballot_types_map.get(
                   parseInt(ballots[active_ballot].ballot_type)
@@ -49,7 +49,9 @@ const BallotResult = () => {
               }}
             >
               <>
-                <Typography variant="h6">Voting</Typography>{" "}
+                <Typography variant="h6" className={styles.heading}>
+                  Voting
+                </Typography>{" "}
               </>
               <Grid item xs={12} md={6}>
                 <CountdownTimer
@@ -73,7 +75,7 @@ const BallotResult = () => {
               }}
             >
               <div>
-                <Typography variant="h5" pb={2}>
+                <Typography variant="h5" pb={2} className={styles.heading}>
                   Ballot Candidates
                 </Typography>
               </div>
@@ -93,7 +95,11 @@ const BallotResult = () => {
             </Grid>
 
             <Grid item xs={12}>
-              <Typography variant="h4" sx={{ textAlign: "center" }}>
+              <Typography
+                variant="h4"
+                className={styles.heading}
+                sx={{ textAlign: "center" }}
+              >
                 Total Votes: 0
               </Typography>
             </Grid>
