@@ -22,7 +22,7 @@ const OpenBallot = () => {
       <Grid container>
         <Grid container>
           <Grid item xs={8} mb={4}>
-            <Typography variant="h5">
+            <Typography variant="h5" className={styles.heading}>
               {ballots[active_ballot].ballot_name}{" "}
               <Typography variant="caption">{`open Ballot`}</Typography>
             </Typography>
@@ -41,7 +41,7 @@ const OpenBallot = () => {
           xs={12}
           sx={{ display: "flex", alignItems: "center" }}
         >
-          <Typography variant="h5" pr={4}>
+          <Typography variant="h5" pr={4} className={styles.heading}>
             {" "}
             Organizer:{" "}
           </Typography>
@@ -61,7 +61,9 @@ const OpenBallot = () => {
           }}
         >
           <div>
-            <Typography variant="h5">Ballot Candidates</Typography>
+            <Typography variant="h5" className={styles.heading}>
+              Ballot Candidates
+            </Typography>
           </div>
 
           <>
@@ -88,7 +90,7 @@ const OpenBallot = () => {
             alignItems: "center",
           }}
         >
-          <Typography variant="h5" pb={1}>
+          <Typography variant="h5" pb={1} className={styles.heading}>
             Important Dates and Times
           </Typography>
 
@@ -144,7 +146,9 @@ const OpenBallot = () => {
         </Grid>
 
         <Box xs={12} pt={2} pb={2} sx={{ width: "100%", textAlign: "center" }}>
-          <Typography variant="body1">Registered Voters: 0</Typography>
+          <Typography variant="body1" className={styles.heading}>
+            Registered Voters: 0
+          </Typography>
         </Box>
 
         {connected_account === ballots[active_ballot].ballot_chair && (
