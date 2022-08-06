@@ -1,8 +1,6 @@
-import Head from "next/head";
-import React, { useState } from "react";
-
 import { useDispatch, useSelector } from "react-redux";
-import { add_active_ballot } from "../store/ballot_slice";
+
+import { add_active_ballot, add_active_tab } from "../store/ballot_slice";
 
 import {
   Grid,
@@ -16,11 +14,10 @@ import {
 } from "@mui/material";
 
 // icons
-import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
 
 // Components
 
-// styleshee
+// stylesheet
 import styles from "../styles/create_ballot.module.css";
 
 const LeftSideBar = () => {
@@ -31,9 +28,10 @@ const LeftSideBar = () => {
   const ballots = useSelector((state) => state.ballot.ballots);
   const active_ballot = useSelector((state) => state.ballot.active_ballot);
 
-  const [error, set_error] = useState("");
-
-  const [wallet_color, set_wallet_color] = useState("red");
+  const handle_ballot_change = (key, tab) => {
+    dispatch(add_active_tab(tab));
+    dispatch(add_active_ballot(key));
+  };
 
   return (
     <>
@@ -46,20 +44,12 @@ const LeftSideBar = () => {
           item
           xs={12}
           sx={{
-            height: "20vh",
+            // height: "20vh",
             textAlign: "center",
             padding: "10px",
           }}
         >
           <Typography variant="h4">Jamii Ballots</Typography>
-          <Button
-            variant="outlined"
-            color="success"
-            onClick={(e) => handle_new_ballot(e, 0)}
-            className={styles.right_btns}
-          >
-            New Ballot
-          </Button>
         </Grid>
         <Divider />
         <Grid
@@ -72,7 +62,7 @@ const LeftSideBar = () => {
             <List
               key={key}
               className={key === active_ballot && styles.heading}
-              onClick={() => dispatch(add_active_ballot(key))}
+              onClick={() => handle_ballot_change(key, 1)}
               sx={{ cursor: "pointer" }}
             >
               <ListItem alignItems="flex-start">
@@ -96,21 +86,32 @@ const LeftSideBar = () => {
           xs={12}
           sx={{
             height: "10vh",
+            textAlign: "center",
           }}
         >
-          <footer className={styles.left_footer}>
-            <div>{error && <small>{error}</small>}</div>
+          <div>
+            {!connected && (
+              <Typography variant="caption">
+                <a href="https://metamask.zendesk.com/hc/en-us/articles/360045901112-Manually-connecting-to-a-dapp">
+                  Connect wallet
+                </a>
+              </Typography>
+            )}
+          </div>
 
-            <Grid container sx={{ display: "flex", justifyContent: "center" }}>
-              {connected ? (
-                <AccountBalanceWalletOutlinedIcon
-                  sx={{ color: wallet_color }}
-                />
-              ) : (
-                <Button className={styles.right_btns}>Connect Wallet</Button>
-              )}
-            </Grid>
-          </footer>
+          <Grid container sx={{ display: "flex", justifyContent: "center" }}>
+            {connected ? (
+              <Typography variant="body2" sx={{ color: "green" }}>
+                connected
+              </Typography>
+            ) : (
+              <Button className={styles.right_btns}>
+                <Typography variant="body2" sx={{ color: "red" }}>
+                  Connect Wallet
+                </Typography>
+              </Button>
+            )}
+          </Grid>
         </Grid>
       </Box>
     </>
