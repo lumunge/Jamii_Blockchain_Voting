@@ -39,13 +39,17 @@ const OpenBallot = () => {
           item
           mb={4}
           xs={12}
-          sx={{ display: "flex", alignItems: "center" }}
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column" },
+            alignItems: "center",
+          }}
         >
           <Typography variant="h5" pr={4} className={styles.heading}>
             {" "}
             Organizer:{" "}
           </Typography>
-          <Typography variant="body1">
+          <Typography variant="caption">
             {ballots[active_ballot].ballot_chair}
           </Typography>
         </Grid>
@@ -67,16 +71,14 @@ const OpenBallot = () => {
           </div>
 
           <>
-            {Object.keys(ballots[active_ballot].ballot_candidates).map(
-              (key) => (
-                <div key={key}>
-                  <Typography variant="body1" pb={1} pt={1}>
-                    {ballots[active_ballot].ballot_candidates[key]}
-                  </Typography>
-                  <Divider />
-                </div>
-              )
-            )}
+            {Object.keys(ballots[active_ballot].candidates).map((key) => (
+              <div key={key}>
+                <Typography variant="caption" pb={1} pt={1}>
+                  {ballots[active_ballot].candidates[key]}
+                </Typography>
+                <Divider />
+              </div>
+            ))}
           </>
         </Grid>
 
