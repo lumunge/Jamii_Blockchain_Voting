@@ -1,8 +1,7 @@
 import { useState } from "react";
-import useLocalStorage from "use-local-storage";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
-import { useMedia } from "../hooks/useMedia";
+import { add_theme } from "../store/theme_slice";
 
 import {
   AppBar,
@@ -14,9 +13,13 @@ import {
   Divider,
 } from "@mui/material";
 
+// icons
 import MenuIcon from "@mui/icons-material/Menu";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
+import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 
+// components
 import LeftSideBar from "./LeftSideBar";
 import RightSideBar from "./RightSideBar";
 
@@ -24,9 +27,17 @@ import RightSideBar from "./RightSideBar";
 import styles from "../styles/create_ballot.module.css";
 
 const MobileNav = (props) => {
+  const dispatch = useDispatch();
+
   const drawerWidth = 240;
-  const defaultDark = useMedia("(prefers-color-scheme: dark)").matches;
   const { window } = props;
+
+  const current_theme = useSelector((state) => state.theme.current_theme);
+
+  const switch_theme = () => {
+    const new_theme = current_theme === "light" ? "dark" : "light";
+    dispatch(add_theme(new_theme));
+  };
 
   const [left_open, set_left_open] = useState(false);
   const [right_open, set_right_open] = useState(false);
@@ -54,6 +65,17 @@ const MobileNav = (props) => {
       <Typography variant="h6" sx={{ my: 2 }}>
         Jamii Ballots
       </Typography>
+      {current_theme === "dark" ? (
+        <DarkModeOutlinedIcon
+          onClick={switch_theme}
+          sx={{ color: "#000", cursor: "pointer" }}
+        />
+      ) : (
+        <LightModeOutlinedIcon
+          onClick={switch_theme}
+          sx={{ color: "#000", cursor: "pointer" }}
+        />
+      )}
       <Divider />
       <RightSideBar />
     </Box>
@@ -98,7 +120,7 @@ const MobileNav = (props) => {
           open={left_open}
           onClose={handle_left_side_bar}
           ModalProps={{
-            keepMounted: true, // Better open performance on mobile.
+            keepMounted: true,
           }}
           sx={{
             display: { xs: "block", sm: "none" },
@@ -120,7 +142,7 @@ const MobileNav = (props) => {
           open={right_open}
           onClose={handle_right_side_bar}
           ModalProps={{
-            keepMounted: true, // Better open performance on mobile.
+            keepMounted: true,
           }}
           sx={{
             display: { xs: "block", sm: "none" },
