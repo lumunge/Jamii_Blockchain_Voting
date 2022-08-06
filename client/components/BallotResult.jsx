@@ -5,6 +5,10 @@ import { ballot_types_map } from "../utils/functions.js";
 
 // Components
 import CountdownTimer from "../components/CountdownTimer";
+import NoBallots from "../components/NoBallots";
+
+// stylesheet
+import styles from "../styles/create_ballot.module.css";
 
 const BallotResult = () => {
   const ballots = useSelector((state) => state.ballot.ballots);
@@ -27,10 +31,7 @@ const BallotResult = () => {
               </Typography>
             </Grid>
             <Grid item xs={4}>
-              <Chip
-                label={ballots[active_ballot].ballot_id}
-                // onClick={handleClick}
-              />
+              <Chip label={ballots[active_ballot].ballot_id} />
             </Grid>
           </Grid>
 
@@ -81,16 +82,14 @@ const BallotResult = () => {
               </div>
 
               <>
-                {Object.keys(ballots[active_ballot].ballot_candidates).map(
-                  (key) => (
-                    <div key={key}>
-                      <Typography variant="body1" pt={1} pb={1}>
-                        {ballots[active_ballot].ballot_candidates[key]}
-                      </Typography>
-                      <Divider />
-                    </div>
-                  )
-                )}
+                {Object.keys(ballots[active_ballot].candidates).map((key) => (
+                  <div key={key}>
+                    <Typography variant="caption" pt={1} pb={1}>
+                      {ballots[active_ballot].candidates[key]}
+                    </Typography>
+                    <Divider />
+                  </div>
+                ))}
               </>
             </Grid>
 
@@ -106,9 +105,7 @@ const BallotResult = () => {
           </Grid>
         </>
       ) : (
-        <Grid container>
-          <Typography variant="h3">You have No Active Ballots</Typography>
-        </Grid>
+        <NoBallots />
       )}
     </>
   );
