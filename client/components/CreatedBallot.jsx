@@ -1,26 +1,21 @@
+import { useSelector } from "react-redux";
+
 import { ballot_types_map } from "../utils/functions.js";
 
 import { Grid, Typography, Divider, Chip } from "@mui/material";
-// import Notification from "../components/Notification";
 
 // icons
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 
-// styleshee
+// stylesheet
 import styles from "../styles/create_ballot.module.css";
 
-const CreatedBallot = ({
-  ballot,
-  ballot_id,
-  account,
-  start_registration,
-  end_registration,
-  start_voting,
-  end_ballot_1,
-}) => {
+const CreatedBallot = () => {
+  const ballot = useSelector((state) => state.ballot.initial_ballot);
+
   return (
     <>
-      <Grid container>
+      <Grid container sx={{ textAlign: { xs: "center" } }}>
         <Grid item xs={8} mb={4}>
           <Typography variant="h5" className={styles.heading}>
             {ballot.ballot_name}{" "}
@@ -30,23 +25,24 @@ const CreatedBallot = ({
           </Typography>
         </Grid>
         <Grid item xs={4}>
-          <Chip
-            label={ballot_id}
-            // onClick={handleClick}
-          />
+          <Chip label={ballot.ballot_id} />
         </Grid>
 
         <Grid
           item
           mb={4}
           xs={12}
-          sx={{ display: "flex", alignItems: "center" }}
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column" },
+            alignItems: "center",
+          }}
         >
           <Typography variant="h5" pr={4} className={styles.heading}>
             {" "}
             Organizer:{" "}
           </Typography>
-          <Typography variant="body1">{account}</Typography>
+          <Typography variant="caption">{ballot.ballot_chair}</Typography>
         </Grid>
 
         <Grid
@@ -68,7 +64,7 @@ const CreatedBallot = ({
           <>
             {Object.keys(ballot.ballot_candidates).map((key) => (
               <div key={key}>
-                <Typography variant="body1" pt={1} pb={1}>
+                <Typography variant="caption" pt={1} pb={1}>
                   {ballot.ballot_candidates[key]}
                 </Typography>
                 <Divider />
@@ -84,15 +80,15 @@ const CreatedBallot = ({
           <div>
             <Typography variant="h6">Registration:</Typography>{" "}
             <Typography variant="subtitle1">
-              Starts: {new Date(start_registration).toDateString()} Ends:{" "}
-              {new Date(end_registration).toDateString()}
+              Starts: {new Date(ballot.start_registration).toDateString()} Ends:{" "}
+              {new Date(ballot.end_registration).toDateString()}
             </Typography>
           </div>
           <div>
             <Typography variant="h6">Voting:</Typography>{" "}
             <Typography variant="subtitle1">
-              Starts: {new Date(start_voting).toDateString()}, Ends:{" "}
-              {new Date(end_ballot_1).toDateString()}
+              Starts: {new Date(ballot.start_voting).toDateString()}, Ends:{" "}
+              {new Date(ballot.end_voting).toDateString()}
             </Typography>
           </div>
         </Grid>
