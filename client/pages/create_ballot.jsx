@@ -4,11 +4,18 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { login, add_connected_account } from "../store/auth-slice";
 import {
+  add_new_ballot,
   add_ballot,
-  add_active_ballot,
+  add_show_new_ballot,
+  add_tab_state,
+  add_active_tab,
   add_show_dates,
   add_show_type,
   add_show_form,
+  add_ballot_state,
+  add_ballot_candidates,
+  add_ballot_dates,
+  add_ballot_id_chair,
 } from "../store/ballot_slice";
 import { add_notification } from "../store/notification_slice";
 import { add_theme } from "../store/theme_slice";
@@ -33,23 +40,15 @@ import {
   Typography,
   Divider,
   TextField,
-  Paper,
   Modal,
   Checkbox,
   FormControlLabel,
-  List,
-  ListItem,
-  ListItemText,
 } from "@mui/material";
 
 // icons
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
-import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
-import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import PersonAddAltOutlinedIcon from "@mui/icons-material/PersonAddAltOutlined";
-import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
-import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
+import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 
 // Components
 import CreatedBallot from "../components/CreatedBallot";
@@ -57,6 +56,10 @@ import OpenBallot from "../components/OpenBallot";
 import BallotResult from "../components/BallotResult";
 import TabPanel from "../components/TabPanel";
 import Notification from "../components/Notification";
+import NoBallots from "../components/NoBallots";
+import MobileNav from "../components/MobileNav";
+import LeftSideBar from "../components/LeftSideBar";
+import RightSideBar from "../components/RightSideBar";
 
 // styleshee
 import styles from "../styles/create_ballot.module.css";
@@ -64,17 +67,9 @@ import styles from "../styles/create_ballot.module.css";
 const create_ballot = () => {
   const dispatch = useDispatch();
 
-  const connected = useSelector((state) => state.auth.is_connected);
-
-  const initial_ballot_state = {
-    ballot_type: "",
-    ballot_name: "",
-    ballot_chair: "",
-    ballot_candidates: [],
-    ballot_days: "",
-    registration_period: "",
-    open_date: "",
-  };
+  const initial_ballot_state = useSelector(
+    (state) => state.ballot.initial_ballot
+  );
 
   const ballot_fee = 10000000000000000;
 
@@ -88,29 +83,23 @@ const create_ballot = () => {
   const show_type = useSelector((state) => state.ballot.show_type);
   const show_form = useSelector((state) => state.ballot.show_form);
   const ballots = useSelector((state) => state.ballot.ballots);
-  const active_ballot = useSelector((state) => state.ballot.active_ballot);
   const current_theme = useSelector((state) => state.theme.current_theme);
-  const connected_account = useSelector(
-    (state) => state.auth.connected_account
-  );
 
-  const [value, set_value] = useState(0);
+  const show_new_ballot = useSelector((state) => state.ballot.show_new_ballot);
+
+  const active_tab = useSelector((state) => state.ballot.active_tab);
+
   const [error, set_error] = useState("");
-
-  const [wallet_color, set_wallet_color] = useState("red");
 
   const [web_3, set_web_3] = useState(null);
   const [accounts, set_accounts] = useState(null);
   const [chain_id, set_chain_id] = useState(0);
 
-  const [create_ballot, set_create_ballot] = useState("Create Ballot");
-  const [end_ballot, set_end_ballot] = useState("End Ballot");
+  const ballot_text = useSelector((state) => state.ballot.tabs);
 
   const [type_open, set_type_open] = useState(false);
   const [schedule_open, set_schedule_open] = useState(false);
-  const [ballot_id, set_ballot_id] = useState("");
-  const [ballot, set_ballot] = useState(initial_ballot_state);
-  const [initial_ballot, set_initial_ballot] = useState(initial_ballot_state);
+
   const [ballot_candidates, set_ballot_candidates] = useState([]);
   const [factory, set_factory] = useState(null);
 
@@ -126,11 +115,6 @@ const create_ballot = () => {
   ]);
   const [candidates_arr, set_candidates_arr] = useState([]);
 
-  const switch_theme = () => {
-    const new_theme = current_theme === "light" ? "dark" : "light";
-    dispatch(add_theme(new_theme));
-  };
-
   const open_ballot_type = () => set_type_open(true);
   const close_ballot_type = () => {
     set_type_open(false);
@@ -142,25 +126,51 @@ const create_ballot = () => {
   };
 
   const set_initial_ballot_state = () => {
-    set_ballot(initial_ballot_state);
-    set_initial_ballot(initial_ballot_state);
+    dispatch(add_ballot_state(initial_ballot_state));
     dispatch(add_show_dates(false));
     dispatch(add_show_type(false));
     set_candidates([]);
-    set_create_ballot("Create Ballot");
-    set_end_ballot("End Ballot");
+    dispatch(
+      add_tab_state({
+        tab_1: "Create Ballot",
+        tab_2: "Open Ballots",
+        tab_3: "End Ballot",
+      })
+    );
   };
 
   const handle_ballot_data = (e) => {
-    const data = e.target.value;
-    set_ballot({
-      ...ballot,
-      [e.target.name]: data,
-    });
-    set_initial_ballot({
-      ...initial_ballot,
-      [e.target.name]: data,
-    });
+    dispatch(
+      add_ballot_state({
+        ...initial_ballot_state,
+        [e.target.name]: e.target.value,
+      })
+    );
+  };
+
+  const handle_new_ballot = async () => {
+    dispatch(add_active_tab(0));
+
+    dispatch(add_show_form(true));
+    dispatch(add_show_dates(false));
+    dispatch(add_show_type(false));
+
+    set_candidates([]);
+    dispatch(
+      add_tab_state({
+        tab_1: "Create Ballot",
+        tab_2: "Open Ballots",
+        tab_3: "End Ballot",
+      })
+    );
+
+    dispatch(
+      add_new_ballot({
+        ballot_name: "",
+      })
+    );
+
+    console.log("Handling New ballot: ");
   };
 
   const set_ballot_dates = () => {
@@ -180,15 +190,17 @@ const create_ballot = () => {
     console.log("Ballot Days: ", ballot_days);
     console.log("Registration Window: ", registration_period);
 
-    initial_ballot.ballot_days = ballot_days;
-    initial_ballot.registration_period = registration_period;
-    ballot.ballot_days = ballot_days;
-    ballot.registration_period = registration_period;
-
-    set_start_registration(start_registration);
-    set_end_registration(end_registration);
-    set_start_voting(start_voting);
-    set_end_ballot_1(end_ballot_1);
+    dispatch(
+      add_ballot_dates({
+        start_registration: start_registration,
+        end_registration: end_registration,
+        start_voting: start_voting,
+        end_voting: end_ballot_1,
+        ballot_days: ballot_days,
+        registration_period: registration_period,
+        open_date: new window.Date(),
+      })
+    );
 
     dispatch(add_show_dates(true));
 
@@ -221,14 +233,13 @@ const create_ballot = () => {
     let candidates_arr = list.map((a) => a.address);
     set_candidates_arr(candidates_arr);
     console.log("CANDIDATES LIST: ", candidates_arr);
-    initial_ballot.ballot_candidates = candidates_arr;
-    ballot.ballot_candidates = candidates_arr;
+    dispatch(add_ballot_candidates(candidates_arr));
   };
   // end candidates input
 
   // tabs
-  const handle_tab_change = async (e, new_value) => {
-    set_value(new_value);
+  const handle_tab_change = (e, new_value) => {
+    dispatch(add_active_tab(new_value));
 
     if (new_value == 2) {
       set_ballot_candidates(candidates_arr);
@@ -237,21 +248,8 @@ const create_ballot = () => {
     console.log("BALLOT CANDIDATES: ", ballot_candidates);
   };
 
-  const handle_new_ballot = async (e, new_value) => {
-    set_value(new_value);
-
+  const handle_add_show_form = () => {
     dispatch(add_show_form(true));
-    dispatch(add_show_dates(false));
-    dispatch(add_show_type(false));
-
-    set_ballot(initial_ballot_state);
-    set_initial_ballot(initial_ballot_state);
-
-    set_candidates([]);
-    set_create_ballot("Create Ballot");
-    set_end_ballot("End Ballot");
-
-    console.log("Handling New ballot: ");
   };
 
   TabPanel.propTypes = {
@@ -378,15 +376,22 @@ const create_ballot = () => {
       );
 
       let ballot_id = uuid();
-      let ballot_name = ballot.ballot_name;
-      let candidates = ballot.ballot_candidates;
-      let ballot_type = ballot.ballot_type;
-      let ballot_days = ballot.ballot_days;
-      let registration_period = ballot.registration_period;
+      let ballot_name = initial_ballot_state.ballot_name;
+      let candidates = initial_ballot_state.ballot_candidates;
+      let ballot_type = initial_ballot_state.ballot_type;
+      let ballot_days = initial_ballot_state.ballot_days;
+      let registration_period = initial_ballot_state.registration_period;
 
-      ballot.ballot_id = ballot_id;
-      ballot.ballot_chair = accounts[0];
-      ballot.open_date = Date.now();
+      // initial_ballot_state.ballot_id = ballot_id;
+      // initial_ballot_state.ballot_chair = accounts[0];
+      // initial_ballot_state.open_date = Date.now();
+
+      dispatch(
+        add_ballot_id_chair({
+          ballot_id: ballot_id,
+          ballot_chair: accounts[0],
+        })
+      );
 
       // validation here
 
@@ -431,14 +436,34 @@ const create_ballot = () => {
         })
       );
 
-      set_ballot_id(ballot_id);
-      set_create_ballot(
-        `Created Ballot: ${new Date().toString().slice(4, 25)}`
+      // set_ballot_id(ballot_id);
+      dispatch(
+        add_tab_state({
+          tab_1: `Created Ballot: ${new Date().toString().slice(4, 25)}`,
+          tab_2: "Open Ballots",
+          tab_3: `Results: ${new Date(end_ballot_1).toDateString()}`,
+        })
       );
 
-      set_end_ballot(`Results: ${new Date(end_ballot_1).toDateString()}`);
+      dispatch(add_show_new_ballot(true));
+      // set_create_ballot(
+      //   `Created Ballot: ${new Date().toString().slice(4, 25)}`
+      // );
 
-      dispatch(add_ballot(ballot));
+      // set_end_ballot(`Results: ${new Date(end_ballot_1).toDateString()}`);
+
+      dispatch(
+        add_ballot({
+          ballot_chair: accounts[0],
+          open_date: Date.now(),
+          ballot_id: ballot_id,
+          ballot_name: ballot_name,
+          candidates: candidates,
+          ballot_type: ballot_type,
+          ballot_days: ballot_days,
+          registration_period: registration_period,
+        })
+      );
 
       dispatch(add_show_form(false));
 
@@ -458,7 +483,7 @@ const create_ballot = () => {
 
   useEffect(() => {
     init();
-  }, [ballot.ballot_name]);
+  }, [initial_ballot_state.ballot_name]);
 
   return (
     <div className={styles.wrapper} data-theme={current_theme}>
@@ -470,118 +495,35 @@ const create_ballot = () => {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Grid container xs={12}>
-        <Grid container xs={2}>
-          <Grid
-            item
-            xs={12}
-            sx={{
-              height: "20vh",
-              textAlign: "center",
-              padding: "10px",
-            }}
-          >
-            <Typography variant="h4">Jamii Ballots</Typography>
-            <Button
-              variant="outlined"
-              color="success"
-              onClick={(e) => handle_new_ballot(e, 0)}
-              className={styles.right_btns}
-            >
-              New Ballot
-            </Button>
-          </Grid>
-          <Divider />
-          <Grid
-            item
-            xs={12}
-            sx={{ height: "60vh", overflowY: "auto", textAlign: "center" }}
-          >
-            {/* <form onSubmit={(e) => get_ballot(e)}>
-              <TextField
-                id="standard-basic"
-                label="Search Ballots..."
-                variant="standard"
-                name="ballot_id"
-                type="text"
-                value={ballot_id}
-                onChange={(e) => set_ballot_id(e.target.value)}
-              />
-              <button type="submit">search</button>
-            </form> */}
-            <Typography variant="body1">Ballots</Typography>
-            {Object.keys(ballots).map((key) => (
-              <List
-                key={key}
-                onClick={() => dispatch(add_active_ballot(key))}
-                sx={{ cursor: "pointer" }}
-              >
-                <ListItem alignItems="flex-start">
-                  <ListItemText
-                    primary={ballots[key].ballot_name}
-                    secondary={
-                      <span className={styles.side_bar_text}>
-                        {" — this is a ballot to vote in ..."}
-                      </span>
-                    }
-                  />
-                </ListItem>
-                <Divider variant="inset" component="li" />
-              </List>
-            ))}
-          </Grid>
 
-          <Grid
-            item
-            xs={12}
-            sx={{
-              height: "10vh",
-            }}
-          >
-            <footer className={styles.left_footer}>
-              {/* {connected ? (
-              <div className={styles.connect_container}>
-                <div>
-                  <small>{error}</small>
-                </div>
-                <div>
-                  <Button>
-                    <AccountBalanceWalletOutlinedIcon
-                      sx={{ color: "#33FF57" }}
-                    />
-                  </Button>
-                </div>
-                <div>Ballot Owner: {user_addr}</div>
-              </div>
-            ) : ( */}
-              <div>{error && <small>{error}</small>}</div>
+      <MobileNav />
 
-              <div className={styles.connect_container}>
-                {/* )} */}
-                {/* <Button onClick={connect_wallet()}>
-              <AccountBalanceWalletOutlinedIcon sx={{ color: "#FF5733" }} />
-            </Button> */}
-                <div>
-                  <Button>
-                    <AccountBalanceWalletOutlinedIcon
-                      sx={{ color: wallet_color }}
-                    />
-                  </Button>
-                </div>
-                <div>
-                  <Button>
-                    <SettingsOutlinedIcon />
-                  </Button>
-                </div>
-              </div>
-            </footer>
-          </Grid>
+      <Grid container>
+        <Grid
+          item
+          lg={2}
+          md={2}
+          sm={2}
+          sx={{
+            display: { xs: "none", sm: "block", md: "block", lg: "block" },
+          }}
+        >
+          <LeftSideBar />
         </Grid>
 
-        <Grid item xs={10} className={styles.main_bar} sx={{ display: "flex" }}>
-          <Box sx={{ width: "100%" }}>
+        <Grid
+          item
+          lg={10}
+          md={10}
+          sm={10}
+          xs={12}
+          sx={{
+            height: "100vh",
+            marginTop: { xs: "1rem" },
+          }}
+        >
+          <Box>
             <Box
-              className={styles.main_panel}
               sx={{
                 borderBottom: 1,
                 borderColor: "divider",
@@ -589,62 +531,69 @@ const create_ballot = () => {
                 justifyContent: "space-between",
               }}
             >
-              <div>
+              <Grid
+                container
+                ml={2}
+                xs={12}
+                sx={{
+                  display: "flex",
+                }}
+              >
                 <Tabs
-                  value={value}
+                  value={active_tab}
                   onChange={handle_tab_change}
-                  aria-label="basic tabs example"
+                  variant="scrollable"
+                  scrollButtons="auto"
+                  sx={{
+                    padding: "1rem 0",
+                  }}
                 >
                   <Tab
                     className={styles.tab}
-                    label={create_ballot}
+                    label={ballot_text.tab_1}
                     {...a11yProps(0)}
                   />
                   <Tab
                     className={styles.tab}
-                    label="Open Ballot"
+                    label={ballot_text.tab_2}
                     {...a11yProps(1)}
                   />
                   <Tab
                     className={styles.tab}
-                    label={end_ballot}
+                    label={ballot_text.tab_3}
                     {...a11yProps(2)}
                   />
                 </Tabs>
-              </div>
-              <div className={styles.main_panel_actions}>
-                <Button
-                  className={styles.panel_icons}
-                  onClick={() => dispatch(add_show_form(true))}
-                >
-                  {current_theme === "dark" ? (
-                    <ContentCopyIcon sx={{ color: "#fff" }} />
-                  ) : (
-                    <ContentCopyIcon sx={{ color: "#000" }} />
-                  )}
-                </Button>
-                {current_theme === "dark" ? (
-                  // <Button onClick={switch_theme}>
-                  <Button onClick={switch_theme}>
-                    <DarkModeOutlinedIcon sx={{ color: "#fff" }} />
-                  </Button>
-                ) : (
-                  // <Button onClick={switch_theme}>
-                  <Button onClick={switch_theme}>
-                    <LightModeOutlinedIcon sx={{ color: "#000" }} />
-                  </Button>
-                )}
-              </div>
+              </Grid>
             </Box>
-            <div className={styles.ballot_details}>
-              <div className={styles.panel_details}>
+
+            <Grid
+              //  className={styles.ballot_details}
+              sx={{
+                display: "flex",
+              }}
+            >
+              <Grid
+                sx={{
+                  width: "100%",
+                  height: "100%",
+                }}
+              >
                 <TabPanel
-                  value={value}
+                  value={active_tab}
                   index={0}
-                  className={styles.ballot_container}
+                  // className={styles.ballot_container}
+                  sx={{
+                    width: { xs: "100%", sm: "100%", md: "100%" },
+                  }}
                 >
-                  {ballot_id.length == 0 || show_form === true ? (
-                    <div className={styles.ballot_form}>
+                  {ballots.length == 0 || show_form === true ? (
+                    <Box
+                      sx={{
+                        padding: "1rem",
+                        margin: "0 auto",
+                      }}
+                    >
                       <>
                         <Notification
                           open={show_notification}
@@ -653,21 +602,34 @@ const create_ballot = () => {
                         />
                       </>
                       <form>
-                        <div className={styles.form_item}>
+                        <Grid xs={12}>
                           <TextField
                             required
                             id="filled-basic"
                             label="ballot name"
                             variant="filled"
                             name="ballot_name"
-                            value={initial_ballot.ballot_name}
+                            value={initial_ballot_state.ballot_name}
                             onChange={handle_ballot_data}
                             fullWidth
+                            InputProps={{
+                              className: styles.input,
+                            }}
                           />
-                        </div>
+                        </Grid>
                         {/* _ballot_candidates_addr ->> array */}
-                        <div
-                          className={`${styles.form_item} ${styles.form_item_2}`}
+                        <Grid
+                          container
+                          sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            flexDirection: {
+                              xs: "column",
+                              sm: "column",
+                              md: "row",
+                              lg: "row",
+                            },
+                          }}
                         >
                           <div>
                             <Grid
@@ -689,7 +651,7 @@ const create_ballot = () => {
                                 <div>
                                   <Typography variant="captiom" component="p">
                                     {ballot_types_map.get(
-                                      parseInt(ballot.ballot_type)
+                                      parseInt(initial_ballot_state.ballot_type)
                                     )}{" "}
                                   </Typography>
                                 </div>
@@ -799,7 +761,8 @@ const create_ballot = () => {
                               {show_dates && (
                                 <div>
                                   {convert_seconds(
-                                    parseInt(ballot.ballot_days) / 1000
+                                    parseInt(initial_ballot_state.ballot_days) /
+                                      1000
                                   ) === false ? (
                                     <Typography
                                       variant="captiom"
@@ -813,13 +776,15 @@ const create_ballot = () => {
                                     <Typography variant="captiom" component="p">
                                       Ballot - Period:{" "}
                                       {convert_seconds(
-                                        parseInt(ballot.ballot_days) / 1000
+                                        parseInt(
+                                          initial_ballot_state.ballot_days
+                                        ) / 1000
                                       )}{" "}
                                     </Typography>
                                   )}
 
                                   {convert_seconds(
-                                    ballot.registration_period
+                                    initial_ballot_state.registration_period
                                   ) === false ? (
                                     <Typography
                                       variant="captiom"
@@ -833,7 +798,7 @@ const create_ballot = () => {
                                     <Typography variant="captiom" component="p">
                                       Registration - Period:{" "}
                                       {convert_seconds(
-                                        ballot.registration_period
+                                        initial_ballot_state.registration_period
                                       )}{" "}
                                     </Typography>
                                   )}
@@ -936,15 +901,19 @@ const create_ballot = () => {
                               </div>
                             </Modal>
                           </div>
-                        </div>
+                        </Grid>
                         {/* new candidates */}
                         <div>
+                          <Typography variant="caption">
+                            Select more than 1 Candidate
+                          </Typography>
                           {candidates.map((data, index) => {
                             const { address } = data;
+
                             return (
                               <div className={styles.add_candidate}>
                                 <TextField
-                                  helperText="Select more than 1 Candidate"
+                                  // helperText="Select more than 1 Candidate"
                                   required
                                   key={index}
                                   label="candidate address"
@@ -955,6 +924,9 @@ const create_ballot = () => {
                                   name="address"
                                   fullWidth
                                   className={styles.candidate_field}
+                                  InputProps={{
+                                    className: styles.input,
+                                  }}
                                 />
 
                                 <div>
@@ -1025,86 +997,62 @@ const create_ballot = () => {
                           </Button>
                         </Grid>
                       </form>
-                    </div>
+                    </Box>
                   ) : (
                     <>
-                      <CreatedBallot
-                        ballot={ballot}
-                        ballot_id={ballot_id}
-                        account={accounts[0]}
-                        start_registration={start_registration}
-                        end_registration={end_registration}
-                        start_voting={start_voting}
-                        end_ballot_1={end_ballot_1}
-                      />
+                      <CreatedBallot />
                     </>
                   )}
                 </TabPanel>
                 <TabPanel
-                  value={value}
+                  value={active_tab}
                   index={1}
                   className={styles.ballot_container}
                 >
-                  {ballots.length >= 1 ? (
-                    <OpenBallot />
-                  ) : (
-                    <Grid container>
-                      <h4>You have no active Ballots!!</h4>
-                      <small>create one?</small>
-                    </Grid>
-                  )}
+                  {ballots.length >= 1 ? <OpenBallot /> : <NoBallots />}
                 </TabPanel>
                 <TabPanel
-                  value={value}
+                  value={active_tab}
                   index={2}
                   className={styles.ballot_container}
                 >
-                  {ballot_id.length > 1 ? (
-                    <BallotResult />
-                  ) : (
-                    <Grid container>
-                      <h4>You have no active Ballots!!</h4>
-                      <small>create one?</small>
-                    </Grid>
-                  )}
+                  {ballots.length >= 1 ? <BallotResult /> : <NoBallots />}
                 </TabPanel>
-              </div>
-              <div className={styles.panel_actions}>
-                <Button
-                  variant="outlined"
-                  color="success"
-                  className={styles.right_btns}
-                >
-                  Preview Ballot
-                </Button>
-                <Button
-                  variant="outlined"
-                  color="success"
-                  className={styles.right_btns}
-                >
-                  Print Results
-                </Button>
-                <div>
-                  {!connected && (
-                    <>
-                      <Paper elevation={4} sx={{ padding: "10px" }}>
-                        <span>Connect Wallet to Create Ballot</span>
-                      </Paper>
-                    </>
-                  )}
-                </div>
-                <Typography variant="caption">
-                  {3 - ballots.length} Test Ballots Left
-                </Typography>
-                {ballots.length === 3 && (
-                  <Notification
-                    open={show_notification}
-                    type={type_notification}
-                    message={message_notification}
-                  />
+              </Grid>
+              <>
+                {show_new_ballot && (
+                  <Button
+                    onClick={handle_new_ballot}
+                    sx={{
+                      position: "absolute",
+                      top: "120px",
+                      left: 0,
+                      right: 0,
+                      marginLeft: "auto",
+                      marginRight: "auto",
+                      textAlign: "center",
+                      width: "50px",
+                    }}
+                  >
+                    <AddCircleOutlineOutlinedIcon />
+                  </Button>
                 )}
-              </div>
-            </div>
+              </>
+
+              <Grid
+                item
+                sx={{
+                  display: {
+                    xs: "none",
+                    sm: "block",
+                    md: "block",
+                    lg: "block",
+                  },
+                }}
+              >
+                <RightSideBar />
+              </Grid>
+            </Grid>
           </Box>
         </Grid>
       </Grid>
