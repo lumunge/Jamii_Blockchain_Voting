@@ -16,6 +16,17 @@
   align-items: center;
 }
 
+.right_btns {
+  margin: 10px 0;
+  text-transform: capitalize;
+  border: 1px solid var(--button-hover);
+  color: var(--button-hover);
+}
+.right_btns:hover {
+  transition: 0.2s ease-in-out;
+  color: var(--text-primary);
+}
+
 .landing {
   height: calc(100vh - 65px);
   width: 100%;
