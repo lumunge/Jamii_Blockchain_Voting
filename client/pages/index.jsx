@@ -63,7 +63,7 @@ const Home = () => {
               Jamii ballots is an E-Voting System that utilizes blockchain
               tecnhology to secure and keep the voting process transparent.
             </Typography>
-            <Button>Start a Ballot</Button>
+            <Button className={styles.right_btns}>Start a Ballot</Button>
           </Grid>
         </Grid>
 
@@ -92,8 +92,14 @@ const Home = () => {
               for online voting.
             </Typography>
             <Box>
-              <Button>What are Jamii Ballots</Button>
-              <Button>Blockchain Voting</Button>
+              <Button className={styles.right_btns}>
+                What are Jamii Ballots
+              </Button>
+              {"  "}
+              <Button className={styles.right_btns}>
+                {" "}
+                What is Blockchain Voting
+              </Button>
             </Box>
           </Grid>
         </Grid>
@@ -117,7 +123,7 @@ const Home = () => {
               us. Jamii ballots offers voting for many occassions from free
               general elections to closed door boardroom secret ballots.{" "}
             </Typography>
-            <Button>Use Cases</Button>
+            <Button className={styles.right_btns}>Use Cases</Button>
           </Grid>
           <Grid xs={12} sm={6} md={6} lg={6}>
             <Image
@@ -146,8 +152,9 @@ const Home = () => {
               chip in and contribute to the growth of Jaii Ballots.
             </Typography>
             <>
-              <Button>How to Contribute</Button>
-              <Button>
+              <Button className={styles.right_btns}>How to Contribute</Button>
+              {"  "}
+              <Button className={styles.right_btns}>
                 {" "}
                 <GitHubIcon /> Github
               </Button>
