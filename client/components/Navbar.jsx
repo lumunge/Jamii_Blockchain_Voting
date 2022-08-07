@@ -127,13 +127,13 @@ const Navbar = (props) => {
                 Get Started
               </Button>
             </Link>
-            {theme === "dark" ? (
+            {theme === "light" ? (
               <Button onClick={switch_theme}>
-                <DarkModeOutlinedIcon sx={{ color: "#fff" }} />
+                <DarkModeOutlinedIcon sx={{ color: "#000" }} />
               </Button>
             ) : (
               <Button onClick={switch_theme}>
-                <LightModeOutlinedIcon sx={{ color: "#000" }} />
+                <LightModeOutlinedIcon sx={{ color: "#fff" }} />
               </Button>
             )}
             <Button>
