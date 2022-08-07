@@ -18,7 +18,6 @@ import {
   add_ballot_id_chair,
 } from "../store/ballot_slice";
 import { add_notification } from "../store/notification_slice";
-import { add_theme } from "../store/theme_slice";
 
 import { v4 as uuid } from "uuid";
 import map from "../../build/deployments/map.json";
