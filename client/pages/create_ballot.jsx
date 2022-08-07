@@ -283,7 +283,7 @@ const create_ballot = () => {
         set_web_3(web3);
         set_accounts(accounts);
         set_chain_id(chain_id);
-        set_wallet_color("orange");
+        // set_wallet_color("orange");
 
         dispatch(login());
         dispatch(add_connected_account(accounts[0]));
@@ -358,9 +358,9 @@ const create_ballot = () => {
       return undefined;
     }
     console.log("WEB_3# ", web_3);
-    if (web_3 !== null) {
-      set_wallet_color("green");
-    }
+    // if (web_3 !== null) {
+    //   set_wallet_color("green");
+    // }
     return new web3.eth.Contract(contract_artifact.abi, address);
   };
 
@@ -446,11 +446,6 @@ const create_ballot = () => {
       );
 
       dispatch(add_show_new_ballot(true));
-      // set_create_ballot(
-      //   `Created Ballot: ${new Date().toString().slice(4, 25)}`
-      // );
-
-      // set_end_ballot(`Results: ${new Date(end_ballot_1).toDateString()}`);
 
       dispatch(
         add_ballot({
@@ -568,7 +563,6 @@ const create_ballot = () => {
             </Box>
 
             <Grid
-              //  className={styles.ballot_details}
               sx={{
                 display: "flex",
               }}
@@ -582,7 +576,6 @@ const create_ballot = () => {
                 <TabPanel
                   value={active_tab}
                   index={0}
-                  // className={styles.ballot_container}
                   sx={{
                     width: { xs: "100%", sm: "100%", md: "100%" },
                   }}
