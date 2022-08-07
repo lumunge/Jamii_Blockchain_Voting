@@ -20,7 +20,8 @@ body {
   --card-text: rgba(17, 17, 31, 1);
   --text-primary: rgba(17, 17, 31, 1);
   --text-secondary: #11111f;
-  --heading-text: darkslateblue;
+  /* --heading-text: darkslateblue; */
+  --heading-text: #78d64b;
 
   /* --button-hover: rgba(51, 168, 255, 1); */
   --button-hover: darkslateblue;
