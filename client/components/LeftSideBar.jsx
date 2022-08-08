@@ -24,6 +24,9 @@ const LeftSideBar = () => {
   const dispatch = useDispatch();
 
   const connected = useSelector((state) => state.auth.is_connected);
+  const connected_account = useSelector(
+    (state) => state.auth.connected_account
+  );
 
   const ballots = useSelector((state) => state.ballot.ballots);
   const active_ballot = useSelector((state) => state.ballot.active_ballot);
@@ -57,27 +60,30 @@ const LeftSideBar = () => {
           xs={12}
           sx={{ height: "60vh", overflowY: "auto", textAlign: "center" }}
         >
-          <Typography variant="body1">Ballots</Typography>
           {Object.keys(ballots).map((key) => (
-            <List
-              key={key}
-              className={key === active_ballot && styles.heading}
-              onClick={() => handle_ballot_change(key, 1)}
-              sx={{ cursor: "pointer" }}
-            >
-              <ListItem alignItems="flex-start">
-                <ListItemText
-                  className={key === active_ballot && styles.heading}
-                  primary={ballots[key].ballot_name}
-                  secondary={
-                    <span className={styles.side_bar_text}>
-                      {" — this is a ballot to vote in ..."}
-                    </span>
-                  }
-                />
-              </ListItem>
-              <Divider variant="inset" component="li" />
-            </List>
+            <>
+              <Typography variant="body1">Ballots</Typography>
+
+              <List
+                key={key}
+                className={key === active_ballot && styles.heading}
+                onClick={() => handle_ballot_change(key, 1)}
+                sx={{ cursor: "pointer" }}
+              >
+                <ListItem alignItems="flex-start">
+                  <ListItemText
+                    className={key === active_ballot && styles.heading}
+                    primary={ballots[key].ballot_name}
+                    secondary={
+                      <span className={styles.side_bar_text}>
+                        {" — this is a ballot to vote in ..."}
+                      </span>
+                    }
+                  />
+                </ListItem>
+                <Divider variant="inset" component="li" />
+              </List>
+            </>
           ))}
         </Grid>
 
@@ -101,9 +107,15 @@ const LeftSideBar = () => {
 
           <Grid container sx={{ display: "flex", justifyContent: "center" }}>
             {connected ? (
-              <Typography variant="body2" sx={{ color: "green" }}>
-                connected
-              </Typography>
+              <>
+                <Typography variant="caption">
+                  {connected_account.substr(0, 10) + "..."}
+                </Typography>
+                <br />
+                <Typography variant="caption" sx={{ color: "#78d64b" }}>
+                  connected
+                </Typography>
+              </>
             ) : (
               <Button className={styles.right_btns}>
                 <Typography variant="body2" sx={{ color: "red" }}>
