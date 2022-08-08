@@ -16,13 +16,12 @@ const NoBallots = () => {
     >
       <Typography variant="h4">You have no Open Ballots.</Typography>
       <Image
-        // className={styles.footer_image}
-        src="/not_available_nobg.png"
+        src="/no_ballots_nobg.png"
         alt="not_available_image"
         width={500}
         height={500}
       />
-      <Typography variant="caption">Create on in the previous tab.</Typography>
+      <Typography variant="caption">Create one in the previous tab.</Typography>
     </Grid>
   );
 };
