@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
+
 import { getWeb3 } from "../../utils/getWeb3";
 import map from "../../../build/deployments/map.json";
 
 import { useDispatch, useSelector } from "react-redux";
 import {
+  add_ballot,
   add_ballot_candidates,
   add_ballot_event,
 } from "../../store/ballot_slice";
@@ -15,9 +18,7 @@ import {
 } from "../../store/auth-slice";
 import { useRouter } from "next/router";
 
-import CountdownTimer from "../../components/CountdownTimer";
-
-import { ballot_types_map, convert_time_unix } from "../../utils/functions";
+import { ballot_types_map } from "../../utils/functions";
 import { get_account } from "../../wrapper/wrapper";
 import {
   TextField,
@@ -27,17 +28,35 @@ import {
   Typography,
   Box,
   Grid,
+  Divider,
 } from "@mui/material";
 
+// icons
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+
+// compoenents
+import CountdownTimer from "../../components/CountdownTimer";
+import Navbar from "../../components/Navbar";
+import Footer from "../../components/Footer";
+
+// stylesheet
 import styles from "../../styles/register_voter.module.css";
 
 const voter_registration = () => {
   const router = useRouter();
   const { ballot_id } = router.query;
-  const [account, set_account] = useState("");
-  const [ballot, set_ballot] = useState(null);
+  const localhost = "http://localhost:3000/";
+
+  let date_now = new Date().getTime();
+  // const [account, set_account] = useState("");
+  const account = useSelector((state) => state.auth.connected_account);
+  // const [ballot, set_ballot] = useState(null);
+  const ballot = useSelector((state) => state.ballot.ballot);
+  const current_theme = useSelector((state) => state.theme.current_theme);
+
+  const [disabled, set_disabled] = useState(false);
+
   const [user_id, set_user_id] = useState(0);
   const [error, set_error] = useState("");
   const [web_3, set_web_3] = useState({});
@@ -135,19 +154,22 @@ const voter_registration = () => {
 
     // set_account(account);
     // set_factory(_jamii_factory);
-    set_ballot(ballot);
+    // set_ballot(ballot);
+    dispatch(add_ballot(ballot));
     dispatch(add_connected_account(account));
     dispatch(add_factory(_jamii_factory));
     dispatch(add_ballot_candidates(ballot_candidates));
 
-    console.log("GAGAGAA: ", _jamii_factory);
-    console.log("BALLOTELLI: ", ballot);
+    console.log("FACTORY: ", _jamii_factory);
+    console.log("BALLOT: ", ballot);
     console.log("ACCOUNT: ", account);
+    console.log("CANDIDATES: ", ballot_candidates);
     return _jamii_factory;
   };
 
   const register_new_voter = async (e, _user_id, _ballot_id) => {
     e.preventDefault();
+    set_disabled(true);
     await factory?.methods
       .register_voter(_user_id, _ballot_id)
       .send({ from: connected_account, gas: 3000000 })
@@ -159,10 +181,6 @@ const voter_registration = () => {
       });
   };
 
-  const test = () => {
-    console.log(factory);
-  };
-
   useEffect(() => {
     init();
     load();
@@ -170,39 +188,57 @@ const voter_registration = () => {
   }, []);
 
   return (
-    <>
+    <div className={styles.container} data-theme={current_theme}>
+      <Navbar />
       <>
         {!ballot ? (
-          <Container maxWidth="sm" sx={{ height: "100vh" }}>
-            <small>{error}</small>
-            <Typography variant="h3" sx={{ textAlign: "center" }}>
-              Ballot Registration
+          <Container
+            maxWidth="sm"
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              height: { xs: "100vh" },
+            }}
+          >
+            <Typography variant="caption" sx={{ color: "red" }}>
+              {error}
             </Typography>
-            <Box sx={{ position: "relative", top: "40%" }}>
-              <Chip
-                label={ballot_id}
-                variant="outlined"
+
+            <Grid container justifyContent="center" alignItems="center" mt={10}>
+              <Grid item xs={12} textAlign="center">
+                <Chip
+                  label="jamii ballots"
+                  variant="outlined"
+                  className={styles.chip_text}
+                />
+              </Grid>
+              <Typography
                 sx={{
-                  padding: "6% 9% 6% 0",
-                  position: "relative",
-                  left: "2rem",
-                  fontSize: "1.2rem",
-                }}
-                // onClick={handleClick}
-              />
-              {/* <h4>Ballot {ballot_id}</h4> */}
-              <Button
-                variant="outlined"
-                onClick={() => load()}
-                disabled={ballot}
-                sx={{
-                  borderRadius: "50%",
-                  padding: "4% 0",
+                  textAlign: "center",
+                  fontSize: { xs: "2rem", sm: "3rem", md: "3rem", lg: "3rem" },
                 }}
               >
-                <ArrowForwardIosIcon />
+                Ballot Registration
+              </Typography>
+              <Typography variant="body1">{ballot_id}</Typography>
+
+              <Image
+                src="/register_2_nobg.png"
+                alt="register_image"
+                width={500}
+                height={500}
+              />
+
+              <Button
+                className={styles.right_btns}
+                onClick={() => load()}
+                disabled={ballot}
+              >
+                Proceed to Registration
               </Button>
-            </Box>
+            </Grid>
             {/* <button onClick={() => load()} disabled={ballot}>
                Start Registration
              </button> */}
@@ -210,7 +246,10 @@ const voter_registration = () => {
         ) : (
           <>
             {!ballot.expired ? (
-              <Container maxWidth="sm" sx={{ height: "100vh" }}>
+              <Container
+                maxWidth="sm"
+                sx={{ height: "100vh", marginTop: "5rem" }}
+              >
                 <Grid item xs={12} mb={4}>
                   <CountdownTimer
                     target_date={
@@ -232,7 +271,7 @@ const voter_registration = () => {
                   <Grid item xs={4}>
                     <Chip
                       label={ballot.ballot_id}
-                      sx={{ backgroundColor: status }}
+                      // sx={{ backgroundColor: status }}
                       // onClick={handleClick}
                     />
                   </Grid>
@@ -242,7 +281,16 @@ const voter_registration = () => {
                   item
                   mb={4}
                   xs={12}
-                  sx={{ display: "flex", alignItems: "center" }}
+                  sx={{
+                    display: "flex",
+                    flexDirection: {
+                      xs: "column",
+                      sm: "column",
+                      md: "column",
+                      lg: "row",
+                    },
+                    alignItems: "center",
+                  }}
                 >
                   <Typography variant="h5" pr={4}>
                     {" "}
@@ -251,7 +299,7 @@ const voter_registration = () => {
                   <Typography variant="body1">{ballot.chair}</Typography>
                 </Grid>
 
-                <Grid mb={4} item xs={12}>
+                <Grid container justifyContent="center" mb={4} item xs={12}>
                   <div>
                     <Typography variant="h5">Ballot Candidates</Typography>
                   </div>
@@ -259,52 +307,62 @@ const voter_registration = () => {
                   <>
                     {Object.keys(ballot_candidates).map((key) => (
                       <div key={key}>
-                        <Typography variant="body1">
+                        <Typography variant="body1" mb={2} mt={2}>
                           {ballot_candidates[key]}
                         </Typography>
+                        <Divider />
                       </div>
                     ))}
                   </>
                 </Grid>
 
-                <Grid item xs={12}>
-                  <form>
-                    <TextField
-                      id="standard-basic"
-                      label="Valid National ID Number"
-                      variant="outlined"
-                      name="user_id"
-                      type="text"
-                      value={user_id}
-                      onChange={(e) => set_user_id(e.target.value)}
-                      InputProps={{
-                        className: styles.user_id_input,
-                      }}
-                      sx={{ height: "13px" }}
-                      disabled={registered}
-                    />
-                    <Button
-                      variant="contained"
-                      onClick={(e) => register_new_voter(e, user_id, ballot_id)}
-                      sx={{
-                        right: "10px",
-                        height: "55px",
-                        borderRadius: "0 20px 20px 0",
-                      }}
-                    >
-                      Register
-                    </Button>
-                  </form>
+                <Grid
+                  container
+                  item
+                  xs={12}
+                  sx={{ display: "flex", flexDirection: "column" }}
+                >
+                  <TextField
+                    id="standard-basic"
+                    label="Valid National ID Number"
+                    variant="outlined"
+                    name="user_id"
+                    type="text"
+                    value={user_id}
+                    onChange={(e) => set_user_id(e.target.value)}
+                    InputProps={{
+                      className: styles.user_id_input,
+                    }}
+                    sx={{ height: "13px" }}
+                    disabled={
+                      registered ||
+                      date_now >
+                        (parseInt(ballot.open_date) +
+                          parseInt(ballot.registration_window)) *
+                          1000
+                    }
+                  />
+                  <br />
+                  <br />
+                  <br />
+                  <Button
+                    className={styles.right_btns}
+                    onClick={(e) => register_new_voter(e, user_id, ballot_id)}
+                    sx={{ width: "40%", margin: "0 auto" }}
+                    disabled={disabled}
+                  >
+                    Register
+                  </Button>
                 </Grid>
                 <h1>{user_address}</h1>
-                {account === ballot.chair.toLowerCase() && (
-                  <Grid item xs={12}>
-                    <div>
+                {account.toLowerCase() === ballot.chair?.toLowerCase() && (
+                  <Grid container justifyContent="center" item xs={12}>
+                    <Grid item xs={12} textAlign="center">
                       <Typography variant="caption">
                         Registration link:
                       </Typography>{" "}
-                    </div>
-                    <div className={styles.copy_link}>
+                    </Grid>
+                    <Grid xs={12} className={styles.copy_link}>
                       <input
                         onFocus={(e) => e.target.select()}
                         type="text"
@@ -316,7 +374,7 @@ const voter_registration = () => {
                         type="button"
                         onClick={() => {
                           navigator.clipboard.writeText(
-                            `${localhost}register_voter/51927f0d-f299-46fa-8336-7742e8b9dbb4`
+                            `${localhost}register_voter/${ballot_id}`
                           );
                         }}
                         className={styles.copy_link_button}
@@ -325,16 +383,22 @@ const voter_registration = () => {
                           <ContentCopyIcon />
                         </span>
                       </button>
-                    </div>
+                    </Grid>
                   </Grid>
                 )}
 
                 {registered && (
-                  <Grid item xs={12}>
-                    <div>
+                  <Grid container item xs={12} justifyContent="center">
+                    <Grid container item justifyContent="center" xs={12}>
                       <Typography variant="caption">Voting Link:</Typography>{" "}
-                    </div>
-                    <div className={styles.copy_link}>
+                    </Grid>
+                    <Grid
+                      container
+                      item
+                      justifyContent="center"
+                      xs={12}
+                      className={styles.copy_link}
+                    >
                       <input
                         onFocus={(e) => e.target.select()}
                         type="text"
@@ -355,20 +419,21 @@ const voter_registration = () => {
                           <ContentCopyIcon />
                         </span>
                       </button>
-                    </div>
+                    </Grid>
                   </Grid>
                 )}
               </Container>
             ) : (
               <>
                 <h4>Registration Closed!</h4>
-                <h5>{ballot.voters_count} Peopls Voted.</h5>
+                <h5>{ballot.voters_count} People Voted.</h5>
               </>
             )}
           </>
         )}
       </>
-    </>
+      <Footer />
+    </div>
   );
 };
 

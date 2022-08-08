@@ -1,26 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { getWeb3 } from "../../utils/getWeb3";
-
-import { ballot_types_map } from "../../utils/functions";
-
-import CountdownTimer from "../../components/CountdownTimer";
-
-import map from "../../../build/deployments/map.json";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
+import Image from "next/image";
+
+import { getWeb3 } from "../../utils/getWeb3";
 import { get_account } from "../../wrapper/wrapper";
-import {
-  TextField,
-  Container,
-  Button,
-  Chip,
-  Typography,
-  Box,
-  Grid,
-  Divider,
-} from "@mui/material";
 
 import { useDispatch, useSelector } from "react-redux";
-import { wrapper } from "../../store/store";
+import { add_voted_voted } from "../../store/voter_slice";
 import {
   add_ballot,
   add_ballot_candidates,
@@ -33,8 +19,30 @@ import {
   add_web_3,
   add_factory,
 } from "../../store/auth-slice";
-import { add_voted_voted } from "../../store/voter_slice";
+
+import { ballot_types_map } from "../../utils/functions";
+import map from "../../../build/deployments/map.json";
+
+import {
+  TextField,
+  Container,
+  Button,
+  Chip,
+  Typography,
+  Box,
+  Grid,
+  Divider,
+} from "@mui/material";
+
+// icons
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+
+// components
+import CountdownTimer from "../../components/CountdownTimer";
+import Navbar from "../../components/Navbar";
+import Footer from "../../components/Footer";
+
+// stylesheet
 import styles from "../../styles/vote.module.css";
 
 const Vote = () => {
@@ -55,6 +63,8 @@ const Vote = () => {
   const account = useSelector((state) => state.auth.connected_account);
 
   const ballot = useSelector((state) => state.ballot.ballots[2]);
+
+  const current_theme = useSelector((state) => state.theme.current_theme);
 
   const ballot_candidates = useSelector(
     (state) => state.ballot.ballot_candidates
@@ -177,180 +187,209 @@ const Vote = () => {
   }, []);
 
   return (
-    <Container maxWidth="sm" sx={{ height: "100vh" }}>
-      {!ballot_candidates ? (
-        <Container>
-          <small>{error}</small>
-          <Typography variant="h3" sx={{ textAlign: "center" }}>
-            Jamii Voting
-          </Typography>
-          <Box sx={{ position: "relative", top: "40%" }}>
-            <Chip
-              label={ballot_id}
-              variant="outlined"
+    <div className={styles.container} data-theme={current_theme}>
+      <Navbar />
+
+      <>
+        <Container maxWidth="sm" sx={{ height: "100vh", marginTop: "5rem" }}>
+          {!ballot_candidates ? (
+            <Container
+              maxWidth="sm"
               sx={{
-                padding: "6% 9% 6% 0",
-                position: "relative",
-                left: "2rem",
-                fontSize: "1.2rem",
-              }}
-              // onClick={handleClick}
-            />
-            {/* <h4>Ballot {ballot_id}</h4> */}
-            <Button
-              variant="outlined"
-              onClick={() => load()}
-              disabled={jamii_factory}
-              sx={{
-                borderRadius: "50%",
-                padding: "4% 0",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
               }}
             >
-              <ArrowForwardIosIcon />
-            </Button>
-          </Box>
-          {/* <button onClick={() => load()} disabled={ballot}>
-               Start Registration
-             </button> */}
-          {/* </Container>
-        <Container maxWidth="sm" sx={{ height: "100vh" }}>
-          <button onClick={() => load()}>Enter Ballot</button>*/}
-        </Container>
-      ) : (
-        <>
-          {!voted ? (
+              <Typography variant="caption" sx={{ color: "red" }}>
+                {error}
+              </Typography>
+
+              <Grid item xs={12} textAlign="center">
+                <Chip
+                  label="jamii ballots"
+                  variant="outlined"
+                  className={styles.chip_text}
+                />
+              </Grid>
+              <Typography
+                sx={{
+                  textAlign: "center",
+                  fontSize: { xs: "2rem", sm: "3rem", md: "3rem", lg: "3rem" },
+                }}
+              >
+                Ballot Voting
+              </Typography>
+              <Typography variant="body1">{ballot_id}</Typography>
+
+              <Image
+                src="/vote_nobg.png"
+                alt="vote_image"
+                width={500}
+                height={500}
+              />
+
+              <Button
+                className={styles.right_btns}
+                onClick={() => load()}
+                disabled={jamii_factory}
+              >
+                Proceed to Voting
+              </Button>
+            </Container>
+          ) : (
             <>
-              <form onSubmit={(e) => cast_vote(e)}>
-                {ballot && (
-                  <>
-                    <Grid item xs={12} mb={4}>
-                      <CountdownTimer
-                        target_date={
-                          (parseInt(ballot.open_date) +
-                            parseInt(ballot._days) / 1000) *
-                          1000
-                        }
-                      />
-                    </Grid>
+              {!voted ? (
+                <>
+                  <form onSubmit={(e) => cast_vote(e)}>
+                    {ballot && (
+                      <>
+                        <Grid item xs={12} mb={4}>
+                          <CountdownTimer
+                            target_date={
+                              (parseInt(ballot.open_date) +
+                                parseInt(ballot._days) / 1000) *
+                              1000
+                            }
+                          />
+                        </Grid>
 
-                    <Grid container>
-                      <Grid item xs={8} mb={4}>
-                        <Typography variant="h5">
-                          {ballot.ballot_name}{" "}
-                          <Typography variant="caption">{`${ballot_types_map.get(
-                            parseInt(ballot.ballot_type)
-                          )} Ballot`}</Typography>
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={4}>
-                        <Chip
-                          label={ballot.ballot_id}
-                          sx={{ backgroundColor: status }}
-                          // onClick={handleClick}
-                        />
-                      </Grid>
-                    </Grid>
+                        <Grid container>
+                          <Grid item xs={8} mb={4}>
+                            <Typography variant="h5">
+                              {ballot.ballot_name}{" "}
+                              <Typography variant="caption">{`${ballot_types_map.get(
+                                parseInt(ballot.ballot_type)
+                              )} Ballot`}</Typography>
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={4}>
+                            <Chip
+                              label={ballot.ballot_id}
+                              sx={{ backgroundColor: status }}
+                              // onClick={handleClick}
+                            />
+                          </Grid>
+                        </Grid>
 
+                        <Grid
+                          item
+                          mb={4}
+                          xs={12}
+                          sx={{ display: "flex", alignItems: "center" }}
+                        >
+                          <Typography variant="h5" pr={4}>
+                            {" "}
+                            Organizer:{" "}
+                          </Typography>
+                          <Typography variant="body1">
+                            {ballot.chair}
+                          </Typography>
+                        </Grid>
+
+                        <Grid container>
+                          <Grid item xs={12}>
+                            <Typography variant="h5">
+                              Tick a Single Checkbox
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={12} mb={4}>
+                            {Object.keys(ballot_candidates)?.map((key) => (
+                              <>
+                                <Grid
+                                  container
+                                  key={key}
+                                  pt={2}
+                                  pb={2}
+                                  sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    textAlign: "center",
+                                  }}
+                                >
+                                  <Grid item xs={9}>
+                                    <label for="candidate">
+                                      <Typography variant="body1">
+                                        {ballot_candidates[key]}
+                                      </Typography>
+                                    </label>
+                                  </Grid>
+                                  <Grid item xs={3}>
+                                    <input
+                                      type="checkbox"
+                                      name="candidate"
+                                      value={ballot_candidates[key]}
+                                      onChange={handle_box_change}
+                                      className={styles.check_box}
+                                      disabled={voted}
+                                    />
+                                  </Grid>
+                                  <br></br>
+                                </Grid>
+                                <Divider />
+                              </>
+                            ))}
+                          </Grid>
+                        </Grid>
+                      </>
+                    )}
                     <Grid
                       item
-                      mb={4}
                       xs={12}
-                      sx={{ display: "flex", alignItems: "center" }}
+                      mb={4}
+                      sx={{ display: "flex", justifyContent: "center" }}
                     >
-                      <Typography variant="h5" pr={4}>
-                        {" "}
-                        Organizer:{" "}
+                      <Button
+                        variant="contained"
+                        type="submit"
+                        disabled={selected_candidate.length == 0}
+                      >
+                        Vote
+                      </Button>
+                    </Grid>
+                  </form>
+                  {ballot && (
+                    <Grid
+                      item
+                      xs={12}
+                      sx={{ display: "flex", justifyContent: "center" }}
+                    >
+                      <Typography>
+                        Casted Votes: {ballot.voters_count}{" "}
                       </Typography>
-                      <Typography variant="body1">{ballot.chair}</Typography>
                     </Grid>
-
-                    <Grid container>
-                      <Grid item xs={12}>
-                        <Typography variant="h5">
-                          Tick a Single Checkbox
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={12} mb={4}>
-                        {Object.keys(ballot_candidates)?.map((key) => (
-                          <>
-                            <Grid
-                              container
-                              key={key}
-                              pt={2}
-                              pb={2}
-                              sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                textAlign: "center",
-                              }}
-                            >
-                              <Grid item xs={9}>
-                                <label for="candidate">
-                                  <Typography variant="body1">
-                                    {ballot_candidates[key]}
-                                  </Typography>
-                                </label>
-                              </Grid>
-                              <Grid item xs={3}>
-                                <input
-                                  type="checkbox"
-                                  name="candidate"
-                                  value={ballot_candidates[key]}
-                                  onChange={handle_box_change}
-                                  className={styles.check_box}
-                                  disabled={voted}
-                                />
-                              </Grid>
-                              <br></br>
-                            </Grid>
-                            <Divider />
-                          </>
-                        ))}
-                      </Grid>
-                    </Grid>
-                  </>
-                )}
-                <Grid
-                  item
-                  xs={12}
-                  mb={4}
-                  sx={{ display: "flex", justifyContent: "center" }}
-                >
-                  <Button
-                    variant="contained"
-                    type="submit"
-                    disabled={selected_candidate.length == 0}
+                  )}
+                </>
+              ) : (
+                <Grid container>
+                  <Image
+                    src="/voted_nobg.png"
+                    alt="voted_image"
+                    width={500}
+                    height={500}
+                  />
+                  <Typography
+                    sx={{
+                      fontSize: {
+                        xs: "2rem",
+                        sm: "3rem",
+                        md: "3rem",
+                        lg: "3rem",
+                      },
+                    }}
                   >
-                    Vote
-                  </Button>
-                </Grid>
-              </form>
-              {ballot && (
-                <Grid
-                  item
-                  xs={12}
-                  sx={{ display: "flex", justifyContent: "center" }}
-                >
-                  <Typography>Casted Votes: {ballot.voters_count} </Typography>
+                    You already cast your vote in this ballot.
+                  </Typography>
+                  <Button className={styles.right_btns}>Back Home</Button>
                 </Grid>
               )}
             </>
-          ) : (
-            <>
-              <h1>You already cast your vote in this</h1>
-              <h1>Modal Here</h1>
-              <div>
-                <h1>Tick Icon Here</h1>
-                <p>Your vote has bee casted</p>
-                <button>
-                  Back to voting Page With State changed and countdown timer
-                </button>
-              </div>
-            </>
           )}
-        </>
-      )}
-    </Container>
+        </Container>
+      </>
+      <Footer />
+    </div>
   );
 };
 
