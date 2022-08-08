@@ -25,7 +25,9 @@ const initialState = {
   show_dates: false,
   show_type: false,
   event: "",
+  ballot: {},
   ballots: [],
+  ballot_candidates: [],
   active_ballot: 0,
   active_tab: 0,
   ballot_status: true,
@@ -56,6 +58,7 @@ export const ballot_slice = createSlice({
     },
     add_ballot: (state, action) => {
       state.ballots = [...state.ballots, action.payload];
+      state.ballot = action.payload;
     },
     add_active_ballot: (state, action) => {
       state.active_ballot = action.payload;
@@ -71,6 +74,7 @@ export const ballot_slice = createSlice({
     },
     add_ballot_candidates: (state, action) => {
       state.initial_ballot.ballot_candidates = action.payload;
+      state.ballot_candidates = action.payload;
     },
     add_ballot_dates: (state, action) => {
       state.initial_ballot.start_registration =
