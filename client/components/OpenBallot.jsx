@@ -49,7 +49,12 @@ const OpenBallot = () => {
             {" "}
             Organizer:{" "}
           </Typography>
-          <Typography variant="caption">
+          <Typography
+            variant="caption"
+            sx={{
+              fontSize: { xs: "12px", sm: "15px", md: "15px", lg: "20px" },
+            }}
+          >
             {ballots[active_ballot].ballot_chair}
           </Typography>
         </Grid>
@@ -73,7 +78,19 @@ const OpenBallot = () => {
           <>
             {Object.keys(ballots[active_ballot].candidates).map((key) => (
               <div key={key}>
-                <Typography variant="caption" pb={1} pt={1}>
+                <Typography
+                  variant="caption"
+                  pb={1}
+                  pt={1}
+                  sx={{
+                    fontSize: {
+                      xs: "12px",
+                      sm: "15px",
+                      md: "15px",
+                      lg: "20px",
+                    },
+                  }}
+                >
                   {ballots[active_ballot].candidates[key]}
                 </Typography>
                 <Divider />
@@ -165,7 +182,13 @@ const OpenBallot = () => {
             }}
           >
             <div>
-              <Typography variant="caption">Registration link:</Typography>{" "}
+              <Typography
+                sx={{
+                  fontSize: { xs: "12px", sm: "15px", md: "15px", lg: "20px" },
+                }}
+              >
+                Registration link:
+              </Typography>{" "}
             </div>
             <div className={styles.copy_link}>
               <input

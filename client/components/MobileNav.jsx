@@ -65,17 +65,6 @@ const MobileNav = (props) => {
       <Typography variant="h6" sx={{ my: 2 }}>
         Jamii Ballots
       </Typography>
-      {current_theme === "dark" ? (
-        <DarkModeOutlinedIcon
-          onClick={switch_theme}
-          sx={{ color: "#000", cursor: "pointer" }}
-        />
-      ) : (
-        <LightModeOutlinedIcon
-          onClick={switch_theme}
-          sx={{ color: "#000", cursor: "pointer" }}
-        />
-      )}
       <Divider />
       <RightSideBar />
     </Box>

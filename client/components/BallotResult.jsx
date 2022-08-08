@@ -84,7 +84,18 @@ const BallotResult = () => {
               <>
                 {Object.keys(ballots[active_ballot].candidates).map((key) => (
                   <div key={key}>
-                    <Typography variant="caption" pt={1} pb={1}>
+                    <Typography
+                      pt={1}
+                      pb={1}
+                      sx={{
+                        fontSize: {
+                          xs: "12px",
+                          sm: "15px",
+                          md: "15px",
+                          lg: "20px",
+                        },
+                      }}
+                    >
                       {ballots[active_ballot].candidates[key]}
                     </Typography>
                     <Divider />
