@@ -70,7 +70,7 @@ export const ballot_types_map = new Map([
 
 export const nav_items_map = new Map([
   ["Use Cases", "/use_cases"],
-  ["Success Stories", "/sucess_stories"],
+  ["Success Stories", "/success_stories"],
   ["Help Center", "/help_center"],
   ["Blog", "/blog"],
 ]);
