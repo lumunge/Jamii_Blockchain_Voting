@@ -1,7 +1,7 @@
 import Head from "next/head";
+import Image from "next/image";
 
 import { useSelector } from "react-redux";
-import Image from "next/image";
 
 import { Grid, Box, Container, Button, Typography } from "@mui/material";
 
@@ -22,8 +22,29 @@ const Home = () => {
     <div className={styles.container} data-theme={current_theme}>
       <Head>
         <title>Jamii Blockchain Voting</title>
-        <meta name="description" content="A voting system on the blockchain." />
+        <meta
+          name="description"
+          content="A voting system that leverages blockchain technology!"
+        />
         <link rel="icon" href="/favicon.ico" />
+        <link
+          rel="apple-touch-icon"
+          sizes="180x180"
+          href="/apple-touch-icon.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="32x32"
+          href="/favicon-32x32.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="16x16"
+          href="/favicon-16x16.png"
+        />
+        <link rel="manifest" href="/site.webmanifest" />
       </Head>
 
       <Navbar />
@@ -55,7 +76,10 @@ const Home = () => {
             <Typography
               variant="h4"
               mb={2}
-              sx={{ marginTop: "6rem", fontWeight: "600" }}
+              sx={{
+                marginTop: { xs: "1rem", sm: "1rem", md: "6rem", lg: "6rem" },
+                fontWeight: "600",
+              }}
             >
               Welcome to Jamii Ballots
             </Typography>
@@ -83,7 +107,12 @@ const Home = () => {
             />
           </Grid>
           <Grid item xs={12} sm={6} md={6} lg={6}>
-            <Typography variant="h3" mb={2}>
+            <Typography
+              mb={2}
+              sx={{
+                fontSize: { xs: "2rem", sm: "3rem", md: "3rem", lg: "3rem" },
+              }}
+            >
               What are Jamii Ballots?
             </Typography>
             <Typography variant="h5" mb={2}>
@@ -92,14 +121,9 @@ const Home = () => {
               for online voting.
             </Typography>
             <Box>
-              <Button className={styles.right_btns}>
-                What are Jamii Ballots
-              </Button>
+              <Button className={styles.right_btns}>Jamii Ballots?</Button>
               {"  "}
-              <Button className={styles.right_btns}>
-                {" "}
-                What is Blockchain Voting
-              </Button>
+              <Button className={styles.right_btns}> Blockchain Voting?</Button>
             </Box>
           </Grid>
         </Grid>
@@ -109,10 +133,25 @@ const Home = () => {
           alignItems="center"
           mt={4}
           mb={4}
-          sx={{ height: "100vh" }}
+          sx={{ height: "100%" }}
         >
-          <Grid item xs={12} sm={6} md={6} lg={6}>
-            <Typography variant="h3" mb={2}>
+          <Grid
+            item
+            xs={12}
+            sm={6}
+            md={6}
+            lg={6}
+            sx={{
+              textAlign: { xs: "center", sm: "left", md: "left", lg: "left" },
+            }}
+          >
+            <Typography
+              variant="h3"
+              mb={2}
+              sx={{
+                fontSize: { xs: "2rem", sm: "3rem", md: "3rem", lg: "3rem" },
+              }}
+            >
               Where can you use Jamii Ballots?
             </Typography>
             <Typography variant="h5" mb={2}>
@@ -137,8 +176,11 @@ const Home = () => {
 
         <Grid
           container
+          mt={4}
+          mb={4}
           alignItems="center"
           sx={{
+            height: "100vh",
             backgroundColor: "rgba(72, 61, 139, 0.2)",
           }}
           mb={6}
