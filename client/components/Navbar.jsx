@@ -1,5 +1,4 @@
 import { useState } from "react";
-// import useMedia from "../utils/useMedia";
 import Head from "next/head";
 import Link from "next/link";
 import useLocalStorage from "use-local-storage";
@@ -71,6 +70,11 @@ const Navbar = (props) => {
             </ListItemButton>
           </ListItem>
         ))}
+        <ListItem disablePadding>
+          <ListItemButton sx={{ textAlign: "center" }}>
+            <ListItemText primary="Get Started" />
+          </ListItemButton>
+        </ListItem>
       </List>
     </Box>
   );
@@ -127,6 +131,18 @@ const Navbar = (props) => {
                 Get Started
               </Button>
             </Link>
+          </Box>
+          <Box
+            sx={{
+              position: {
+                xs: "absolute",
+                sm: "relative",
+                md: "relative",
+                lg: "relative",
+              },
+              right: "0",
+            }}
+          >
             {theme === "light" ? (
               <Button onClick={switch_theme}>
                 <DarkModeOutlinedIcon sx={{ color: "#000" }} />
