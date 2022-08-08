@@ -1,0 +1,15 @@
+.container {
+  background-color: var(--background);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  width: 100%;
+}
+.right_btns {
+  text-transform: capitalize;
+  border: 1px solid var(--button-hover);
+  color: var(--button-hover);
+}
+.right_btns:hover {
+  transition: 0.2s ease-in-out;
+  color: var(--text-primary);
+}
