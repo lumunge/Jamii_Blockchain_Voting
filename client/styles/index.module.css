@@ -4,7 +4,19 @@
   overflow-x: hidden;
   width: 100%;
 }
+
+.main {
+  min-height: 100vh;
+  padding: 4rem 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
 .right_btns {
+  margin: 10px 0;
   text-transform: capitalize;
   border: 1px solid var(--button-hover);
   color: var(--button-hover);
@@ -12,10 +24,4 @@
 .right_btns:hover {
   transition: 0.2s ease-in-out;
   color: var(--text-primary);
-}
-
-.check_box {
-  width: 35px;
-  height: 35px;
-  cursor: pointer;
 }

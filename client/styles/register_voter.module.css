@@ -1,5 +1,23 @@
+.container {
+  background-color: var(--background);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  width: 100%;
+}
+.right_btns {
+  text-transform: capitalize;
+  border: 1px solid var(--button-hover);
+  color: var(--button-hover);
+}
+.right_btns:hover {
+  transition: 0.2s ease-in-out;
+  color: var(--text-primary);
+}
+.chip_text {
+  color: var(--text-primary);
+}
+
 .copy_link {
-  /* --height: 36px; */
   height: 40px;
   display: flex;
   max-width: 250px;
@@ -39,5 +57,5 @@
 }
 
 .user_id_input {
-  border-radius: 20px 0 0 20px;
+  border-radius: 20px;
 }
