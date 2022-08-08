@@ -357,9 +357,6 @@ const create_ballot = () => {
       return undefined;
     }
     console.log("WEB_3# ", web_3);
-    // if (web_3 !== null) {
-    //   set_wallet_color("green");
-    // }
     return new web3.eth.Contract(contract_artifact.abi, address);
   };
 
@@ -380,10 +377,6 @@ const create_ballot = () => {
       let ballot_type = initial_ballot_state.ballot_type;
       let ballot_days = initial_ballot_state.ballot_days;
       let registration_period = initial_ballot_state.registration_period;
-
-      // initial_ballot_state.ballot_id = ballot_id;
-      // initial_ballot_state.ballot_chair = accounts[0];
-      // initial_ballot_state.open_date = Date.now();
 
       dispatch(
         add_ballot_id_chair({
@@ -414,18 +407,7 @@ const create_ballot = () => {
               })
             );
           }
-
-          console.log("Ballot created Successfully 1!!");
-          console.log("LOADING AFTER: ", show_notification);
         });
-      // console.log(
-      //   ballot_id,
-      //   ballot_name,
-      //   candidates,
-      //   ballot_type,
-      //   ballot_days,
-      //   registration_period
-      // );
 
       dispatch(
         add_notification({
@@ -435,7 +417,6 @@ const create_ballot = () => {
         })
       );
 
-      // set_ballot_id(ballot_id);
       dispatch(
         add_tab_state({
           tab_1: `Created Ballot: ${new Date().toString().slice(4, 25)}`,
@@ -460,8 +441,6 @@ const create_ballot = () => {
       );
 
       dispatch(add_show_form(false));
-
-      console.log("Ballot created Successfully 3!!");
     } catch (error) {
       dispatch(
         add_notification({
@@ -470,8 +449,6 @@ const create_ballot = () => {
           message: "An Error Occured!",
         })
       );
-      console.log("ERROR: ", error);
-      console.log(error.message);
     }
   };
 

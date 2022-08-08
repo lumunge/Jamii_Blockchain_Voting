@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/router";
 import Image from "next/image";
 
 import { getWeb3 } from "../../utils/getWeb3";
@@ -16,7 +17,7 @@ import {
   add_factory,
   add_connected_account,
 } from "../../store/auth-slice";
-import { useRouter } from "next/router";
+import { add_notification } from "../../store/notification_slice";
 
 import { ballot_types_map } from "../../utils/functions";
 import { get_account } from "../../wrapper/wrapper";
@@ -32,13 +33,13 @@ import {
 } from "@mui/material";
 
 // icons
-import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 
 // compoenents
 import CountdownTimer from "../../components/CountdownTimer";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
+import Notification from "../../components/Notification";
 
 // stylesheet
 import styles from "../../styles/register_voter.module.css";
@@ -49,11 +50,11 @@ const voter_registration = () => {
   const localhost = "http://localhost:3000/";
 
   let date_now = new Date().getTime();
-  // const [account, set_account] = useState("");
   const account = useSelector((state) => state.auth.connected_account);
-  // const [ballot, set_ballot] = useState(null);
   const ballot = useSelector((state) => state.ballot.ballot);
   const current_theme = useSelector((state) => state.theme.current_theme);
+
+  const show_notification = useSelector((state) => state.notification.open);
 
   const [disabled, set_disabled] = useState(false);
 
@@ -61,10 +62,8 @@ const voter_registration = () => {
   const [error, set_error] = useState("");
   const [web_3, set_web_3] = useState({});
   const [chain_id, set_chain_id] = useState(0);
-  // const [voting_link, set_voting_link] = useState(false);
 
   const dispatch = useDispatch();
-  // const ballot_id = useSelector((state) => state.ballot.ballot_ids[0]);
 
   const factory = useSelector((state) => state.auth.factory);
   const ballot_candidates = useSelector(
@@ -104,11 +103,9 @@ const voter_registration = () => {
       } catch (error) {
         if (error.message == "User rejected the request.") {
           set_error("Connect your Metamask Wallet!");
-          // set_notification(!notification);
         } else {
+          set_error("Connect your Metamask Wallet!");
           console.log(error);
-          // set_notification(!notification);
-          // notify(error, "You have to connect your Metamask Wallet!")
         }
       }
     }
@@ -152,33 +149,51 @@ const voter_registration = () => {
 
     const account = await get_account();
 
-    // set_account(account);
-    // set_factory(_jamii_factory);
-    // set_ballot(ballot);
     dispatch(add_ballot(ballot));
     dispatch(add_connected_account(account));
     dispatch(add_factory(_jamii_factory));
     dispatch(add_ballot_candidates(ballot_candidates));
 
-    console.log("FACTORY: ", _jamii_factory);
-    console.log("BALLOT: ", ballot);
-    console.log("ACCOUNT: ", account);
-    console.log("CANDIDATES: ", ballot_candidates);
+    // console.log("FACTORY: ", _jamii_factory);
+    // console.log("BALLOT: ", ballot);
+    // console.log("ACCOUNT: ", account);
+    // console.log("CANDIDATES: ", ballot_candidates);
     return _jamii_factory;
   };
 
   const register_new_voter = async (e, _user_id, _ballot_id) => {
     e.preventDefault();
-    set_disabled(true);
-    await factory?.methods
-      .register_voter(_user_id, _ballot_id)
-      .send({ from: connected_account, gas: 3000000 })
-      .on("receipt", async () => {
-        // notification
-        // set_voting_link(true);
-        dispatch(add_voter_registered(true));
-        console.log("Voter Registered Successfully!!");
+
+    try {
+      dispatch(
+        add_notification({
+          open: true,
+          type: "info",
+          message: "Processing Registration...",
+        })
+      );
+      set_disabled(true);
+      await factory?.methods
+        .register_voter(_user_id, _ballot_id)
+        .send({ from: connected_account, gas: 3000000 })
+        .on("receipt", async () => {
+          dispatch(add_voter_registered(true));
+          dispatch(
+            add_notification({
+              open: true,
+              type: "success",
+              message: "Registered Successfully!",
+            })
+          );
+        });
+    } catch (error) {
+      add_notification({
+        open: true,
+        type: "error",
+        message: "Failed to process your Registration!",
       });
+      console.log(error);
+    }
   };
 
   useEffect(() => {
@@ -239,16 +254,13 @@ const voter_registration = () => {
                 Proceed to Registration
               </Button>
             </Grid>
-            {/* <button onClick={() => load()} disabled={ballot}>
-               Start Registration
-             </button> */}
           </Container>
         ) : (
           <>
             {!ballot.expired ? (
               <Container
                 maxWidth="sm"
-                sx={{ height: "100vh", marginTop: "5rem" }}
+                sx={{ minHeight: "100vh", marginTop: "5rem" }}
               >
                 <Grid item xs={12} mb={4}>
                   <CountdownTimer
@@ -322,6 +334,9 @@ const voter_registration = () => {
                   xs={12}
                   sx={{ display: "flex", flexDirection: "column" }}
                 >
+                  <Box mb={2} mt={2}>
+                    {show_notification && <Notification />}
+                  </Box>
                   <TextField
                     id="standard-basic"
                     label="Valid National ID Number"
@@ -437,17 +452,4 @@ const voter_registration = () => {
   );
 };
 
-// export const getServerSideProps = wrapper.getServerSideProps(
-// (store) => async () => {
-//     const { ballot_id } = router.query;
-//     // const get_ballot_details = async () => {
-//     const new_ballot = await get_ballot(ballot_id);
-//     // set_ballot(new_ballot);
-//     console.log("NEW BALLOT", new_ballot);
-//     // };
-//     store.dispatch(add_ballot(new_ballot));
-//     // store.dispatch(add_contract(contract));
-//     // store.dispatch(increment());
-// }
-// );
 export default voter_registration;

@@ -1,6 +1,7 @@
 import { useDispatch, useSelector } from "react-redux";
 
 import { add_active_ballot, add_active_tab } from "../store/ballot_slice";
+import { add_notification } from "../store/notification_slice";
 
 import {
   Grid,
@@ -15,7 +16,8 @@ import {
 
 // icons
 
-// Components
+// components
+import Notification from "../components/Notification";
 
 // stylesheet
 import styles from "../styles/create_ballot.module.css";
@@ -34,6 +36,46 @@ const LeftSideBar = () => {
   const handle_ballot_change = (key, tab) => {
     dispatch(add_active_tab(tab));
     dispatch(add_active_ballot(key));
+  };
+
+  const init = async () => {
+    dispatch(
+      add_notification({
+        open: true,
+        type: "info",
+        message: "Connecting Wallet...",
+      })
+    );
+
+    if (
+      typeof window !== "undefined" &&
+      typeof window.ethereum !== "undefined"
+    ) {
+      try {
+        await window.ethereum.request({ method: "eth_requestAccounts" });
+      } catch (error) {
+        if (error.message == "User rejected the request.") {
+          dispatch(
+            add_notification({
+              open: true,
+              type: "info",
+              message: "Try connecting Your Metamask wallet!",
+            })
+          );
+        } else if (
+          error.message ==
+          "Request of type 'wallet_requestPermissions' already pending for origin http://localhost:3000. Please wait."
+        ) {
+          dispatch(
+            add_notification({
+              open: true,
+              type: "info",
+              message: "Pending Connection to Wallet!",
+            })
+          );
+        }
+      }
+    }
   };
 
   return (
@@ -98,7 +140,10 @@ const LeftSideBar = () => {
           <div>
             {!connected && (
               <Typography variant="caption">
-                <a href="https://metamask.zendesk.com/hc/en-us/articles/360045901112-Manually-connecting-to-a-dapp">
+                <a
+                  target="_blank"
+                  href="https://metamask.zendesk.com/hc/en-us/articles/360045901112-Manually-connecting-to-a-dapp"
+                >
                   Connect wallet
                 </a>
               </Typography>
@@ -117,7 +162,7 @@ const LeftSideBar = () => {
                 </Typography>
               </>
             ) : (
-              <Button className={styles.right_btns}>
+              <Button className={styles.right_btns} onClick={init}>
                 <Typography variant="body2" sx={{ color: "red" }}>
                   Connect Wallet
                 </Typography>

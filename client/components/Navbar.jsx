@@ -1,12 +1,13 @@
 import { useState } from "react";
-import Head from "next/head";
 import Link from "next/link";
 import useLocalStorage from "use-local-storage";
 
 import { useDispatch } from "react-redux";
+import { add_theme } from "../store/theme_slice";
 
 import { useMedia } from "../hooks/useMedia";
-import { add_theme } from "../store/theme_slice";
+
+import { nav_items_map } from "../utils/functions";
 
 import {
   AppBar,
@@ -28,9 +29,7 @@ import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import LanguageIcon from "@mui/icons-material/Language";
 
-import { nav_items_map } from "../utils/functions";
-
-// styleshee
+// stylesheet
 import styles from "../styles/create_ballot.module.css";
 
 const Navbar = (props) => {
@@ -119,17 +118,19 @@ const Navbar = (props) => {
           </Box>
           <Box sx={{ display: { xs: "none", sm: "block" } }}>
             <Link href="/create_ballot">
-              <Button
-                sx={{
-                  flexGrow: 1,
-                  color: "#11111f",
-                  textTransform: "capitalize",
-                  backgroundColor: "#78d64b",
-                  padding: "10px 1rem",
-                }}
-              >
-                Get Started
-              </Button>
+              <a target="_blank" rel="noopener noreferrer">
+                <Button
+                  sx={{
+                    flexGrow: 1,
+                    color: "#11111f",
+                    textTransform: "capitalize",
+                    backgroundColor: "#78d64b",
+                    padding: "10px 1rem",
+                  }}
+                >
+                  Get Started
+                </Button>
+              </a>
             </Link>
           </Box>
           <Box
@@ -170,7 +171,7 @@ const Navbar = (props) => {
           open={mobileOpen}
           onClose={handleDrawerToggle}
           ModalProps={{
-            keepMounted: true, // Better open performance on mobile.
+            keepMounted: true,
           }}
           sx={{
             display: { xs: "block", sm: "none" },

@@ -2,7 +2,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { add_notification } from "../store/notification_slice";
 import { Alert } from "@mui/material";
 
-const Notification = ({ type, message }) => {
+const Notification = () => {
   const dispatch = useDispatch();
 
   const show_notification = useSelector((state) => state.notification.open);

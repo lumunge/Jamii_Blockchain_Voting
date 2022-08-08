@@ -7,6 +7,7 @@ import { get_account } from "../../wrapper/wrapper";
 
 import { useDispatch, useSelector } from "react-redux";
 import { add_voted_voted } from "../../store/voter_slice";
+import { add_notification } from "../../store/notification_slice";
 import {
   add_ballot,
   add_ballot_candidates,
@@ -35,12 +36,12 @@ import {
 } from "@mui/material";
 
 // icons
-import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 
 // components
 import CountdownTimer from "../../components/CountdownTimer";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
+import Notification from "../../components/Notification";
 
 // stylesheet
 import styles from "../../styles/vote.module.css";
@@ -50,6 +51,8 @@ const Vote = () => {
   const dispatch = useDispatch();
 
   const [error, set_error] = useState("");
+
+  const show_notification = useSelector((state) => state.notification.open);
 
   const { ballot_id } = router.query;
   const [selected_candidate, set_selected_candidate] = useState("");
@@ -154,7 +157,7 @@ const Vote = () => {
     dispatch(add_connected_account(account));
     dispatch(add_ballot_candidates(candidates));
 
-    console.log("GAGAGAA: ", jamii_factory);
+    console.log("FACTORY: ", jamii_factory);
     console.log("BALLOT: ", ballot);
     console.log("ACCOUNT: ", account);
     console.log("ChAIN_ID: ", chain_id);
@@ -165,19 +168,39 @@ const Vote = () => {
 
   const cast_vote = async (e) => {
     e.preventDefault();
-    await jamii_factory?.methods
-      .vote(selected_candidate, ballot_id)
-      .send({ from: account, gas: 3000000 })
-      .on("receipt", async () => {
-        // notification
-        dispatch(add_voted_voted(true));
-        console.log("Voter Successfully Voted!!");
-      });
-  };
-
-  const test = () => {
-    console.log(ballot);
-    console.log(account);
+    try {
+      dispatch(
+        add_notification({
+          open: true,
+          type: "success",
+          message: "Processing Vote!",
+        })
+      );
+      await jamii_factory?.methods
+        .vote(selected_candidate, ballot_id)
+        .send({ from: account, gas: 3000000 })
+        .on("receipt", async () => {
+          // notification
+          dispatch(add_voted_voted(true));
+          dispatch(
+            add_notification({
+              open: true,
+              type: "success",
+              message: "You Voted Successfully!",
+            })
+          );
+          console.log("Voter Successfully Voted!!");
+        });
+    } catch (error) {
+      dispatch(
+        add_notification({
+          open: true,
+          type: "error",
+          message: "Failed to process your Vote!",
+        })
+      );
+      console.log(error);
+    }
   };
 
   useEffect(() => {
@@ -289,6 +312,9 @@ const Vote = () => {
                         </Grid>
 
                         <Grid container>
+                          <Box mt={2} mb={2}>
+                            {show_notification && <Notification />}
+                          </Box>
                           <Grid item xs={12}>
                             <Typography variant="h5">
                               Tick a Single Checkbox
@@ -379,7 +405,7 @@ const Vote = () => {
                       },
                     }}
                   >
-                    You already cast your vote in this ballot.
+                    Your Vote was Cast Successfully!.
                   </Typography>
                   <Button className={styles.right_btns}>Back Home</Button>
                 </Grid>
