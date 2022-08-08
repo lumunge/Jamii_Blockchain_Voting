@@ -1,6 +1,6 @@
 import { getEthereum } from "../utils/getEthereum";
 import { getWeb3 } from "../utils/getWeb3";
-import map from "../../build/deployments/map.json";
+import map from "../map.json";
 
 let init_chain_id = 0;
 let init_web_3 = null;
@@ -11,30 +11,35 @@ export const init = async () => {
   const web3 = await getWeb3();
   init_web_3 = web3;
 
-  try {
-    const ethereum = await getEthereum();
-    ethereum.enable();
-  } catch (e) {
-    console.log(`Could not enable accounts. Interaction with contracts not available.
-            Use a modern browser with a Web3 plugin to fix this issue.`);
-    console.log(e);
+  if (typeof window !== "undefined" && typeof window.ethereum !== "undefined") {
+    try {
+      await window.ethereum.request({ method: "eth_requestAccounts" });
+      const accounts = await web3.eth.getAccounts();
+      const chain_id = parseInt(await web3.eth.getChainId());
+
+      console.log("GOTTEN CHAIN ID: ", chain_id);
+
+      init_accounts = accounts;
+      init_chain_id = chain_id;
+
+      dispatch(login());
+
+      await load_initial_contracts();
+    } catch (error) {
+      if (error.message == "User rejected the request.") {
+        // set_error("Connect your Metamask Wallet!");
+        // set_notification(!notification);
+        // } else {
+        // set_error("Connect Metamask Wallet!!");
+        console.log(error);
+        // set_notification(!notification);
+        // notify(error, "You have to connect your Metamask Wallet!")
+      }
+    }
   }
-
-  const accounts = await web3.eth.getAccounts();
-  init_accounts = accounts;
-  const chain_id = parseInt(await web3.eth.getChainId());
-  init_chain_id = chain_id;
-
-  console.log("GOTTEN CHAIN ID: ", init_chain_id);
-
-  //   set_web_3(web3);
-  //   set_accounts(accounts);
-  //   set_chain_id(chain_id);
-
-  await load_initial_contracts();
 };
 
-const load_initial_contracts = async () => {
+export const load_initial_contracts = async () => {
   // <=42 to exclude Kovan, <42 to include kovan
   // if (chain_id < 42) {
   //   // Wrong Network!
@@ -54,7 +59,7 @@ const load_initial_contracts = async () => {
   console.log("BEFORE SET!! ", init_web_3);
 
   const _jamii_factory = await load_contract(_chain_id, "JamiiFactory");
-  init_factory = _jamii_factory;
+  init_factory = await load_contract(_chain_id, "JamiiFactory");
 
   if (!_jamii_factory) {
     console.log("FAILED TO GET FACTORY!!");
@@ -62,8 +67,6 @@ const load_initial_contracts = async () => {
   }
 
   console.log(_jamii_factory);
-
-  //   set_factory(_jamii_factory);
 };
 
 const load_contract = async (chain, contract_name) => {
@@ -147,11 +150,27 @@ export const register_voter = async (_id_number, _ballot_id) => {
   return unique_voter_id;
 };
 
+export const get_account = async () => {
+  await window.ethereum.enable();
+  const accounts = await window.ethereum.request({
+    method: "eth_requestAccounts",
+  });
+  const account = accounts[0];
+  console.log(account);
+  window.ethereum.on("accountsChanged", function (accounts) {
+    // Time to reload your interface with accounts[0]!
+    console.log(accounts[0]);
+  });
+  return account || accounts[0];
+};
+
 export const get_ballot = async (ballot_id) => {
+  init();
   const ballot = await init_factory?.methods.get_ballot(ballot_id).call();
   //   //   set_ballot(ballot);
   console.log("BALLOT ID:", ballot_id);
   console.log(ballot);
+  console.log(init_accounts);
   //   console.log("TESTING GET BALOTT!! ", init_factory);
   return ballot;
 };
