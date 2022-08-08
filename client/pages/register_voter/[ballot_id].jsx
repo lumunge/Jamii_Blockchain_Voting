@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import Image from "next/image";
 
 import { getWeb3 } from "../../utils/getWeb3";
-import map from "../../../build/deployments/map.json";
+import map from "../../map.json";
 
 import { useDispatch, useSelector } from "react-redux";
 import {

@@ -20,7 +20,7 @@ import {
 import { add_notification } from "../store/notification_slice";
 
 import { v4 as uuid } from "uuid";
-import map from "../../build/deployments/map.json";
+import map from "../map.json";
 import { getWeb3 } from "../utils/getWeb3";
 import {
   convert_time_unix,
