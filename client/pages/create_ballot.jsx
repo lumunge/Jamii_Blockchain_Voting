@@ -488,10 +488,26 @@ const create_ballot = () => {
           content="A voting system that leverages blockchain technology!"
         />
         <link rel="icon" href="/favicon.ico" />
+        <link
+          rel="apple-touch-icon"
+          sizes="180x180"
+          href="/apple-touch-icon.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="32x32"
+          href="/favicon-32x32.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="16x16"
+          href="/favicon-16x16.png"
+        />
+        <link rel="manifest" href="/site.webmanifest" />
       </Head>
-
       <MobileNav />
-
       <Grid container>
         <Grid
           item
@@ -586,13 +602,13 @@ const create_ballot = () => {
                         margin: "0 auto",
                       }}
                     >
-                      <>
+                      <Box mb={2}>
                         <Notification
                           open={show_notification}
                           type={type_notification}
                           message={message_notification}
                         />
-                      </>
+                      </Box>
                       <form>
                         <Grid xs={12}>
                           <TextField
@@ -996,18 +1012,10 @@ const create_ballot = () => {
                     </>
                   )}
                 </TabPanel>
-                <TabPanel
-                  value={active_tab}
-                  index={1}
-                  className={styles.ballot_container}
-                >
+                <TabPanel value={active_tab} index={1}>
                   {ballots.length >= 1 ? <OpenBallot /> : <NoBallots />}
                 </TabPanel>
-                <TabPanel
-                  value={active_tab}
-                  index={2}
-                  className={styles.ballot_container}
-                >
+                <TabPanel value={active_tab} index={2}>
                   {ballots.length >= 1 ? <BallotResult /> : <NoBallots />}
                 </TabPanel>
               </Grid>
