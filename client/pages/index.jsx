@@ -13,7 +13,7 @@ import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 
 // styles
-import styles from "../styles/Home.module.css";
+import styles from "../styles/index.module.css";
 
 const Home = () => {
   const current_theme = useSelector((state) => state.theme.current_theme);
