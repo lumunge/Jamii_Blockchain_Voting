@@ -22,7 +22,7 @@ import {
 } from "../../store/auth-slice";
 
 import { ballot_types_map } from "../../utils/functions";
-import map from "../../../build/deployments/map.json";
+import map from "../../build/deployments/map.json";
 
 import {
   TextField,
