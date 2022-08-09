@@ -21,6 +21,7 @@ import { add_notification } from "../store/notification_slice";
 
 import { v4 as uuid } from "uuid";
 import map from "../build/deployments/map.json";
+
 import { getWeb3 } from "../utils/getWeb3";
 import {
   convert_time_unix,
@@ -347,12 +348,12 @@ const create_ballot = () => {
     let contract_artifact;
     try {
       contract_artifact = await import(
-        `../../build/deployments/${chain}/${address}.json`
+        `../build/deployments/${chain}/${address}.json`
       );
       console.log(contract_artifact);
     } catch (e) {
       console.log(
-        `Failed to load contract artifact "../../build/deployments/${chain}/${address}.json"`
+        `Failed to load contract artifact "../build/deployments/${chain}/${address}.json"`
       );
       return undefined;
     }

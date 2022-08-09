@@ -85,12 +85,12 @@ const load_contract = async (chain, contract_name) => {
   let contract_artifact;
   try {
     contract_artifact = await import(
-      `../../build/deployments/${chain}/${address}.json`
+      `../build/deployments/${chain}/${address}.json`
     );
     console.log(contract_artifact);
   } catch (e) {
     console.log(
-      `Failed to load contract artifact "../../build/deployments/${chain}/${address}.json"`
+      `Failed to load contract artifact "../build/deployments/${chain}/${address}.json"`
     );
     return undefined;
   }
