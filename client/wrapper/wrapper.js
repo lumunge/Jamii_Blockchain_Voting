@@ -1,6 +1,6 @@
 import { getEthereum } from "../utils/getEthereum";
 import { getWeb3 } from "../utils/getWeb3";
-import map from "../map.json";
+import map from "../build/deployments/map.json";
 
 let init_chain_id = 0;
 let init_web_3 = null;
