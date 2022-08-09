@@ -248,10 +248,6 @@ const create_ballot = () => {
     console.log("BALLOT CANDIDATES: ", ballot_candidates);
   };
 
-  const handle_add_show_form = () => {
-    dispatch(add_show_form(true));
-  };
-
   TabPanel.propTypes = {
     children: PropTypes.node,
     index: PropTypes.number.isRequired,
@@ -450,6 +446,7 @@ const create_ballot = () => {
           message: "An Error Occured!",
         })
       );
+      console.log(error);
     }
   };
 
