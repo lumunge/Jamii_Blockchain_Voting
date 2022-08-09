@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import Image from "next/image";
 
 import { getWeb3 } from "../../utils/getWeb3";
-import map from "../../map.json";
+import map from "../../build/deployments/map.json";
 
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -127,12 +127,12 @@ const voter_registration = () => {
     let contract_artifact;
     try {
       contract_artifact = await import(
-        `../../../build/deployments/${chain}/${address}.json`
+        `../../build/deployments/${chain}/${address}.json`
       );
       console.log(contract_artifact);
     } catch (e) {
       console.log(
-        `Failed to load contract artifact "../../../build/deployments/${chain}/${address}.json"`
+        `Failed to load contract artifact "../../build/deployments/${chain}/${address}.json"`
       );
       return undefined;
     }
