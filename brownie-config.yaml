@@ -1,18 +1,16 @@
 dependencies:
-  # - OpenZeppelin/openzeppelin-contracts-upgradeable@4.7.1
   - OpenZeppelin/openzeppelin-contracts@4.7.1
   - OpenZeppelin/openzeppelin-contracts-upgradeable@4.7.1
 compiler:
   solc:
     remappings:
-      # - "@openzeppelin-upgradeable=OpenZeppelin/openzeppelin-contracts-upgradeable@4.7.1"
       - "@openzeppelin=OpenZeppelin/openzeppelin-contracts@4.7.1"
       - "@openzeppelin_upgradeable=OpenZeppelin/openzeppelin-contracts-upgradeable@4.7.1"
 dotenv: .env
 owner:
   addr: ${FEE}
 wallets:
-  from_key: ${PRIVATE_KEY_LOCAL}
+  from_key: ${PRIVATE_KEY_1}
 networks:
   default: development
   rinkeby:
