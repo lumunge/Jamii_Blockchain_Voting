@@ -2,7 +2,6 @@ __pycache__
 .env
 .history
 .hypothesis/
-build/
 reports/
 JamiiBlock.md
 JamiiBlockII.md
