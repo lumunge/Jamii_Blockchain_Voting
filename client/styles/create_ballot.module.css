@@ -6,8 +6,8 @@
 }
 
 .navbar {
-  background-color: var(--background);
-  color: var(--text-primary);
+  background-color: var(--background) !important;
+  color: var(--text-primary) !important;
 }
 .nav_links {
   color: var(--text-primary);
