@@ -64,15 +64,21 @@ const Navbar = (props) => {
       <List>
         {nav_items.map((item) => (
           <ListItem key={item} disablePadding>
-            <ListItemButton sx={{ textAlign: "center" }}>
-              <ListItemText primary={item} />
-            </ListItemButton>
+            <Link href={nav_items_map.get(item)}>
+              <ListItemButton sx={{ textAlign: "center" }}>
+                <ListItemText primary={item} />
+              </ListItemButton>
+            </Link>
           </ListItem>
         ))}
         <ListItem disablePadding>
-          <ListItemButton sx={{ textAlign: "center" }}>
-            <ListItemText primary="Get Started" />
-          </ListItemButton>
+          <Link href="/create_ballot">
+            <a target="_blank" rel="noopener noreferrer">
+              <ListItemButton sx={{ textAlign: "center" }}>
+                <ListItemText primary="Get Started" />
+              </ListItemButton>
+            </a>
+          </Link>
         </ListItem>
       </List>
     </Box>
