@@ -357,96 +357,355 @@ const create_ballot = () => {
     return new web3.eth.Contract(contract_artifact.abi, address);
   };
 
-  const create_new_ballot = async (e) => {
-    e.preventDefault();
-    try {
-      dispatch(
-        add_notification({
-          open: true,
-          type: "info",
-          message: "Publishing Ballot...",
-        })
-      );
-
-      let ballot_id = uuid();
-      let ballot_name = initial_ballot_state.ballot_name;
-      let candidates = initial_ballot_state.ballot_candidates;
-      let ballot_type = initial_ballot_state.ballot_type;
-      let ballot_days = initial_ballot_state.ballot_days;
-      let registration_period = initial_ballot_state.registration_period;
-
-      dispatch(
-        add_ballot_id_chair({
-          ballot_id: ballot_id,
-          ballot_chair: accounts[0],
-        })
-      );
-
-      // validation here
-
-      await factory.methods
-        .create_ballot(
-          ballot_id,
-          ballot_name,
-          candidates,
-          ballot_type,
-          ballot_days,
-          registration_period
-        )
-        .send({ from: accounts[0], value: ballot_fee, gas: 3000000 })
-        .on("receipt", async () => {
-          if (ballots.length === 2) {
-            dispatch(
-              add_notification({
-                open: true,
-                type: "info",
-                message: "Ballot Limit Reached",
-              })
-            );
-          }
-        });
-
-      dispatch(
-        add_notification({
-          open: false,
-          type: "",
-          message: "",
-        })
-      );
-
-      dispatch(
-        add_tab_state({
-          tab_1: `Created Ballot: ${new Date().toString().slice(4, 25)}`,
-          tab_2: "Open Ballots",
-          tab_3: `Results: ${new Date(end_ballot_1).toDateString()}`,
-        })
-      );
-
-      dispatch(add_show_new_ballot(true));
-
-      dispatch(
-        add_ballot({
-          ballot_chair: accounts[0],
-          open_date: Date.now(),
-          ballot_id: ballot_id,
-          ballot_name: ballot_name,
-          candidates: candidates,
-          ballot_type: ballot_type,
-          ballot_days: ballot_days,
-          registration_period: registration_period,
-        })
-      );
-
-      dispatch(add_show_form(false));
-    } catch (error) {
+  const validate_ballot = (
+    ballot_name,
+    candidates,
+    ballot_type,
+    ballot_days,
+    registration_period
+  ) => {
+    // all inputs are required
+    // valid ballot name
+    // valiid dates
+    // valid number of candidates
+    // valid format of candidate address
+    let bool = true;
+    // error handling
+    if (ballot_name.length == 0) {
+      bool = false;
       dispatch(
         add_notification({
           open: true,
           type: "error",
-          message: "An Error Occured!",
+          message: "Please enter a valid ballot name!",
         })
       );
-      console.log(error);
+    }
+
+    if (candidates.length <= 1) {
+      bool = false;
+      dispatch(
+        add_notification({
+          open: true,
+          type: "error",
+          message: "A minimum of two candidates are required for a ballot!",
+        })
+      );
+    }
+
+    if (ballot_type === "") {
+      bool = false;
+      dispatch(
+        add_notification({
+          open: true,
+          type: "error",
+          message: "Please select the ballot type!",
+        })
+      );
+    }
+
+    for (let i = 0; i < candidates.length; i++) {
+      if (
+        candidates[i].substring(0, 2) !== "0x" ||
+        candidates[i].length !== 42
+      ) {
+        bool = false;
+        dispatch(
+          add_notification({
+            open: true,
+            type: "error",
+            message: "Wrong candidate address format!",
+          })
+        );
+      }
+    }
+
+    if (
+      ballot_days.length === 0 ||
+      registration_period.length === 0 ||
+      Number.isNaN(ballot_days) ||
+      Number.isNaN(registration_period) ||
+      ballot_days <= 0 ||
+      registration_period <= 0 ||
+      registration_period >= ballot_days / 1000
+    ) {
+      bool = false;
+      dispatch(
+        add_notification({
+          open: true,
+          type: "error",
+          message: "Please enter valid ballot dates!",
+        })
+      );
+    }
+
+    if (convert_seconds(parseInt(ballot_days)) / 1000 === false) {
+      bool = false;
+      dispatch(
+        add_notification({
+          open: true,
+          type: "error",
+          message: "Invalid ballot dates!",
+        })
+      );
+      console.log("Invalid ballot dates");
+    }
+    console.log("Validating ... ", bool);
+
+    return bool;
+  };
+
+  // const create_new_ballot = async (e) => {
+  //   e.preventDefault();
+  //   let ballot_id = uuid();
+  //   let ballot_name = initial_ballot_state.ballot_name;
+  //   let candidates = initial_ballot_state.ballot_candidates;
+  //   let ballot_type = initial_ballot_state.ballot_type;
+  //   let ballot_days = initial_ballot_state.ballot_days;
+  //   let registration_period = initial_ballot_state.registration_period;
+
+  //   validate_ballot(
+  //       ballot_name,
+  //       candidates,
+  //       ballot_type,
+  //       ballot_days,
+  //       registration_period
+  //     );
+
+  //   try {
+  //     dispatch(
+  //       add_ballot_id_chair({
+  //         ballot_id: ballot_id,
+  //         ballot_chair: accounts[0],
+  //       })
+  //     );
+
+  //     console.log("DAYS: ", ballot_days);
+  //     console.log("REGISTRATION: ", registration_period);
+  //     // validation here
+
+  //     // console.log("VALIDATED: ", validated);
+
+  //     dispatch(
+  //       add_notification({
+  //         open: true,
+  //         type: "info",
+  //         message: "Publishing Ballot...",
+  //       })
+  //     );
+
+  //     await factory.methods
+  //       .create_ballot(
+  //         ballot_id,
+  //         ballot_name,
+  //         candidates,
+  //         ballot_type,
+  //         ballot_days,
+  //         registration_period
+  //       )
+  //       .send({ from: accounts[0], value: ballot_fee, gas: 3000000 })
+  //       .on("receipt", async () => {
+  //         if (ballots.length === 2) {
+  //           dispatch(
+  //             add_notification({
+  //               open: true,
+  //               type: "info",
+  //               message: "Ballot Limit Reached",
+  //             })
+  //           );
+  //         }
+  //       });
+
+  //     dispatch(
+  //       add_notification({
+  //         open: false,
+  //         type: "",
+  //         message: "",
+  //       })
+  //     );
+
+  //     dispatch(
+  //       add_tab_state({
+  //         tab_1: `Created Ballot: ${new Date().toString().slice(4, 25)}`,
+  //         tab_2: "Open Ballots",
+  //         tab_3: `Results: ${new Date(end_ballot_1).toDateString()}`,
+  //       })
+  //     );
+
+  //     dispatch(add_show_new_ballot(true));
+
+  //     dispatch(
+  //       add_ballot({
+  //         ballot_chair: accounts[0],
+  //         open_date: Date.now(),
+  //         ballot_id: ballot_id,
+  //         ballot_name: ballot_name,
+  //         candidates: candidates,
+  //         ballot_type: ballot_type,
+  //         ballot_days: ballot_days,
+  //         registration_period: registration_period,
+  //       })
+  //     );
+
+  //     dispatch(add_show_form(false));
+  //   } catch (error) {
+  //     if (error.message.includes("invalid BigNumber string")) {
+  //       validate_ballot(
+  //         ballot_name,
+  //         candidates,
+  //         ballot_type,
+  //         ballot_days,
+  //         registration_period
+  //       );
+  //       // dispatch(
+  //       //   add_notification({
+  //       //     open: true,
+  //       //     type: "error",
+  //       //     message: "Please enter correct ballot details!",
+  //       //   })
+  //       // );
+  //     } else if (
+  //       error.message ===
+  //       "MetaMask Tx Signature: User denied transaction signature."
+  //     ) {
+  //       dispatch(
+  //         add_notification({
+  //           open: true,
+  //           type: "error",
+  //           message: "You have to pay for transaction fees!",
+  //         })
+  //       );
+  //     }
+  //     // validate_ballot(
+  //     //   initial_ballot_state.ballot_name,
+  //     //   initial_ballot_state.ballot_candidates,
+  //     //   initial_ballot_state.ballot_type
+  //     // );
+
+  //     // dispatch(
+  //     //   add_notification({
+  //     //     open: true,
+  //     //     type: "error",
+  //     //     message: "An Error Occured here!",
+  //     //   })
+  //     // );
+  //     console.log("This Message: ", error, "END MESSAGE");
+  //   }
+  // };
+
+  const CREATE_BALLOT = async (e) => {
+    e.preventDefault();
+
+    let ballot_id = uuid();
+    let ballot_name = initial_ballot_state.ballot_name;
+    let candidates = initial_ballot_state.ballot_candidates;
+    let ballot_type = initial_ballot_state.ballot_type;
+    let ballot_days = initial_ballot_state.ballot_days;
+    let registration_period = initial_ballot_state.registration_period;
+
+    let process_ballot = validate_ballot(
+      ballot_name,
+      candidates,
+      ballot_type,
+      ballot_days,
+      registration_period
+    );
+
+    if (process_ballot === true) {
+      try {
+        dispatch(
+          add_ballot_id_chair({
+            ballot_id: ballot_id,
+            ballot_chair: accounts[0],
+          })
+        );
+        // validation here
+        dispatch(
+          add_notification({
+            open: true,
+            type: "info",
+            message: "Publishing Ballot...",
+          })
+        );
+        await factory.methods
+          .create_ballot(
+            ballot_id,
+            ballot_name,
+            candidates,
+            ballot_type,
+            ballot_days,
+            registration_period
+          )
+          .send({ from: accounts[0], value: ballot_fee, gas: 3000000 })
+          .on("receipt", async () => {
+            if (ballots.length === 2) {
+              dispatch(
+                add_notification({
+                  open: true,
+                  type: "info",
+                  message: "Ballot Limit Reached",
+                })
+              );
+            }
+          });
+        dispatch(
+          add_notification({
+            open: false,
+            type: "",
+            message: "",
+          })
+        );
+        dispatch(
+          add_tab_state({
+            tab_1: `Created Ballot: ${new Date().toString().slice(4, 25)}`,
+            tab_2: "Open Ballots",
+            tab_3: `Results: ${new Date(end_ballot_1).toDateString()}`,
+          })
+        );
+        dispatch(add_show_new_ballot(true));
+        dispatch(
+          add_ballot({
+            ballot_chair: accounts[0],
+            open_date: Date.now(),
+            ballot_id: ballot_id,
+            ballot_name: ballot_name,
+            candidates: candidates,
+            ballot_type: ballot_type,
+            ballot_days: ballot_days,
+            registration_period: registration_period,
+          })
+        );
+        dispatch(add_show_form(false));
+      } catch (error) {
+        if (error.message.includes("invalid BigNumber string")) {
+          validate_ballot(
+            ballot_name,
+            candidates,
+            ballot_type,
+            ballot_days,
+            registration_period
+          );
+          dispatch(
+            add_notification({
+              open: true,
+              type: "error",
+              message: "Please enter correct ballot details!",
+            })
+          );
+        } else if (
+          error.message ===
+          "MetaMask Tx Signature: User denied transaction signature."
+        ) {
+          dispatch(
+            add_notification({
+              open: true,
+              type: "error",
+              message: "You have to pay for transaction fees!",
+            })
+          );
+        }
+        console.log("This Message: ", error, "END MESSAGE");
+      }
     }
   };
 
@@ -899,7 +1158,7 @@ const create_ballot = () => {
                                   // helperText="Select more than 1 Candidate"
                                   required
                                   key={index}
-                                  label="candidate address"
+                                  label="candidate address 0x..."
                                   variant="filled"
                                   type="text"
                                   onChange={(e) => handle_candidates(index, e)}
@@ -968,7 +1227,7 @@ const create_ballot = () => {
                               ballots.length === 3 ||
                               show_notification
                             }
-                            onClick={(e) => create_new_ballot(e)}
+                            onClick={(e) => CREATE_BALLOT(e)}
                           >
                             Create Ballot
                           </Button>
