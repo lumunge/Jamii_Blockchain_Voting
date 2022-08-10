@@ -169,16 +169,9 @@ const create_ballot = () => {
         ballot_name: "",
       })
     );
-
-    console.log("Handling New ballot: ");
   };
 
   const set_ballot_dates = () => {
-    console.log("Start registration: ", start_registration);
-    console.log("End Regiusrtation ", end_registration);
-    console.log("Start Voting: ", start_voting);
-    console.log("End Voting: ", end_ballot_1);
-
     let ballot_begin = new Date().getTime();
     let ballot_end = convert_time_unix(end_ballot_1) * 1000;
 
@@ -186,9 +179,6 @@ const create_ballot = () => {
     let registration_period =
       convert_time_unix(end_registration) -
       convert_time_unix(start_registration);
-
-    console.log("Ballot Days: ", ballot_days);
-    console.log("Registration Window: ", registration_period);
 
     dispatch(
       add_ballot_dates({
@@ -232,7 +222,6 @@ const create_ballot = () => {
     set_candidates(list);
     let candidates_arr = list.map((a) => a.address);
     set_candidates_arr(candidates_arr);
-    console.log("CANDIDATES LIST: ", candidates_arr);
     dispatch(add_ballot_candidates(candidates_arr));
   };
   // end candidates input
@@ -244,8 +233,6 @@ const create_ballot = () => {
     if (new_value == 2) {
       set_ballot_candidates(candidates_arr);
     }
-
-    console.log("BALLOT CANDIDATES: ", ballot_candidates);
   };
 
   TabPanel.propTypes = {
@@ -274,8 +261,6 @@ const create_ballot = () => {
         const accounts = await web3.eth.getAccounts();
         const chain_id = parseInt(await web3.eth.getChainId());
 
-        console.log("GOTTEN CHAIN ID: ", chain_id);
-
         set_web_3(web3);
         set_accounts(accounts);
         set_chain_id(chain_id);
@@ -288,9 +273,19 @@ const create_ballot = () => {
       } catch (error) {
         if (error.message == "User rejected the request.") {
           set_error("Connect your Metamask Wallet!");
+          add_notification({
+            open: true,
+            type: "error",
+            message: "Your rejected the wallet connection!",
+          });
           // set_notification(!notification);
         } else {
           // set_error("Connect Metamask Wallet!!");
+          add_notification({
+            open: true,
+            type: "error",
+            message: "Please connect your metamask wallet to Kovan",
+          });
           console.log(error);
           // set_notification(!notification);
           // notify(error, "You have to connect your Metamask Wallet!")
@@ -448,152 +443,12 @@ const create_ballot = () => {
           message: "Invalid ballot dates!",
         })
       );
-      console.log("Invalid ballot dates");
     }
-    console.log("Validating ... ", bool);
 
     return bool;
   };
 
-  // const create_new_ballot = async (e) => {
-  //   e.preventDefault();
-  //   let ballot_id = uuid();
-  //   let ballot_name = initial_ballot_state.ballot_name;
-  //   let candidates = initial_ballot_state.ballot_candidates;
-  //   let ballot_type = initial_ballot_state.ballot_type;
-  //   let ballot_days = initial_ballot_state.ballot_days;
-  //   let registration_period = initial_ballot_state.registration_period;
-
-  //   validate_ballot(
-  //       ballot_name,
-  //       candidates,
-  //       ballot_type,
-  //       ballot_days,
-  //       registration_period
-  //     );
-
-  //   try {
-  //     dispatch(
-  //       add_ballot_id_chair({
-  //         ballot_id: ballot_id,
-  //         ballot_chair: accounts[0],
-  //       })
-  //     );
-
-  //     console.log("DAYS: ", ballot_days);
-  //     console.log("REGISTRATION: ", registration_period);
-  //     // validation here
-
-  //     // console.log("VALIDATED: ", validated);
-
-  //     dispatch(
-  //       add_notification({
-  //         open: true,
-  //         type: "info",
-  //         message: "Publishing Ballot...",
-  //       })
-  //     );
-
-  //     await factory.methods
-  //       .create_ballot(
-  //         ballot_id,
-  //         ballot_name,
-  //         candidates,
-  //         ballot_type,
-  //         ballot_days,
-  //         registration_period
-  //       )
-  //       .send({ from: accounts[0], value: ballot_fee, gas: 3000000 })
-  //       .on("receipt", async () => {
-  //         if (ballots.length === 2) {
-  //           dispatch(
-  //             add_notification({
-  //               open: true,
-  //               type: "info",
-  //               message: "Ballot Limit Reached",
-  //             })
-  //           );
-  //         }
-  //       });
-
-  //     dispatch(
-  //       add_notification({
-  //         open: false,
-  //         type: "",
-  //         message: "",
-  //       })
-  //     );
-
-  //     dispatch(
-  //       add_tab_state({
-  //         tab_1: `Created Ballot: ${new Date().toString().slice(4, 25)}`,
-  //         tab_2: "Open Ballots",
-  //         tab_3: `Results: ${new Date(end_ballot_1).toDateString()}`,
-  //       })
-  //     );
-
-  //     dispatch(add_show_new_ballot(true));
-
-  //     dispatch(
-  //       add_ballot({
-  //         ballot_chair: accounts[0],
-  //         open_date: Date.now(),
-  //         ballot_id: ballot_id,
-  //         ballot_name: ballot_name,
-  //         candidates: candidates,
-  //         ballot_type: ballot_type,
-  //         ballot_days: ballot_days,
-  //         registration_period: registration_period,
-  //       })
-  //     );
-
-  //     dispatch(add_show_form(false));
-  //   } catch (error) {
-  //     if (error.message.includes("invalid BigNumber string")) {
-  //       validate_ballot(
-  //         ballot_name,
-  //         candidates,
-  //         ballot_type,
-  //         ballot_days,
-  //         registration_period
-  //       );
-  //       // dispatch(
-  //       //   add_notification({
-  //       //     open: true,
-  //       //     type: "error",
-  //       //     message: "Please enter correct ballot details!",
-  //       //   })
-  //       // );
-  //     } else if (
-  //       error.message ===
-  //       "MetaMask Tx Signature: User denied transaction signature."
-  //     ) {
-  //       dispatch(
-  //         add_notification({
-  //           open: true,
-  //           type: "error",
-  //           message: "You have to pay for transaction fees!",
-  //         })
-  //       );
-  //     }
-  //     // validate_ballot(
-  //     //   initial_ballot_state.ballot_name,
-  //     //   initial_ballot_state.ballot_candidates,
-  //     //   initial_ballot_state.ballot_type
-  //     // );
-
-  //     // dispatch(
-  //     //   add_notification({
-  //     //     open: true,
-  //     //     type: "error",
-  //     //     message: "An Error Occured here!",
-  //     //   })
-  //     // );
-  //     console.log("This Message: ", error, "END MESSAGE");
-  //   }
-  // };
-
-  const CREATE_BALLOT = async (e) => {
+  const create_new_ballot = async (e) => {
     e.preventDefault();
 
     let ballot_id = uuid();
@@ -704,7 +559,6 @@ const create_ballot = () => {
             })
           );
         }
-        console.log("This Message: ", error, "END MESSAGE");
       }
     }
   };
@@ -1227,7 +1081,7 @@ const create_ballot = () => {
                               ballots.length === 3 ||
                               show_notification
                             }
-                            onClick={(e) => CREATE_BALLOT(e)}
+                            onClick={(e) => create_new_ballot(e)}
                           >
                             Create Ballot
                           </Button>
