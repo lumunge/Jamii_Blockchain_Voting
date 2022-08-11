@@ -17,7 +17,6 @@ import {
 // icons
 
 // components
-import Notification from "../components/Notification";
 
 // stylesheet
 import styles from "../styles/create_ballot.module.css";
@@ -70,9 +69,20 @@ const LeftSideBar = () => {
             add_notification({
               open: true,
               type: "info",
-              message: "Pending Connection to Wallet!",
+              message:
+                "Pending connection to Metamask Wallet in browser toolbar!",
             })
           );
+        } else if (error.message == "A request is already in progress") {
+          dispatch(
+            add_notification({
+              open: true,
+              type: "error",
+              message: "This application requires a Metamask Browser Extension",
+            })
+          );
+        } else {
+          console.log(error);
         }
       }
     }

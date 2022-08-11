@@ -270,23 +270,54 @@ const create_ballot = () => {
         dispatch(add_connected_account(accounts[0]));
 
         await load_initial_contracts();
+        console.log("CONNECTED #1");
       } catch (error) {
         if (error.message == "User rejected the request.") {
           set_error("Connect your Metamask Wallet!");
-          add_notification({
-            open: true,
-            type: "error",
-            message: "Your rejected the wallet connection!",
-          });
-          // set_notification(!notification);
+          dispatch(
+            add_notification({
+              open: true,
+              type: "error",
+              message: "You rejected the wallet connection!",
+            })
+          );
+          console.log("ERROR _ 1 HERE: ", error);
+          console.log("CONNECTED #2");
+        } else if (
+          error.message ==
+          "Request of type 'wallet_requestPermissions' already pending for origin http://localhost:3000. Please wait."
+        ) {
+          dispatch(
+            add_notification({
+              open: true,
+              type: "info",
+              message:
+                "Pending connection to Metamask Wallet in browser toolbar!",
+            })
+          );
+          console.log("ERROR _ 2 HERE: ", error);
+          console.log("CONNECTED #3");
+        } else if (error.message == "A request is already in progress") {
+          dispatch(
+            add_notification({
+              open: true,
+              type: "error",
+              message: "This application requires a Metamask Browser Extension",
+            })
+          );
         } else {
           // set_error("Connect Metamask Wallet!!");
-          add_notification({
-            open: true,
-            type: "error",
-            message: "Please connect your metamask wallet to Kovan",
-          });
-          console.log(error);
+          dispatch(
+            add_notification({
+              open: true,
+              type: "error",
+              message: "Please connect your metamask wallet to Kovan",
+            })
+          );
+          console.log("ERROR _ 3 HERE: ", error);
+          console.log("CONNECTED #4");
+
+          // console.log(error);
           // set_notification(!notification);
           // notify(error, "You have to connect your Metamask Wallet!")
         }
@@ -319,6 +350,7 @@ const create_ballot = () => {
     }
 
     console.log(_jamii_factory);
+    console.log("CONNECTED #5");
 
     set_factory(_jamii_factory);
   };
@@ -329,10 +361,12 @@ const create_ballot = () => {
     let address;
     try {
       address = map[chain][contract_name][0];
+      console.log("CONNECTED #6");
     } catch (e) {
       console.log(
         `Couldn't find any deployed contract "${contract_name}" on the chain "${chain}".`
       );
+      console.log("CONNECTED #7");
       return undefined;
     }
 
@@ -342,13 +376,16 @@ const create_ballot = () => {
         `../build/deployments/${chain}/${address}.json`
       );
       console.log(contract_artifact);
+      console.log("CONNECTED #8");
     } catch (e) {
       console.log(
         `Failed to load contract artifact "../build/deployments/${chain}/${address}.json"`
       );
+      console.log("CONNECTED #9");
       return undefined;
     }
     console.log("WEB_3# ", web_3);
+    console.log("CONNECTED #10");
     return new web3.eth.Contract(contract_artifact.abi, address);
   };
 
