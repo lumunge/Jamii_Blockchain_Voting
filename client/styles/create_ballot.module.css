@@ -10,12 +10,15 @@
   color: var(--text-primary) !important;
 }
 .nav_links {
-  color: var(--text-primary);
-  text-transform: capitalize;
+  color: var(--text-primary) !important;
+  text-transform: capitalize !important;
+}
+.a_link {
+  text-decoration: none !important;
 }
 
 .side_bar_text {
-  color: var(--text-secondary);
+  color: var(--text-secondary) !important;
 }
 
 /* mid styling */
@@ -35,14 +38,14 @@
 /* end panel styling */
 
 .right_btns {
-  margin: 10px 0;
-  text-transform: capitalize;
-  border: 1px solid var(--button-hover);
-  color: var(--button-hover);
+  margin: 10px 0 !important;
+  text-transform: capitalize !important;
+  border: 1px solid var(--button-hover) !important;
+  color: var(--button-hover) !important;
 }
 .right_btns:hover {
-  transition: 0.2s ease-in-out;
-  color: var(--text-primary);
+  transition: 0.2s ease-in-out !important;
+  color: var(--text-primary) !important;
 }
 
 .input {
