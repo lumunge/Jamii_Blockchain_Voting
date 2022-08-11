@@ -38,14 +38,6 @@ const LeftSideBar = () => {
   };
 
   const init = async () => {
-    dispatch(
-      add_notification({
-        open: true,
-        type: "info",
-        message: "Connecting Wallet...",
-      })
-    );
-
     if (
       typeof window !== "undefined" &&
       typeof window.ethereum !== "undefined"
