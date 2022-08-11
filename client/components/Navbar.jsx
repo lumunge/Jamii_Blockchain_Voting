@@ -73,7 +73,11 @@ const Navbar = (props) => {
         ))}
         <ListItem disablePadding>
           <Link href="/create_ballot">
-            <a target="_blank" rel="noopener noreferrer">
+            <a
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.a_link}
+            >
               <ListItemButton sx={{ textAlign: "center" }}>
                 <ListItemText primary="Get Started" />
               </ListItemButton>
@@ -124,7 +128,11 @@ const Navbar = (props) => {
           </Box>
           <Box sx={{ display: { xs: "none", sm: "block" } }}>
             <Link href="/create_ballot">
-              <a target="_blank" rel="noopener noreferrer">
+              <a
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.a_link}
+              >
                 <Button
                   sx={{
                     flexGrow: 1,

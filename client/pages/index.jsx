@@ -1,5 +1,6 @@
 import Head from "next/head";
 import Image from "next/image";
+import Link from "next/link";
 
 import { useSelector } from "react-redux";
 
@@ -87,7 +88,15 @@ const Home = () => {
               Jamii ballots is an E-Voting System that utilizes blockchain
               tecnhology to secure and keep the voting process transparent.
             </Typography>
-            <Button className={styles.right_btns}>Start a Ballot</Button>
+            <Link href="/create_ballot">
+              <a
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.a_link}
+              >
+                <Button className={styles.right_btns}>Start a Ballot</Button>
+              </a>
+            </Link>
           </Grid>
         </Grid>
 
@@ -121,9 +130,14 @@ const Home = () => {
               for online voting.
             </Typography>
             <Box>
-              <Button className={styles.right_btns}>Jamii Ballots?</Button>
+              <Button className={styles.right_btns} disabled>
+                Jamii Ballots?
+              </Button>
               {"  "}
-              <Button className={styles.right_btns}> Blockchain Voting?</Button>
+              <Button className={styles.right_btns} disabled>
+                {" "}
+                Blockchain Voting?
+              </Button>
             </Box>
           </Grid>
         </Grid>
@@ -162,7 +176,9 @@ const Home = () => {
               us. Jamii ballots offers voting for many occassions from free
               general elections to closed door boardroom secret ballots.{" "}
             </Typography>
-            <Button className={styles.right_btns}>Use Cases</Button>
+            <Button className={styles.right_btns} disabled>
+              Use Cases
+            </Button>
           </Grid>
           <Grid xs={12} sm={6} md={6} lg={6}>
             <Image
@@ -194,11 +210,14 @@ const Home = () => {
               chip in and contribute to the growth of Jaii Ballots.
             </Typography>
             <>
-              <Button className={styles.right_btns}>How to Contribute</Button>
+              <Button className={styles.right_btns} disabled>
+                How to Contribute
+              </Button>
               {"  "}
-              <Button className={styles.right_btns}>
+              <Button className={styles.right_btns} disabled>
                 {" "}
-                <GitHubIcon /> Github
+                <GitHubIcon />
+                Github
               </Button>
             </>
           </Grid>
