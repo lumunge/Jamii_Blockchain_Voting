@@ -24,16 +24,16 @@
 /* mid styling */
 
 .tab {
-  text-transform: capitalize;
-  border: 1px solid var(--text-primary);
-  margin: 10px 10px 0 10px;
-  border-radius: 30px;
-  color: var(--text-primary);
+  text-transform: capitalize !important;
+  border: 1px solid var(--text-primary) !important;
+  margin: 10px 10px 0 10px !important;
+  border-radius: 30px !important;
+  color: var(--text-primary) !important;
 }
 .tab:hover {
-  color: var(--button-hover);
-  border: 1px solid var(--button-hover);
-  transition: 0.2s ease-in-out;
+  color: var(--button-hover) !important;
+  border: 1px solid var(--button-hover) !important;
+  transition: 0.2s ease-in-out !important;
 }
 /* end panel styling */
 
