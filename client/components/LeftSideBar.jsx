@@ -77,6 +77,14 @@ const LeftSideBar = () => {
           console.log(error);
         }
       }
+    } else {
+      dispatch(
+        add_notification({
+          open: true,
+          type: "error",
+          message: "Please use a browser with the Metamask extension!",
+        })
+      );
     }
   };
 

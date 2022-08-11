@@ -322,6 +322,14 @@ const create_ballot = () => {
           // notify(error, "You have to connect your Metamask Wallet!")
         }
       }
+    } else {
+      dispatch(
+        add_notification({
+          open: true,
+          type: "error",
+          message: "Please use a browser with the Metamask extension!",
+        })
+      );
     }
   };
 
