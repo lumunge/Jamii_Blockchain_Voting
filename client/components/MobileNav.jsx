@@ -52,9 +52,6 @@ const MobileNav = (props) => {
 
   const left_drawer = (
     <Box onClick={handle_left_side_bar} sx={{ textAlign: "center" }}>
-      <Typography variant="h6" sx={{ my: 2 }}>
-        Jamii Ballots
-      </Typography>
       <Divider />
       <LeftSideBar />
     </Box>
