@@ -31,35 +31,21 @@ contract JamiiFactory is IJamiiFactory, JamiiBase, Utils {
     modifier only_voter(address _candidate, string memory _ballot_id) {
         Ballot memory ballot = id_to_ballot_mapping[_ballot_id];
         require(
-            address_to_voter_mapping[msg.sender].registered == true &&
-                !exists(voted_to_ballots[msg.sender], _ballot_id) &&
+            address_to_voter_mapping[msg.sender].registered == true && // voter is registered
+                !exists(voted_to_ballots[msg.sender], _ballot_id) && // voted has NOT voted
                 compare_strings(
                     id_to_ballot_mapping[_ballot_id].ballot_id,
                     _ballot_id
                 ) ==
-                true &&
-                ballot.expired == false &&
+                true && // ballot_id is valid
+                ballot.expired == false && // ballot still open
                 compare_strings(
                     address_to_candidate_mapping[_candidate].ballot_id,
                     _ballot_id
                 ) ==
-                true,
+                true, // candidate exists in ballot
             "Voter Error!"
         );
-        // require(
-        //     address_to_voter_mapping[msg.sender].registered == true,
-        //     "Please Register to Vote!"
-        // );
-        // require(
-        //     !exists(voted_to_ballots[msg.sender], _ballot_id),
-        //     "You already CAST your Vote in This Ballot!"
-        // );
-        // require(compare_strings(id_to_ballot_mapping[_ballot_id].ballot_id, _ballot_id) == true, "Invalid Ballot Id!");
-        // require(ballot.expired == false, "Ballot has Expired");
-        // require(
-        //     compare_strings(address_to_candidate_mapping[_candidate].ballot_id, _ballot_id) == true,
-        //     "Candidate does not exist in Ballot!"
-        // );
         _;
     }
 
@@ -70,39 +56,21 @@ contract JamiiFactory is IJamiiFactory, JamiiBase, Utils {
         Ballot memory ballot = id_to_ballot_mapping[_ballot_id];
         Voter memory voter = address_to_voter_mapping[msg.sender];
         require(
-            voter.rights == true &&
-                address_to_voter_mapping[msg.sender].registered == true &&
-                !exists(voted_to_ballots[msg.sender], _ballot_id) &&
+            voter.rights == true && // voter has voting rights
+                address_to_voter_mapping[msg.sender].registered == true && // voter is registered
+                !exists(voted_to_ballots[msg.sender], _ballot_id) && // voter has NOT voted
                 compare_strings(
                     id_to_ballot_mapping[_ballot_id].ballot_id,
                     _ballot_id
                 ) ==
-                true &&
+                true && // ballot_id is valid
                 compare_strings(
                     address_to_candidate_mapping[_candidate].ballot_id,
                     _ballot_id
                 ) ==
-                true,
+                true, // candidate exists in ballot
             "Voter Error(Closed Ballot)!"
         );
-        // require(voter.rights == true, "No Voting Rights!");
-        // require(
-        //     address_to_voter_mapping[msg.sender].registered == true,
-        //     "Please Register to Vote!"
-        // );
-        // require(
-        //     !exists(voted_to_ballots[msg.sender], _ballot_id),
-        //     "You already CAST your Vote in This Ballot!"
-        // );
-        // require(
-        //     compare_strings(id_to_ballot_mapping[_ballot_id].ballot_id, _ballot_id) == true,
-        //     "Invalid Ballot Id!"
-        // );
-        // require(ballot.expired == false, "Ballot has Expired");
-        // require(
-        //     compare_strings(address_to_candidate_mapping[_candidate].ballot_id, _ballot_id) == true,
-        //     "Candidate does not exist in Ballot!"
-        // );
         _;
     }
 
@@ -117,31 +85,13 @@ contract JamiiFactory is IJamiiFactory, JamiiBase, Utils {
         uint256 duration = (block.timestamp - ballot.open_date);
         uint256 n = ballots.length;
         require(
-            n >= 1 &&
-                duration < (ballot._days * 86400) &&
-                !exists(voter_to_ballots[msg.sender], _ballot_id) &&
-                !exists(voter_id_to_ballots[_id_number], _ballot_id) &&
-                duration < (ballot.registration_window * 86400),
+            n >= 1 && // ballot exists
+                duration < (ballot._days * 86400) && // ballot NOT expired
+                !exists(voter_to_ballots[msg.sender], _ballot_id) && // NOT yet registered(address)
+                !exists(voter_id_to_ballots[_id_number], _ballot_id) && // NOT yet registered(id_number)
+                duration < (ballot.registration_window * 86400), // registration still Open
             "Error Voter Registration!!"
         );
-        // require(n >= 1, "No such Ballot Exists!");
-        // require(
-        //     ballot.ballot_id <= ballots[n - 1].ballot_id,
-        //     "No such Ballot Exists!"
-        // );
-        // require(duration < (ballot._days * 86400), "This Ballot Expired!");
-        // require(
-        //     !exists(voter_to_ballots[msg.sender], _ballot_id),
-        //     "You are Registered in this Ballot!"
-        // );
-        // require(
-        //     !exists(voter_id_to_ballots[_id_number], _ballot_id),
-        //     "Your ID is Registered in this Ballot!"
-        // );
-        // require(
-        //     (duration < (ballot.registration_window * 86400)),
-        //     "Registration Period has Passed!"
-        // );
         _;
     }
 
@@ -172,26 +122,14 @@ contract JamiiFactory is IJamiiFactory, JamiiBase, Utils {
     ) public payable {
         bytes memory bytes_ballot_name = bytes(_ballot_name);
         require(
-            msg.value >= ballot_fee &&
-                bytes_ballot_name.length > 0 &&
-                _ballot_candidates_addr.length > 1 &&
-                _ballot_type <= ballot_types &&
-                _days > _registration_period &&
-                _registration_period > 0,
+            msg.value >= ballot_fee && // make sure funds are enough
+                bytes_ballot_name.length > 0 && // Valid ballot name
+                _ballot_candidates_addr.length > 1 && // > 2 ballot candidates
+                _ballot_type <= ballot_types && // valid ballot type
+                _days > _registration_period && // invalid dates
+                _registration_period > 0, // invalid registration period
             "Error Ballot Creation!"
         );
-        // require(msg.value >= ballot_fee, "Insufficient funds!");
-        // require(bytes_ballot_name.length > 0, "Enter a valid Ballot Name!");
-        // require(
-        //     _ballot_candidates_addr.length > 1,
-        //     "Not Enough Ballot Candidates!"
-        // );
-        // require(_ballot_type <= ballot_types, "Not a valid Ballot Type!");
-        // require(
-        //     _days > _registration_period,
-        //     "Registration Period > Voting Days!"
-        // );
-        // require(_registration_period > 0, "Registration Period should be > 1!");
 
         ballot_candidate_mapping[_ballot_id] = _ballot_candidates_addr;
 
@@ -359,49 +297,19 @@ contract JamiiFactory is IJamiiFactory, JamiiBase, Utils {
         uint256 _ballot_type = ballot.ballot_type;
 
         require(
-            (msg.sender == ballot.chair &&
-                ballot.voters_count >= 1 &&
-                ballot.expired == false &&
+            (msg.sender == ballot.chair && // check permissions
+                ballot.voters_count >= 1 && // ballot is valid
+                ballot.expired == false && // balot is Open
                 compare_strings(
                     address_to_voter_mapping[_voter].ballot_id,
                     _ballot_id
                 ) ==
-                true &&
-                address_to_voter_mapping[_voter].registered == true &&
-                address_to_voter_mapping[_voter].rights == false &&
-                _ballot_type == 1) || _ballot_type == 3,
+                true && // voter is registered in ballot
+                address_to_voter_mapping[_voter].registered == true && // voter is registered voter
+                address_to_voter_mapping[_voter].rights == false && // voter does NOT have voting rights
+                _ballot_type == 1) || _ballot_type == 3, // ballot is closed-paid ballot
             "Error Assigning Voting Rights!"
         );
-
-        // require(
-        //     msg.sender == ballot.chair &&,
-        //     "Insufficient Permissions!"
-        // );
-
-        // require(ballot.voters_count >= 1, "No such Ballot Exists!");
-
-        // require(ballot.expired == false, "This Ballot Expired!");
-
-        // require(
-        //     _ballot_type == 1 ||
-        //         _ballot_type == 3 ||
-        //         _ballot_type == 4 ||
-        //         _ballot_type == 6,
-        //     "Not a Closed Ballot!"
-        // );
-        // require(
-        //     compare_strings(address_to_voter_mapping[_voter].ballot_id, _ballot_id) == true,
-        //     "Voter CanNOT vote in this Ballot!"
-        // );
-        // require(
-        //     address_to_voter_mapping[_voter].registered == true,
-        //     "NOT a Registered Voter!"
-        // );
-        // require(
-        //     address_to_voter_mapping[_voter].rights == false,
-        //     "Already has Voting Rights!"
-        // );
-
         // closed paid ballot [3]
         // require voter has sufficient voting tokens for a ballot -> buy voting rights -> awaiting approval
         address_to_voter_mapping[_voter].rights = true;
@@ -409,9 +317,7 @@ contract JamiiFactory is IJamiiFactory, JamiiBase, Utils {
         emit assigned_voting_rights(_voter);
     }
 
-    // function buy_voting_rights(){
-
-    // }
+    // function buy_voting_rights(){ }
 
     function create_vote(address _candidate) internal {
         address_to_candidate_mapping[_candidate].vote_count++;
@@ -460,7 +366,6 @@ contract JamiiFactory is IJamiiFactory, JamiiBase, Utils {
     }
 
     /** GETTERS **/
-
     function get_ballot(string memory _ballot_id)
         public
         view
