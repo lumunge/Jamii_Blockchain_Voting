@@ -1,3 +1,3 @@
 ### Contracts:
 
-**Kovan:** https://kovan.etherscan.io/address/0x0677C2964d70eA99EE1DD1Ad63445a6226813c91
+**Goerli Testnet:** https://goerli.etherscan.io/address/0xF35BF829104450F63E098d333E70BB55cD755DD6

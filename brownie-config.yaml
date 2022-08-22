@@ -17,6 +17,8 @@ networks:
     verify: True
   kovan:
     verify: True
+  goerli:
+    verify: True
   development:
     verify: False
   ganache-local:
