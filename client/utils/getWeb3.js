@@ -17,7 +17,7 @@ export const getWeb3 = async () => {
   } else {
     // const provider = new Web3.providers.HttpProvider("http://127.0.0.1:8545");
     const provider = new Web3.providers.HttpProvider(
-      process.env.KOVAN_INFURA_URL
+      process.env.GOERLI_INFURA_URL
     );
     web3 = new Web3(provider);
   }

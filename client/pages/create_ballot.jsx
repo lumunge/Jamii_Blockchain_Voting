@@ -345,6 +345,9 @@ const create_ballot = () => {
     if (chain_id === 42) {
       _chain_id = 42;
     }
+    if (chain_id === 5) {
+      _chain_id = 5;
+    }
     if (chain_id === 1337) {
       _chain_id = 1337;
     }
