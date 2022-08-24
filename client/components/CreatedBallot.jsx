@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useSelector } from "react-redux";
 
 import { ballot_types_map } from "../utils/functions.js";
@@ -6,12 +7,19 @@ import { Grid, Typography, Divider, Chip } from "@mui/material";
 
 // icons
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 
 // stylesheet
 import styles from "../styles/create_ballot.module.css";
 
 const CreatedBallot = () => {
   const ballot = useSelector((state) => state.ballot.initial_ballot);
+  const domain =
+    process.env.NODE_ENV == "developemt"
+      ? "https://jamii-ballots.vercel.app/"
+      : "http://localhost:3000/";
+
+  const [copied, set_copied] = useState(false);
 
   return (
     <Grid container sx={{ width: "100%", padding: "1rem", height: "100%" }}>
@@ -134,21 +142,28 @@ const CreatedBallot = () => {
             onFocus={(e) => e.target.select()}
             type="text"
             className={styles.copy_link_input}
-            value={`http://localhost:3000/register_voter/${ballot.ballot_id}`}
+            value={`${domain}register_voter/${ballot.ballot_id}`}
             readonly
           />
           <button
             type="button"
             onClick={() => {
               navigator.clipboard.writeText(
-                `http://localhost:3000/register_voter/${ballot.ballot_id}`
+                `${domain}register_voter/${ballot.ballot_id}`
               );
+              set_copied(true);
             }}
             className={styles.copy_link_button}
           >
-            <span className={styles.material_icons}>
-              <ContentCopyIcon />
-            </span>
+            {!copied ? (
+              <span className={styles.material_icons}>
+                <ContentCopyIcon />
+              </span>
+            ) : (
+              <span className={styles.material_icons}>
+                <CheckCircleOutlinedIcon />
+              </span>
+            )}
           </button>
         </div>
       </Grid>

@@ -282,7 +282,7 @@ const create_ballot = () => {
               message: "You rejected the wallet connection!",
             })
           );
-          console.log("ERROR _ 1 HERE: ", error);
+          console.log("ERROR _ 1: ", error);
           console.log("CONNECTED #2");
         } else if (
           error.message ==
@@ -296,7 +296,7 @@ const create_ballot = () => {
                 "Pending connection to Metamask Wallet in browser toolbar!",
             })
           );
-          console.log("ERROR _ 2 HERE: ", error);
+          console.log("ERROR _ 2: ", error);
           console.log("CONNECTED #3");
         } else if (error.message == "A request is already in progress") {
           dispatch(
@@ -315,7 +315,7 @@ const create_ballot = () => {
               message: "Please connect your metamask wallet to Goerli testnet",
             })
           );
-          console.log("ERROR _ 3 HERE: ", error);
+          console.log("ERROR _ 3: ", error);
           console.log("CONNECTED #4");
 
           // console.log(error);
@@ -344,15 +344,18 @@ const create_ballot = () => {
 
     let _chain_id = 0;
     if (chain_id === 42) {
+      // rinkeby
       _chain_id = 42;
     }
     if (chain_id === 5) {
+      // goerli
       _chain_id = 5;
     }
     if (chain_id === 1337) {
+      // local ganache
       _chain_id = 1337;
     }
-    console.log("_CHAIN_ID:", _chain_id);
+    // console.log("_CHAIN_ID:", _chain_id);
 
     const _jamii_factory = await load_contract(_chain_id, "JamiiFactory");
 

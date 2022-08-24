@@ -47,7 +47,10 @@ import styles from "../../styles/register_voter.module.css";
 const voter_registration = () => {
   const router = useRouter();
   const { ballot_id } = router.query;
-  const localhost = "http://localhost:3000/";
+  const domain =
+    process.env.NODE_ENV == "developemt"
+      ? "https://jamii-ballots.vercel.app/"
+      : "http://localhost:3000/";
 
   let date_now = new Date().getTime();
   const account = useSelector((state) => state.auth.connected_account);
@@ -382,14 +385,14 @@ const voter_registration = () => {
                         onFocus={(e) => e.target.select()}
                         type="text"
                         className={styles.copy_link_input}
-                        value={`${localhost}register_voter/${ballot_id}`}
+                        value={`${domain}register_voter/${ballot_id}`}
                         readonly
                       />
                       <button
                         type="button"
                         onClick={() => {
                           navigator.clipboard.writeText(
-                            `${localhost}register_voter/${ballot_id}`
+                            `${domain}register_voter/${ballot_id}`
                           );
                         }}
                         className={styles.copy_link_button}
@@ -418,14 +421,14 @@ const voter_registration = () => {
                         onFocus={(e) => e.target.select()}
                         type="text"
                         className={styles.copy_link_input}
-                        value={`${localhost}vote/${ballot_id}`}
+                        value={`${domain}vote/${ballot_id}`}
                         readonly
                       />
                       <button
                         type="button"
                         onClick={() => {
                           navigator.clipboard.writeText(
-                            `${localhost}vote/${ballot_id}`
+                            `${domain}vote/${ballot_id}`
                           );
                         }}
                         className={styles.copy_link_button}

@@ -9,7 +9,10 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import styles from "../styles/create_ballot.module.css";
 
 const OpenBallot = () => {
-  const localhost = "http://localhost:3000/";
+  const domain =
+    process.env.NODE_ENV == "developemt"
+      ? "https://jamii-ballots.vercel.app/"
+      : "http://localhost:3000/";
 
   const ballots = useSelector((state) => state.ballot.ballots);
   const active_ballot = useSelector((state) => state.ballot.active_ballot);
@@ -195,14 +198,14 @@ const OpenBallot = () => {
                 onFocus={(e) => e.target.select()}
                 type="text"
                 className={styles.copy_link_input}
-                value={`${localhost}register_voter/${ballots[active_ballot].ballot_id}`}
+                value={`${domain}register_voter/${ballots[active_ballot].ballot_id}`}
                 readonly
               />
               <button
                 type="button"
                 onClick={() => {
                   navigator.clipboard.writeText(
-                    `${localhost}register_voter/${ballots[active_ballot].ballot_id}`
+                    `${domain}register_voter/${ballots[active_ballot].ballot_id}`
                   );
                 }}
                 className={styles.copy_link_button}
