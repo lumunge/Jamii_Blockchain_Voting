@@ -99,6 +99,10 @@ const voter_registration = () => {
         if (chain_id === 42) {
           _chain_id = 42;
         }
+        if (chain_id === 5) {
+          // goerli
+          _chain_id = 5;
+        }
         if (chain_id === 1337) {
           _chain_id = 1337;
         }
