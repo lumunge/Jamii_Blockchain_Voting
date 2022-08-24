@@ -5,13 +5,13 @@
   width: 100%;
 }
 .right_btns {
-  text-transform: capitalize;
-  border: 1px solid var(--button-hover);
-  color: var(--button-hover);
+  text-transform: capitalize !important;
+  border: 1px solid var(--button-hover) !important;
+  color: var(--button-hover) !important;
 }
 .right_btns:hover {
-  transition: 0.2s ease-in-out;
-  color: var(--text-primary);
+  transition: 0.2s ease-in-out !important;
+  color: var(--text-primary) !important;
 }
 .chip_text {
   color: var(--text-primary);
