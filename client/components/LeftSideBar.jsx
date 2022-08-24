@@ -112,10 +112,10 @@ const LeftSideBar = () => {
           xs={12}
           sx={{ height: "60vh", overflowY: "auto", textAlign: "center" }}
         >
+          <Typography variant="body1">Ballots</Typography>
+
           {Object.keys(ballots).map((key) => (
             <>
-              <Typography variant="body1">Ballots</Typography>
-
               <List
                 key={key}
                 className={key === active_ballot && styles.heading}
