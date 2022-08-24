@@ -1,24 +1,46 @@
 {
-  "42": {
+  "1337": {
     "JamiiFactory": [
-      "0x0677C2964d70eA99EE1DD1Ad63445a6226813c91"
+      "0x86462436440B2d4ceBbd8098ce08b6b109a4115D"
     ],
     "ProxyAdmin": [
-      "0x878DfF3D94c3b7e8E91204bfD7135D916C3D4dE7"
+      "0x437E2Fd167f737BE47Ca6D4f5100726e56901ff6"
     ],
     "TransparentUpgradeableProxy": [
-      "0x3f92d2bdb3CD688b3dDB080BEcbcca2354d5CdAC"
+      "0x9d3F694Ae859F85fC188f4e16519BCf98eE317c5"
+    ]
+  },
+  "4": {
+    "JamiiFactory": [
+      "0x8c57e65b1919491eAbE3BD0CA7B7ecE8d3D7C71D"
+    ],
+    "ProxyAdmin": [
+      "0x818B46A3a0038Ac386F77A48FaDCB4F5094f96F6"
+    ],
+    "TransparentUpgradeableProxy": [
+      "0x008C231b05F6654AA4E286108727285C29926f56"
+    ]
+  },
+  "42": {
+    "JamiiFactory": [
+      "0x23305Ae0Aa7573fF852209Dda4515eeceADC5D1a"
+    ],
+    "ProxyAdmin": [
+      "0x9878F316063f1EAcCb702F38996518ff35378696"
+    ],
+    "TransparentUpgradeableProxy": [
+      "0xad47Eb50B3b03Ea87AB3a8DA5e337Bf91e6804EB"
     ]
   },
   "5": {
     "JamiiFactory": [
-      "0xF35BF829104450F63E098d333E70BB55cD755DD6"
+      "0x878DfF3D94c3b7e8E91204bfD7135D916C3D4dE7"
     ],
     "ProxyAdmin": [
-      "0x2d60d6890C98b8a2AA80916f9F38Ab59F6fcF2B4"
+      "0x3f92d2bdb3CD688b3dDB080BEcbcca2354d5CdAC"
     ],
     "TransparentUpgradeableProxy": [
-      "0x6A2725F6Ef60f4689a6B858C6fAFA244e555AD7E"
+      "0x4C3Ac7bd211a42dfE732AdE30E133fd7E64b4E6E"
     ]
   }
 }
