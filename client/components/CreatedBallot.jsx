@@ -16,8 +16,8 @@ const CreatedBallot = () => {
   const ballot = useSelector((state) => state.ballot.initial_ballot);
   const domain =
     process.env.NODE_ENV == "developemt"
-      ? "https://jamii-ballots.vercel.app/"
-      : "http://localhost:3000/";
+      ? "http://localhost:3000/"
+      : "https://jamii-ballots.vercel.app/";
 
   const [copied, set_copied] = useState(false);
 

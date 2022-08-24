@@ -11,8 +11,8 @@ import styles from "../styles/create_ballot.module.css";
 const OpenBallot = () => {
   const domain =
     process.env.NODE_ENV == "developemt"
-      ? "https://jamii-ballots.vercel.app/"
-      : "http://localhost:3000/";
+      ? "http://localhost:3000/"
+      : "https://jamii-ballots.vercel.app/";
 
   const ballots = useSelector((state) => state.ballot.ballots);
   const active_ballot = useSelector((state) => state.ballot.active_ballot);

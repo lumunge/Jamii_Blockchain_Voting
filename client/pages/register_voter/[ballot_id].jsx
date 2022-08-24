@@ -49,8 +49,8 @@ const voter_registration = () => {
   const { ballot_id } = router.query;
   const domain =
     process.env.NODE_ENV == "developemt"
-      ? "https://jamii-ballots.vercel.app/"
-      : "http://localhost:3000/";
+      ? "http://localhost:3000/"
+      : "https://jamii-ballots.vercel.app/";
 
   let date_now = new Date().getTime();
   const account = useSelector((state) => state.auth.connected_account);
