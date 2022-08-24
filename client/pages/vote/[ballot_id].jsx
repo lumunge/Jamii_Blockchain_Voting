@@ -373,6 +373,7 @@ const Vote = () => {
                       <Button
                         variant="contained"
                         type="submit"
+                        className={styles.right_btns}
                         disabled={selected_candidate.length == 0}
                       >
                         Vote

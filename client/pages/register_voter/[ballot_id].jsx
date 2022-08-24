@@ -107,6 +107,7 @@ const voter_registration = () => {
           _chain_id = 1337;
         }
         set_chain_id(_chain_id);
+        console.log(_chain_id);
       } catch (error) {
         if (error.message == "User rejected the request.") {
           set_error("Connect your Metamask Wallet!");
@@ -148,24 +149,32 @@ const voter_registration = () => {
   };
 
   const load = async () => {
-    const _jamii_factory = await load_contract(chain_id, "JamiiFactory");
-    const ballot = await _jamii_factory?.methods.get_ballot(ballot_id).call();
-    const ballot_candidates = await _jamii_factory?.methods
-      .get_candidates(ballot_id)
-      .call();
+    try {
+      const _jamii_factory = await load_contract(chain_id, "JamiiFactory");
+      const ballot = await _jamii_factory?.methods.get_ballot(ballot_id).call();
+      const ballot_candidates = await _jamii_factory?.methods
+        .get_candidates(ballot_id)
+        .call();
 
-    const account = await get_account();
+      const account = await get_account();
 
-    dispatch(add_ballot(ballot));
-    dispatch(add_connected_account(account));
-    dispatch(add_factory(_jamii_factory));
-    dispatch(add_ballot_candidates(ballot_candidates));
+      dispatch(add_ballot(ballot));
+      dispatch(add_connected_account(account));
+      dispatch(add_factory(_jamii_factory));
+      dispatch(add_ballot_candidates(ballot_candidates));
 
-    // console.log("FACTORY: ", _jamii_factory);
-    // console.log("BALLOT: ", ballot);
-    // console.log("ACCOUNT: ", account);
-    // console.log("CANDIDATES: ", ballot_candidates);
-    return _jamii_factory;
+      console.log("FACTORY: ", _jamii_factory);
+      console.log("BALLOT: ", ballot);
+      console.log("ACCOUNT: ", account);
+      console.log("CANDIDATES: ", ballot_candidates);
+      return _jamii_factory;
+    } catch (error) {
+      console.log("STARTING ERROR: ", error);
+      console.log("FACTORY: ", _jamii_factory);
+      console.log("BALLOT: ", ballot);
+      console.log("ACCOUNT: ", account);
+      console.log("CANDIDATES: ", ballot_candidates);
+    }
   };
 
   const register_new_voter = async (e, _user_id, _ballot_id) => {
