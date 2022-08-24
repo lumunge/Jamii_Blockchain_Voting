@@ -1,0 +1,24 @@
+{
+  "42": {
+    "JamiiFactory": [
+      "0x0677C2964d70eA99EE1DD1Ad63445a6226813c91"
+    ],
+    "ProxyAdmin": [
+      "0x878DfF3D94c3b7e8E91204bfD7135D916C3D4dE7"
+    ],
+    "TransparentUpgradeableProxy": [
+      "0x3f92d2bdb3CD688b3dDB080BEcbcca2354d5CdAC"
+    ]
+  },
+  "5": {
+    "JamiiFactory": [
+      "0xF35BF829104450F63E098d333E70BB55cD755DD6"
+    ],
+    "ProxyAdmin": [
+      "0x2d60d6890C98b8a2AA80916f9F38Ab59F6fcF2B4"
+    ],
+    "TransparentUpgradeableProxy": [
+      "0x6A2725F6Ef60f4689a6B858C6fAFA244e555AD7E"
+    ]
+  }
+}

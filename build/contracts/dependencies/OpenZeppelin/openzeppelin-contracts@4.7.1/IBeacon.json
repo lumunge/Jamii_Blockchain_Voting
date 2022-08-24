@@ -1,0 +1,173 @@
+{
+  "abi": [
+    {
+      "inputs": [],
+      "name": "implementation",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "allSourcePaths": {
+    "5": "/home/lumunge/.brownie/packages/OpenZeppelin/openzeppelin-contracts@4.7.1/contracts/proxy/beacon/IBeacon.sol"
+  },
+  "ast": {
+    "absolutePath": "/home/lumunge/.brownie/packages/OpenZeppelin/openzeppelin-contracts@4.7.1/contracts/proxy/beacon/IBeacon.sol",
+    "exportedSymbols": {
+      "IBeacon": [
+        861
+      ]
+    },
+    "id": 862,
+    "license": "MIT",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 853,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "93:23:5"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "canonicalName": "IBeacon",
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "documentation": {
+          "id": 854,
+          "nodeType": "StructuredDocumentation",
+          "src": "118:79:5",
+          "text": " @dev This is the interface that {BeaconProxy} expects of its beacon."
+        },
+        "fullyImplemented": false,
+        "id": 861,
+        "linearizedBaseContracts": [
+          861
+        ],
+        "name": "IBeacon",
+        "nameLocation": "208:7:5",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "documentation": {
+              "id": 855,
+              "nodeType": "StructuredDocumentation",
+              "src": "222:162:5",
+              "text": " @dev Must return an address that can be used as a delegate call target.\n {BeaconProxy} will check that this address is a contract."
+            },
+            "functionSelector": "5c60da1b",
+            "id": 860,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "implementation",
+            "nameLocation": "398:14:5",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 856,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "412:2:5"
+            },
+            "returnParameters": {
+              "id": 859,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 858,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 860,
+                  "src": "438:7:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 857,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "438:7:5",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "437:9:5"
+            },
+            "scope": 861,
+            "src": "389:58:5",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 862,
+        "src": "198:251:5",
+        "usedErrors": []
+      }
+    ],
+    "src": "93:357:5"
+  },
+  "bytecode": "",
+  "bytecodeSha1": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+  "compiler": {
+    "evm_version": "istanbul",
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "version": "0.8.15+commit.e14f2714"
+  },
+  "contractName": "IBeacon",
+  "coverageMap": {
+    "branches": {},
+    "statements": {}
+  },
+  "dependencies": [],
+  "deployedBytecode": "",
+  "deployedSourceMap": "",
+  "language": "Solidity",
+  "natspec": {
+    "details": "This is the interface that {BeaconProxy} expects of its beacon.",
+    "kind": "dev",
+    "methods": {
+      "implementation()": {
+        "details": "Must return an address that can be used as a delegate call target. {BeaconProxy} will check that this address is a contract."
+      }
+    },
+    "version": 1
+  },
+  "offset": [
+    198,
+    449
+  ],
+  "opcodes": "",
+  "pcMap": {},
+  "sha1": "f3f909be8547c9692255a49b95dc0a9e325e5444",
+  "source": "// SPDX-License-Identifier: MIT\n// OpenZeppelin Contracts v4.4.1 (proxy/beacon/IBeacon.sol)\n\npragma solidity ^0.8.0;\n\n/**\n * @dev This is the interface that {BeaconProxy} expects of its beacon.\n */\ninterface IBeacon {\n    /**\n     * @dev Must return an address that can be used as a delegate call target.\n     *\n     * {BeaconProxy} will check that this address is a contract.\n     */\n    function implementation() external view returns (address);\n}\n",
+  "sourceMap": "",
+  "sourcePath": "/home/lumunge/.brownie/packages/OpenZeppelin/openzeppelin-contracts@4.7.1/contracts/proxy/beacon/IBeacon.sol",
+  "type": "interface"
+}

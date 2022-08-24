@@ -1,0 +1,186 @@
+{
+  "abi": [],
+  "allSourcePaths": {
+    "5": "contracts/JamiiFactoryV2.sol"
+  },
+  "ast": {
+    "absolutePath": "contracts/JamiiFactoryV2.sol",
+    "exportedSymbols": {
+      "AddressUpgradeable": [
+        821
+      ],
+      "ContextUpgradeable": [
+        578
+      ],
+      "IJamiiFactory": [
+        253
+      ],
+      "Initializable": [
+        536
+      ],
+      "JamiiBase": [
+        88
+      ],
+      "JamiiFactoryV2": [
+        4
+      ],
+      "OwnableUpgradeable": [
+        385
+      ]
+    },
+    "id": 5,
+    "license": "UNLICENSED",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 1,
+        "literals": [
+          "solidity",
+          "0.8",
+          ".8"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "40:22:5"
+      },
+      {
+        "absolutePath": "interfaces/IJamiiFactory.sol",
+        "file": "../interfaces/IJamiiFactory.sol",
+        "id": 2,
+        "nameLocation": "-1:-1:-1",
+        "nodeType": "ImportDirective",
+        "scope": 5,
+        "sourceUnit": 254,
+        "src": "64:41:5",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "contracts/JamiiBase.sol",
+        "file": "./JamiiBase.sol",
+        "id": 3,
+        "nameLocation": "-1:-1:-1",
+        "nodeType": "ImportDirective",
+        "scope": 5,
+        "sourceUnit": 89,
+        "src": "106:25:5",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "fullyImplemented": true,
+        "id": 4,
+        "linearizedBaseContracts": [
+          4
+        ],
+        "name": "JamiiFactoryV2",
+        "nameLocation": "142:14:5",
+        "nodeType": "ContractDefinition",
+        "nodes": [],
+        "scope": 5,
+        "src": "133:80:5",
+        "usedErrors": []
+      }
+    ],
+    "src": "40:174:5"
+  },
+  "bytecode": "6080604052348015600f57600080fd5b50603f80601d6000396000f3fe6080604052600080fdfea26469706673582212209c9691fee8781ab8c26742d3234d43b3ef304e4ca6c4cfa6765fd80f956f4d9e64736f6c63430008080033",
+  "bytecodeSha1": "73df0a6f5d0123eb2b2db0faf62b602aa77c123a",
+  "compiler": {
+    "evm_version": "istanbul",
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "version": "0.8.8+commit.dddeac2f"
+  },
+  "contractName": "JamiiFactoryV2",
+  "coverageMap": {
+    "branches": {
+      "5": {}
+    },
+    "statements": {
+      "5": {}
+    }
+  },
+  "dependencies": [],
+  "deployedBytecode": "6080604052600080fdfea26469706673582212209c9691fee8781ab8c26742d3234d43b3ef304e4ca6c4cfa6765fd80f956f4d9e64736f6c63430008080033",
+  "deployedSourceMap": "133:80:5:-:0;;;;;",
+  "language": "Solidity",
+  "natspec": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "offset": [
+    133,
+    213
+  ],
+  "opcodes": "PUSH1 0x80 PUSH1 0x40 MSTORE PUSH1 0x0 DUP1 REVERT INVALID LOG2 PUSH5 0x6970667358 0x22 SLT KECCAK256 SWAP13 SWAP7 SWAP2 INVALID 0xE8 PUSH25 0x1AB8C26742D3234D43B3EF304E4CA6C4CFA6765FD80F956F4D SWAP15 PUSH5 0x736F6C6343 STOP ADDMOD ADDMOD STOP CALLER ",
+  "pcMap": {
+    "0": {
+      "offset": [
+        133,
+        213
+      ],
+      "op": "PUSH1",
+      "path": "5",
+      "value": "0x80"
+    },
+    "2": {
+      "fn": null,
+      "offset": [
+        133,
+        213
+      ],
+      "op": "PUSH1",
+      "path": "5",
+      "value": "0x40"
+    },
+    "4": {
+      "fn": null,
+      "offset": [
+        133,
+        213
+      ],
+      "op": "MSTORE",
+      "path": "5"
+    },
+    "5": {
+      "fn": null,
+      "offset": [
+        133,
+        213
+      ],
+      "op": "PUSH1",
+      "path": "5",
+      "value": "0x0"
+    },
+    "7": {
+      "fn": null,
+      "offset": [
+        133,
+        213
+      ],
+      "op": "DUP1",
+      "path": "5"
+    },
+    "8": {
+      "fn": null,
+      "offset": [
+        133,
+        213
+      ],
+      "op": "REVERT",
+      "path": "5"
+    }
+  },
+  "sha1": "00759c9ca2cee09d600da2699f963a67770c62c2",
+  "source": "// SPDX-License-Identifier: UNLICENSED\n\npragma solidity 0.8.8;\n\nimport \"../interfaces/IJamiiFactory.sol\";\nimport \"./JamiiBase.sol\";\n\ncontract JamiiFactoryV2 {\n    /*\n     *\n     * ## Upgrades Here\n     *\n     */\n}\n",
+  "sourceMap": "133:80:5:-:0;;;;;;;;;;;;;;;;;;;",
+  "sourcePath": "contracts/JamiiFactoryV2.sol",
+  "type": "contract"
+}

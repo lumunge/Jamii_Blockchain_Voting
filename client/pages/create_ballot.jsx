@@ -27,6 +27,7 @@ import {
   convert_time_unix,
   ballot_types_map,
   convert_seconds,
+  convert_time,
 } from "../utils/functions.js";
 
 import PropTypes from "prop-types";
@@ -311,7 +312,7 @@ const create_ballot = () => {
             add_notification({
               open: true,
               type: "error",
-              message: "Please connect your metamask wallet to Kovan",
+              message: "Please connect your metamask wallet to Goerli testnet",
             })
           );
           console.log("ERROR _ 3 HERE: ", error);
@@ -970,8 +971,10 @@ const create_ballot = () => {
                                   <TextField
                                     // label="Start Voter Registration"
                                     type="datetime-local"
-                                    defaultValue={Date.now()}
-                                    className={styles.date_field}
+                                    defaultValue={convert_time(
+                                      Date.now() / 1000
+                                    )}
+                                    // className={styles.date_field}
                                     name="start_registration"
                                     // value={start_registration}
                                     onChange={(e) =>
