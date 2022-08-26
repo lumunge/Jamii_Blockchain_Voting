@@ -154,4 +154,7 @@
 .copy_link_button:hover {
   background: #cccccc;
 }
+.check {
+  color: var(--heading-text);
+}
 /* end created ballot page */
