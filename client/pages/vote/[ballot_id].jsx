@@ -386,9 +386,7 @@ const Vote = () => {
                       xs={12}
                       sx={{ display: "flex", justifyContent: "center" }}
                     >
-                      <Typography>
-                        Casted Votes: {ballot.voters_count}{" "}
-                      </Typography>
+                      <Typography>Voters: {ballot.voters_count} </Typography>
                     </Grid>
                   )}
                 </>

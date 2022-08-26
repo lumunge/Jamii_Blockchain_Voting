@@ -14,8 +14,10 @@ import styles from "../styles/create_ballot.module.css";
 
 const CreatedBallot = () => {
   const ballot = useSelector((state) => state.ballot.initial_ballot);
+  const chain_id = useSelector((state) => state.auth.chain_id);
+
   const domain =
-    process.env.NODE_ENV == "developemt"
+    process.env.NODE_ENV !== "production"
       ? "http://localhost:3000/"
       : "https://jamii-ballots.vercel.app/";
 
@@ -161,7 +163,7 @@ const CreatedBallot = () => {
               </span>
             ) : (
               <span className={styles.material_icons}>
-                <CheckCircleOutlinedIcon />
+                <CheckCircleOutlinedIcon className={styles.check} />
               </span>
             )}
           </button>
