@@ -312,7 +312,8 @@ const create_ballot = () => {
             add_notification({
               open: true,
               type: "error",
-              message: "Please connect your metamask wallet to Goerli testnet",
+              message:
+                "Please connect your metamask wallet to Goerli/Rinkeby/Kovan testnets",
             })
           );
           console.log("ERROR _ 3: ", error);
@@ -335,21 +336,18 @@ const create_ballot = () => {
   };
 
   const load_initial_contracts = async () => {
-    // <=42 to exclude Kovan, <42 to include kovan
-    // if (chain_id < 42) {
-    //   // Wrong Network!
-    //   return;
-    // }
-    // console.log("CHAIN_ID:", chain_id);
-
     let _chain_id = 0;
-    if (chain_id === 42) {
-      // rinkeby
-      _chain_id = 42;
+    if (chain_id === 4) {
+      // kovan
+      _chain_id = 4;
     }
     if (chain_id === 5) {
       // goerli
       _chain_id = 5;
+    }
+    if (chain_id === 42) {
+      // rinkeby
+      _chain_id = 42;
     }
     if (chain_id === 1337) {
       // local ganache
