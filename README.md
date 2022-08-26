@@ -12,4 +12,4 @@ The deployed contracts and all transactions related to the deployed version of [
 
 ### Contribute to Jamii Ballots:
 
-More can be found in the [Contribute](https://github.com/ethereum-boilerplate/ethereum-boilerplate/blob/main/CODING_STYLE.md) document.
+More can be found in the [Contribute](https://github.com/lumunge/Jamii_Blockchain_Voting/blob/master/CONTRIBUTE.md) document.

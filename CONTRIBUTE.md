@@ -10,14 +10,17 @@ The following guide serves to get anyone started in contributing to Jamii Ballot
 
 The following need to be installed;
 
-[Brownie](https://eth-brownie.readthedocs.io/en/stable/install.html)
-[Ganache CLI](https://www.npmjs.com/package/ganache-cli)
+[Brownie](https://eth-brownie.readthedocs.io/en/stable/install.html) - a python-based development and testing framework for smart contracts that target the EVM.
 
-Make sure to have a ESlint and Prettier plugin installed to check for code-smells and auto-formatting.
+[Ganache CLI](https://www.npmjs.com/package/ganache-cli) - a personal blockchain for rapid Ethereum decentralized application development.
+
+Make sure to have a ESlint and Prettier plugins are installed to check for code-smells and auto-formatting.
 
 ### Step 1: Clone Jamii Ballots
 
+```
 git clone https://github.com/lumunge/Jamii_Blockchain_Voting.git
+```
 
 ### Step 2: Create a Local Ganache Test Network:
 
@@ -120,6 +123,10 @@ $ npm run dev
 
 ## Video Demonstrations:
 
+## Need help?
+
+If you need help with setting up the project locally for development or have other questions - don't hesitate to write me @ lumungep12@gmail.com
+
 ### Pull Requests
 
 1. Fork the repo and create your branch from `master`.
@@ -131,8 +138,8 @@ We use GitHub issues to track public bugs, although we will keep a close eye on 
 
 ### Coding Style
 
-Please follow the [Coding Style]().
+Please follow the [Coding Style](https://github.com/lumunge/Jamii_Blockchain_Voting/blob/master/CODING_STYLE.md) documentation.
 
 ## License
 
-By contributing to the ethereum-boilerplate, you agree that your contributions will be licensed under its license.
+By contributing to the Jamii ballots, you agree that your contributions will be licensed under its license.
