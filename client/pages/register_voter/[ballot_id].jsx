@@ -34,6 +34,7 @@ import {
 
 // icons
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 
 // compoenents
 import CountdownTimer from "../../components/CountdownTimer";
@@ -46,11 +47,9 @@ import styles from "../../styles/register_voter.module.css";
 
 const voter_registration = () => {
   const router = useRouter();
+  const dispatch = useDispatch();
+
   const { ballot_id } = router.query;
-  const domain =
-    process.env.NODE_ENV == "developemt"
-      ? "http://localhost:3000/"
-      : "https://jamii-ballots.vercel.app/";
 
   let date_now = new Date().getTime();
   const account = useSelector((state) => state.auth.connected_account);
@@ -65,8 +64,13 @@ const voter_registration = () => {
   const [error, set_error] = useState("");
   const [web_3, set_web_3] = useState({});
   const [chain_id, set_chain_id] = useState(0);
+  const [copied, set_copied] = useState(false);
+  const [copied_1, set_copied_1] = useState(false);
 
-  const dispatch = useDispatch();
+  const domain =
+    process.env.NODE_ENV !== "production"
+      ? "http://localhost:3000/"
+      : "https://jamii-ballots.vercel.app/";
 
   const factory = useSelector((state) => state.auth.factory);
   const ballot_candidates = useSelector(
@@ -169,8 +173,8 @@ const voter_registration = () => {
       console.log("CANDIDATES: ", ballot_candidates);
       return _jamii_factory;
     } catch (error) {
-      console.log("STARTING ERROR: ", error);
-      console.log("FACTORY: ", _jamii_factory);
+      // console.log("STARTING ERROR: ", error);
+      // console.log("FACTORY: ", _jamii_factory);
       console.log("BALLOT: ", ballot);
       console.log("ACCOUNT: ", account);
       console.log("CANDIDATES: ", ballot_candidates);
@@ -407,12 +411,19 @@ const voter_registration = () => {
                           navigator.clipboard.writeText(
                             `${domain}register_voter/${ballot_id}`
                           );
+                          set_copied(true);
                         }}
                         className={styles.copy_link_button}
                       >
-                        <span className={styles.material_icons}>
-                          <ContentCopyIcon />
-                        </span>
+                        {!copied ? (
+                          <span className={styles.material_icons}>
+                            <ContentCopyIcon />
+                          </span>
+                        ) : (
+                          <span className={styles.material_icons}>
+                            <CheckCircleOutlinedIcon className={styles.check} />
+                          </span>
+                        )}
                       </button>
                     </Grid>
                   </Grid>
@@ -443,12 +454,19 @@ const voter_registration = () => {
                           navigator.clipboard.writeText(
                             `${domain}vote/${ballot_id}`
                           );
+                          set_copied_1(true);
                         }}
                         className={styles.copy_link_button}
                       >
-                        <span className={styles.material_icons}>
-                          <ContentCopyIcon />
-                        </span>
+                        {!copied_1 ? (
+                          <span className={styles.material_icons}>
+                            <ContentCopyIcon />
+                          </span>
+                        ) : (
+                          <span className={styles.material_icons}>
+                            <CheckCircleOutlinedIcon className={styles.check} />
+                          </span>
+                        )}
                       </button>
                     </Grid>
                   </Grid>
